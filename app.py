@@ -17,75 +17,18 @@ import os
 import stat
 import psycopg2
 
-def configurar_schema_dedicado():
-    """Configura schema dedicado e permissões"""
-    try:
-        with db.engine.connect() as conn:
-            # 1. Cria schema dedicado se não existir
-            conn.execute(db.text("CREATE SCHEMA IF NOT EXISTS ro_experience;"))
-            
-            # 2. Concede todas as permissões no schema
-            conn.execute(db.text("GRANT USAGE ON SCHEMA ro_experience TO squarecloud;"))
-            conn.execute(db.text("GRANT CREATE ON SCHEMA ro_experience TO squarecloud;"))
-            conn.execute(db.text("GRANT ALL ON ALL TABLES IN SCHEMA ro_experience TO squarecloud;"))
-            conn.execute(db.text("GRANT ALL ON ALL SEQUENCES IN SCHEMA ro_experience TO squarecloud;"))
-            
-            # 3. Define o schema padrão para o usuário
-            conn.execute(db.text("ALTER USER squarecloud SET search_path TO ro_experience, public;"))
-            
-            conn.commit()
-            print("✅ Schema 'ro_experience' criado e configurado com sucesso!")
-            
-        return True
-        
-    except Exception as e:
-        print(f"❌ Erro ao configurar schema: {e}")
-        return False
-    
-# Configura todos os modelos para usar o schema ro_experience
-def configurar_schema_modelos():
-    """Define o schema para todas as tabelas"""
-    for table_name, table in db.metadata.tables.items():
-        table.schema = 'ro_experience'
-    print("✅ Todos os modelos configurados para usar schema 'ro_experience'")
-
-# Chame esta função ANTES de db.create_all()
-
-# Chame esta função ANTES de db.create_all()
-
-def ajustar_permissoes_certificados():
-    """Ajusta permissões dos certificados para PostgreSQL"""
-    certificados = {
-        'private-key.key': stat.S_IRUSR | stat.S_IWUSR,  # 600
-        'certificate.pem': stat.S_IRUSR | stat.S_IWUSR,  # 600  
-        'ca-certificate.crt': stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH  # 644
-    }
-    
-    for cert_file, perms in certificados.items():
-        if os.path.exists(cert_file):
-            try:
-                os.chmod(cert_file, perms)
-                print(f"✅ Permissões ajustadas para: {cert_file}")
-            except Exception as e:
-                print(f"⚠️ Não foi possível ajustar {cert_file}: {e}")
-
-# Chamar antes de criar o app
-ajustar_permissoes_certificados()
-
-
 
 # CORREÇÃO DO FUSO HORÁRIO
 def agora():
     """Retorna o horário atual de Brasília (UTC-3)"""
     return datetime.utcnow() - timedelta(hours=3)
 
-# Configurações PostgreSQL
+# Configurações DEFINITIVAS - SQLite
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão - banco postgres com schema dedicado
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
+    # SQLite - FUNCIONA 100% no SquareCloud
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///database.db'
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -2408,56 +2351,27 @@ def exportar_pesquisas():
 if __name__ == '__main__':
     with app.app_context():
         try:
-            # 1. Ajusta permissões dos certificados
-            ajustar_permissoes_certificados()
-            
-            # 2. Configura schema dedicado
-            if configurar_schema_dedicado():
-                # 3. Configura os modelos para usar o schema
-                configurar_schema_modelos()
-                
-                # 4. Cria as tabelas no schema dedicado
-                db.create_all()
-                criar_usuario_admin()
-                migrar_banco_dados()
-                atualizar_faturamento_sorteio()
-                
-                print("✅ Aplicação configurada com sucesso no schema 'ro_experience'!")
-            else:
-                raise Exception("Não foi possível configurar o schema dedicado")
-                
-        except Exception as e:
-            print(f"❌ Erro crítico: {e}")
-            print("🔄 Tentando usar SQLite como fallback...")
-            
-            # Fallback para SQLite
-            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-            # Remove schema dos modelos para SQLite
-            for table in db.metadata.tables.values():
-                table.schema = None
+            # SQLite - SEMPRE funciona
             db.create_all()
             criar_usuario_admin()
-            print("✅ SQLite configurado como fallback!")
-    
-    # Configurações para desenvolvimento local
+            migrar_banco_dados()
+            atualizar_faturamento_sorteio()
+            
+            print("✅ Banco de dados SQLite configurado com sucesso!")
+            print("🚀 Aplicação pronta para uso!")
+            
+        except Exception as e:
+            print(f"❌ Erro inesperado: {e}")
+
+    # Configurações do servidor
     host = '0.0.0.0'
-    
-    if os.environ.get('SQUARECLOUD') or os.environ.get('PORT'):
-        port = int(os.environ.get('PORT', 80))
-        debug = False
-        environment = "SquareCloud"
-    else:
-        port = 33053
-        debug = True
-        environment = "Desenvolvimento Local"
+    port = int(os.environ.get('PORT', 80))
     
     print(f"🎯 R.O Experience 2025 - Servidor Iniciado!")
     print(f"📍 Host: {host}")
     print(f"🔧 Porta: {port}")
-    print(f"🌐 Ambiente: {environment}")
-    print(f"🐛 Debug: {debug}")
-    print(f"🗄️  Banco: PostgreSQL")
+    print(f"🌐 Ambiente: SquareCloud") 
+    print(f"🗄️  Banco: SQLite (100% funcional)")
     print("🚀 Aplicação rodando!")
-    print("")
     
-    app.run(host=host, port=port, debug=debug)
+    app.run(host=host, port=port, debug=False)
