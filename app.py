@@ -19,18 +19,28 @@ def agora():
 
 # Configurações
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'k8!v9#m2$p5&z1@x4*q7(w0)n3^b6-j9_l2+o5=r8t1}y4[u7]i0'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'ro-experience-2025-super-secure-key-12345'
     
-    # PostgreSQL do SquareCloud
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://squarecloud:<password>@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091'
+    # Configuração inteligente - detecta ambiente
+    if os.environ.get('DATABASE_URL'):
+        # PRODUCTION (SquareCloud) - PostgreSQL com SSL
+        db_url = os.environ.get('DATABASE_URL')
+        # Garante que tem SSL mode
+        if 'sslmode=' not in db_url:
+            db_url += '?sslmode=require'
+        SQLALCHEMY_DATABASE_URI = db_url
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_size': 5,  # Reduzido para teste
+            'max_overflow': 10,
+            'pool_pre_ping': True,
+            'pool_recycle': 3600,
+        }
+    else:
+        # LOCAL - SQLite (backup)
+        db_path = 'database.db'
+        SQLALCHEMY_DATABASE_URI = f'sqlite:///{db_path}'
+        SQLALCHEMY_ENGINE_OPTIONS = {}
     
-    # Configurações de performance para PostgreSQL
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_size': 10,
-        'max_overflow': 20,
-        'pool_pre_ping': True,
-        'pool_recycle': 3600,
-    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
