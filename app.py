@@ -16,9 +16,77 @@ import tempfile
 import os
 import stat
 import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-import os
-import stat
+# ---------------------------------------
+# DADOS DO SQUARECLOUD
+# ---------------------------------------
+DB_HOST = "square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app"
+DB_PORT = "7091"
+DB_USER = "squarecloud"
+DB_PASS = "5W3Ww67llyHrBmcutvyL5xXO"
+
+# Nome do novo banco
+DB_NAME = "roexperience"
+
+
+# ---------------------------------------
+# 1) CRIA O BANCO SE NÃO EXISTIR
+# ---------------------------------------
+def criar_database():
+    try:
+        print("🔄 Verificando database...")
+
+        # Conecta no banco default "postgres"
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user=DB_USER,
+            password=DB_PASS,
+            host=DB_HOST,
+            port=DB_PORT
+        )
+
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur = conn.cursor()
+
+        # Verifica se o DB existe
+        cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME,))
+        existe = cur.fetchone()
+
+        # Se não existe, cria
+        if not existe:
+            print(f"🆕 Criando database '{DB_NAME}'...")
+            cur.execute(f"CREATE DATABASE {DB_NAME}")
+        else:
+            print(f"✔️ Database '{DB_NAME}' já existe.")
+
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        print("❌ Erro ao criar database:", e)
+
+
+# Executa criação automática do DB
+criar_database()
+
+
+# ---------------------------------------
+# 2) CONECTA NO BANCO CRIADO
+# ---------------------------------------
+DATABASE_URL = (
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+engine = create_engine(DATABASE_URL, echo=False)
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
+
+print("🚀 Conectado ao banco:", DB_NAME)
+
+
 
 def verificar_certificados():
     """Verifica se os certificados existem e estão corretos"""
@@ -48,6 +116,8 @@ def corrigir_permissoes_certificados():
                 print(f"✅ Permissões ajustadas para: {cert_file}")
             except Exception as e:
                 print(f"⚠️ Não foi possível ajustar {cert_file}: {e}")
+
+
 
 # Chame esta função ANTES de db.create_all()
 corrigir_permissoes_certificados()
