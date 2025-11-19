@@ -2344,29 +2344,51 @@ if __name__ == "__main__":
     testar_permissoes()
 
 if __name__ == '__main__':
+    # Corrige permissões dos certificados primeiro
+    corrigir_permissoes_certificados()
+    
     with app.app_context():
         try:
-            # SQLite - SEMPRE funciona
+            print("🔄 Iniciando configuração do PostgreSQL...")
+            
+            # Cria todas as tabelas
             db.create_all()
+            print("✅ Tabelas criadas com sucesso!")
+            
+            # Cria usuário admin
             criar_usuario_admin()
+            
+            # Executa migração se necessário
             migrar_banco_dados()
+            
+            # Atualiza faturamento para sorteios
             atualizar_faturamento_sorteio()
             
-            print("✅ Banco de dados SQLite configurado com sucesso!")
-            print("🚀 Aplicação pronta para uso!")
+            print("✅ Banco de dados PostgreSQL configurado com sucesso!")
             
         except Exception as e:
-            print(f"❌ Erro inesperado: {e}")
+            print(f"❌ Erro ao configurar PostgreSQL: {e}")
+            print("🔧 Verifique as permissões do usuário no banco de dados")
 
     # Configurações do servidor
     host = '0.0.0.0'
-    port = int(os.environ.get('PORT', 80))
     
+    if os.environ.get('SQUARECLOUD') or os.environ.get('PORT'):
+        port = int(os.environ.get('PORT', 80))
+        debug = False
+        environment = "SquareCloud"
+    else:
+        port = 33053
+        debug = True
+        environment = "Desenvolvimento Local"
+
     print(f"🎯 R.O Experience 2025 - Servidor Iniciado!")
     print(f"📍 Host: {host}")
     print(f"🔧 Porta: {port}")
-    print(f"🌐 Ambiente: SquareCloud") 
-    print(f"🗄️  Banco: SQLite (100% funcional)")
+    print(f"🌐 Ambiente: {environment}")
+    print(f"🐛 Debug: {debug}")
+    print(f"🗄️  Banco: PostgreSQL")
     print("🚀 Aplicação rodando!")
-    
-    app.run(host=host, port=port, debug=False)
+    print("")
+
+    app.run(host=host, port=port, debug=debug)
