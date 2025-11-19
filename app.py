@@ -17,31 +17,52 @@ def agora():
     """Retorna o horário atual de Brasília (UTC-3)"""
     return datetime.utcnow() - timedelta(hours=3)
 
-# Configurações
+## Configurações
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ro-experience-2025-super-secure-key-12345'
     
-    # Verifica SE o certificado existe
-    cert_path = '/application/cert.crt'
+    # Arquivos SSL na pasta application/
+    ssl_files = {
+        'cert': '/application/cert.crt',
+        'key': '/application/client.key',
+        'pem': '/application/client.pem'
+    }
     
-    if os.path.exists(cert_path):
-        print(f"✅ CERTIFICADO ENCONTRADO: {cert_path}")
-        print(f"✅ Tamanho do arquivo: {os.path.getsize(cert_path)} bytes")
+    # Verifica quais existem
+    existing_files = {}
+    for name, path in ssl_files.items():
+        if os.path.exists(path):
+            existing_files[name] = path
+            size = os.path.getsize(path)
+            print(f"✅ {name.upper()} encontrado: {path} ({size} bytes)")
+    
+    # Tenta PostgreSQL se tiver combinação válida
+    if 'cert' in existing_files and ('key' in existing_files or 'pem' in existing_files):
+        print("🚀 Configurando PostgreSQL com SSL...")
         
-        # PostgreSQL COM certificado
         SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/squarecloud'
-        SQLALCHEMY_ENGINE_OPTIONS = {
-            'connect_args': {
-                'sslmode': 'verify-full',
-                'sslrootcert': cert_path
-            }
+        
+        connect_args = {
+            'sslmode': 'verify-full',
+            'sslrootcert': ssl_files['cert']
         }
+        
+        # Usa .key se existir, senão .pem
+        if 'key' in existing_files:
+            connect_args['sslcert'] = ssl_files['cert']
+            connect_args['sslkey'] = ssl_files['key']
+            print("🔑 Usando certificado + key")
+        else:
+            connect_args['sslcert'] = ssl_files['pem']
+            connect_args['sslkey'] = ssl_files['pem']
+            print("🔑 Usando arquivo .pem único")
+        
+        SQLALCHEMY_ENGINE_OPTIONS = {'connect_args': connect_args}
+        
     else:
-        print(f"❌ CERTIFICADO NÃO ENCONTRADO: {cert_path}")
-        # Fallback - SQLite
+        print("🔧 Arquivos SSL incompletos. Usando SQLite.")
         SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
         SQLALCHEMY_ENGINE_OPTIONS = {}
-        print("🔧 Usando SQLite como fallback")
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
