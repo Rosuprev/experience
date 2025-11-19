@@ -21,33 +21,11 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ro-experience-2025-super-secure-key-12345'
     
-    # SEMPRE PostgreSQL com SSL
+    # PostgreSQL com SSL - usando arquivo cert.crt
     SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/squarecloud'
     
-    # Salva o certificado em arquivo
-    cert_content = """-----BEGIN CERTIFICATE-----
-MIIDFTCCAf2gAwIBAgIUDkbsd4C4csezkwaszmtST/v9v0UwDQYJKoZIhvcNAQEL
-BQAwGjEYMBYGA1UEAwwPKi5zcXVhcmV3ZWIuYXBwMB4XDTI1MTExOTEyMDkzOFoX
-DTM1MTExNzEyMDkzOFowGjEYMBYGA1UEAwwPKi5zcXVhcmV3ZWIuYXBwMIIBIjAN
-BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5LpvtB6KEfsfXP6AttAO3zXojsoe
-3oGbOqfM8DxIycPfiZ6X2/XNpevrEpgUCXXKp3u1hsRTLlRL/WczG86C9FU8QLR8
-cc88xWSvOTVmgskHphLBWQHr37qKWF5tPrpG5ZiZOk5AkzN+JGjKUBwnk7rCWQRo
-IPqRyV2OWzb9+U/tpuwblvbW/wOaBT4rnr2WDn0Htkf8vkv4g0UmoACzNSnEWXJ8
-ZKuChO0FQJOeuV9JQNOqV09xHgO7sLGYOFQI/zdN1etVBwQBiYro1VVwKwAP3eS1
-dfL6jIn1akRr552rhZ6FAZwDwAfZd/8SU8EZfa99MLsI+jjXefb5NtaAEQIDAQAB
-o1MwUTAdBgNVHQ4EFgQU+ZARvsnJZH067Igzon+RcZf/lVkwHwYDVR0jBBgwFoAU
-+ZARvsnJZH067Igzon+RcZf/lVkwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0B
-AQsFAAOCAQEAWsxHxEpg9WWv8shhxGxNUDw0QRcedbmRNzoL0B8bFfqfWs+kTEDm
-Yd1WYAwD9dz5JjUFcZ1UaQ1SMAiCeTVxBIwnhryqdhCGx/JV5PWnYMmTT0Gz7lK4
-pX9N2UyYHofSDOkhGZNnfAiDJfep/5TXhlksle5cI0o2NJTH56HRLUOZottbR6St
-kWhTPS0KtZIeuaxMJt/2E2R3HwSdqwBfgpF/k5EAbUST19XF5DHO1hrpXzE0LO4L
-kvPwAP+1PlH4oomZl5Hn/W4GF4tkuw3S+dLvkJqFCeyXvAReipiTVCbUSoAQUZG4
-MxUaA1mEZVDyHCrHddLhA5KTXjtfk+Q0nA==
------END CERTIFICATE-----"""
-    
-    cert_path = '/tmp/ca.crt'
-    with open(cert_path, 'w') as f:
-        f.write(cert_content)
+    # Caminho do certificado - DEVE estar na pasta application/
+    cert_path = '/application/cert.crt'
     
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 5,
@@ -60,6 +38,8 @@ MxUaA1mEZVDyHCrHddLhA5KTXjtfk+Q0nA==
         }
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    print(f"🔧 Certificado configurado em: {cert_path}")
 
 app = Flask(__name__)
 app.config.from_object(Config)
