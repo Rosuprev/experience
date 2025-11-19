@@ -1559,38 +1559,57 @@ def relatorios():
                          revendas_compradoras=revendas_compradoras,
                          ticket_medio=ticket_medio)
 
-@app.route('/exportar-relatorio/<int:sorteio_id>')
+@app.route('/exportar-sorteios')
 @login_required
 @permissao_required('exportacao')
-def exportar_relatorio(sorteio_id):
-    sorteio = Sorteio.query.get_or_404(sorteio_id)
-    vendas = Venda.query.join(Cliente).filter(Cliente.cnpj == sorteio.cnpj_vencedor).all()
-    pedidos_qualificadores = vendas
+def exportar_sorteios():
+    """Exporta TODOS os sorteios para Excel"""
     
-    data = [{
-        'CNPJ': sorteio.cnpj_vencedor,
-        'Razão Social': sorteio.razao_social_vencedor,
-        'Faturamento Total': sorteio.valor_acumulado_revenda,
-        'Brinde Ganho': f'R$ {sorteio.tipo_brinde} - {sorteio.brinde.nome if sorteio.brinde else "N/A"}',
-        'Responsável Recebimento': sorteio.responsavel_recebimento,
-        'Data Sorteio': sorteio.data_sorteio.strftime('%d/%m/%Y %H:%M'),
-        'Números Pedidos': ', '.join([v.numero_pedido for v in pedidos_qualificadores]),
-        'Quantidade de Pedidos': len(pedidos_qualificadores),
-        'Valor Total Pedidos': sum(v.valor_pedido for v in pedidos_qualificadores)
-    }]
-    
-    output = export_to_excel(data, f'relatorio_sorteio_{sorteio_id}.xlsx', 'Sorteio')
-    
-    registrar_log('relatorio_exportado', 'exportacao', {
-        'sorteio_id': sorteio_id,
-        'tipo_relatorio': 'sorteio',
-        'cnpj_vencedor': sorteio.cnpj_vencedor
-    })
-    
-    return send_file(output, 
-                    download_name=f'relatorio_sorteio_{sorteio_id}.xlsx',
-                    as_attachment=True,
-                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    try:
+        sorteios = Sorteio.query.options(db.joinedload(Sorteio.brinde)).order_by(Sorteio.data_sorteio.desc()).all()
+        
+        data = []
+        for sorteio in sorteios:
+            # Busca as vendas que qualificaram este sorteio
+            vendas_qualificadoras = Venda.query.join(Cliente).filter(Cliente.cnpj == sorteio.cnpj_vencedor).all()
+            
+            data.append({
+                'ID Sorteio': sorteio.id,
+                'Tipo Brinde': f"R$ {sorteio.tipo_brinde}",
+                'CNPJ Vencedor': sorteio.cnpj_vencedor,
+                'Razão Social': sorteio.razao_social_vencedor,
+                'Responsável Recebimento': sorteio.responsavel_recebimento,
+                'Faturamento Acumulado': sorteio.valor_acumulado_revenda,
+                'Brinde': sorteio.brinde.nome if sorteio.brinde else 'N/A',
+                'Valor Brinde': sorteio.brinde.valor_aproximado if sorteio.brinde else 'N/A',
+                'Data Sorteio': sorteio.data_sorteio.strftime('%d/%m/%Y %H:%M'),
+                'Quantidade Pedidos': len(vendas_qualificadoras),
+                'Números Pedidos': ', '.join([v.numero_pedido for v in vendas_qualificadoras]),
+                'Valor Total Pedidos': sum(v.valor_pedido for v in vendas_qualificadoras),
+                'Entregue': 'Sim' if sorteio.entregue else 'Não',
+                'Data Entrega': sorteio.data_entrega.strftime('%d/%m/%Y %H:%M') if sorteio.data_entrega else 'N/A',
+                'Responsável Entrega': sorteio.responsavel_entrega or 'N/A'
+            })
+        
+        output = export_to_excel(data, 'todos_sorteios_ro_experience.xlsx', 'Sorteios')
+        
+        registrar_log('exportacao_todos_sorteios', 'exportacao', {
+            'quantidade_sorteios': len(sorteios),
+            'tipo_exportacao': 'excel'
+        })
+        
+        return send_file(
+            output,
+            download_name='todos_sorteios_ro_experience.xlsx',
+            as_attachment=True,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+    except Exception as e:
+        print(f"❌ Erro ao exportar sorteios: {e}")
+        flash(f'Erro ao exportar sorteios: {str(e)}', 'error')
+        return redirect(url_for('sorteio'))
+
 
 @app.route('/api/total-vendas')
 @login_required
