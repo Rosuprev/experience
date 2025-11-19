@@ -23,18 +23,10 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão PostgreSQL com SSL
+    # String de conexão PostgreSQL com SSL - versão simplificada
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://squarecloud:1vpihhkIlpBOLwCAKmRD4SRQ@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience'
+        'postgresql://squarecloud:1vpihhkIlpBOLwCAKmRD4SRQ@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require'
     
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'connect_args': {
-            'sslmode': 'require',
-            'sslrootcert': 'cert.pem',
-            'sslcert': 'cert.crt',
-            'sslkey': 'private.key'
-        }
-    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
@@ -2354,8 +2346,6 @@ def exportar_pesquisas():
                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 if __name__ == '__main__':
-    salvar_certificados()
-    
     with app.app_context():
         try:
             db.create_all()
@@ -2365,8 +2355,9 @@ if __name__ == '__main__':
             print("✅ Banco de dados PostgreSQL configurado com sucesso!")
         except Exception as e:
             print(f"❌ Erro ao conectar com PostgreSQL: {e}")
-            print("🔧 Verifique a string de conexão e certificados SSL")
+            print("🔧 Verifique a string de conexão")
     
+    # Configurações para desenvolvimento local
     host = '0.0.0.0'
     
     if os.environ.get('SQUARECLOUD') or os.environ.get('PORT'):
