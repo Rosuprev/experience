@@ -17,7 +17,7 @@ def agora():
     """Retorna o horário atual de Brasília (UTC-3)"""
     return datetime.utcnow() - timedelta(hours=3)
 
-## Configurações
+# Configurações
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ro-experience-2025-super-secure-key-12345'
     
@@ -35,6 +35,8 @@ class Config:
             existing_files[name] = path
             size = os.path.getsize(path)
             print(f"✅ {name.upper()} encontrado: {path} ({size} bytes)")
+        else:
+            print(f"❌ {name.upper()} não encontrado: {path}")
     
     # Tenta PostgreSQL se tiver combinação válida
     if 'cert' in existing_files and ('key' in existing_files or 'pem' in existing_files):
