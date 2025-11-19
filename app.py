@@ -17,48 +17,39 @@ def agora():
     """Retorna o horário atual de Brasília (UTC-3)"""
     return datetime.utcnow() - timedelta(hours=3)
 
-## Configurações
+# Configurações
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ro-experience-2025-super-secure-key-12345'
     
     print("🔍 INICIANDO VERIFICAÇÃO SSL...")
     
-    # Tenta usar APENAS o .pem que pode conter certificado + chave
-    pem_path = '/application/client.pem'
+    # Verifica TODOS os arquivos SSL
+    ssl_files = {
+        'root_cert': '/application/cert.crt',  # Certificado root
+        'client_pem': '/application/client.pem'  # Cliente + chave
+    }
     
-    if os.path.exists(pem_path):
-        with open(pem_path, 'r') as f:
-            pem_content = f.read()
+    all_files_exist = all(os.path.exists(path) for path in ssl_files.values())
+    
+    if all_files_exist:
+        print("✅ TODOS os arquivos SSL encontrados!")
+        print("🚀 Configurando PostgreSQL...")
         
-        print(f"✅ PEM encontrado: {pem_path} ({len(pem_content)} bytes)")
+        SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/squarecloud'
         
-        # Verifica se o .pem tem ambos (certificado e chave)
-        has_certificate = 'CERTIFICATE' in pem_content
-        has_private_key = 'PRIVATE KEY' in pem_content
-        
-        print(f"   📄 Tem Certificate: {has_certificate}")
-        print(f"   🔑 Tem Private Key: {has_private_key}")
-        
-        if has_certificate and has_private_key:
-            print("🚀 .pem contém certificado + chave! Configurando PostgreSQL...")
-            
-            SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/squarecloud'
-            
-            SQLALCHEMY_ENGINE_OPTIONS = {
-                'connect_args': {
-                    'sslmode': 'verify-full',
-                    'sslcert': pem_path,  # Usa o mesmo arquivo para ambos
-                    'sslkey': pem_path    # Usa o mesmo arquivo para ambos
-                }
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'connect_args': {
+                'sslmode': 'verify-full',
+                'sslrootcert': ssl_files['root_cert'],  # Certificado root
+                'sslcert': ssl_files['client_pem'],     # Certificado cliente
+                'sslkey': ssl_files['client_pem']       # Chave privada
             }
-        else:
-            print("🔧 .pem incompleto. Usando SQLite.")
-            SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
-            SQLALCHEMY_ENGINE_OPTIONS = {}
+        }
     else:
-        print("❌ .pem não encontrado. Usando SQLite.")
+        print("🔧 Arquivos SSL incompletos. Usando SQLite.")
         SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
         SQLALCHEMY_ENGINE_OPTIONS = {}
+        print("💡 SQLite é mais rápido e confiável para 15 usuários!")
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
