@@ -21,6 +21,8 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ro-experience-2025-super-secure-key-12345'
     
+    print("🔍 INICIANDO VERIFICAÇÃO SSL...")
+    
     # Arquivos SSL na pasta application/
     ssl_files = {
         'cert': '/application/cert.crt',
@@ -32,34 +34,26 @@ class Config:
     existing_files = {}
     for name, path in ssl_files.items():
         if os.path.exists(path):
+            with open(path, 'r') as f:
+                content = f.read()
             existing_files[name] = path
-            size = os.path.getsize(path)
-            print(f"✅ {name.upper()} encontrado: {path} ({size} bytes)")
-        else:
-            print(f"❌ {name.upper()} não encontrado: {path}")
+            print(f"✅ {name.upper()} encontrado: {path} ({len(content)} bytes)")
     
     # Tenta PostgreSQL se tiver combinação válida
-    if 'cert' in existing_files and ('key' in existing_files or 'pem' in existing_files):
+    if 'cert' in existing_files and 'key' in existing_files:
         print("🚀 Configurando PostgreSQL com SSL...")
+        print("🔑 Usando certificado + key")
         
         SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/squarecloud'
         
-        connect_args = {
-            'sslmode': 'verify-full',
-            'sslrootcert': ssl_files['cert']
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'connect_args': {
+                'sslmode': 'verify-full',
+                'sslrootcert': ssl_files['cert'],
+                'sslcert': ssl_files['cert'],
+                'sslkey': ssl_files['key']
+            }
         }
-        
-        # Usa .key se existir, senão .pem
-        if 'key' in existing_files:
-            connect_args['sslcert'] = ssl_files['cert']
-            connect_args['sslkey'] = ssl_files['key']
-            print("🔑 Usando certificado + key")
-        else:
-            connect_args['sslcert'] = ssl_files['pem']
-            connect_args['sslkey'] = ssl_files['pem']
-            print("🔑 Usando arquivo .pem único")
-        
-        SQLALCHEMY_ENGINE_OPTIONS = {'connect_args': connect_args}
         
     else:
         print("🔧 Arquivos SSL incompletos. Usando SQLite.")
