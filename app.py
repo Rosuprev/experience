@@ -16,7 +16,7 @@ import tempfile
 import os
 import stat
 import psycopg2
-
+import re
 import os
 import stat
 
@@ -2358,47 +2358,34 @@ def testar_permissoes():
 
  
 
+
+
 def criar_banco_se_nao_existir(app):
     """
-    Tenta conectar ao DB padrão 'postgres' e cria o DB alvo ('dbexperience') se não existir.
+    Cria o banco de dados alvo ('dbexperience') se não existir, conectando-se 
+    ao banco padrão 'postgres' com as mesmas configurações SSL.
     """
     full_uri = app.config['SQLALCHEMY_DATABASE_URI']
     
-    # Extrai o nome do DB alvo ('dbexperience')
-    DB_NAME = full_uri.split('/')[-1].split('?')[0]
+    # 1. Isola o nome do banco de dados alvo ('dbexperience')
+    # O nome do banco está depois do último '/' e antes do '?'
+    db_name_and_query = full_uri.split('/')[-1]
+    DB_NAME = db_name_and_query.split('?')[0]
+
+    # 2. Constrói a URI para a conexão temporária no banco 'postgres'
+    # Substitui o nome do banco alvo pelo banco default 'postgres'
+    temp_uri = full_uri.replace(f'/{DB_NAME}', '/postgres') 
     
-    # Extrai as credenciais e o endereço do servidor para a conexão temporária
-    import re
-    match = re.search(r'//(.*?):(.*?)@([^:]*):(\d+)/', full_uri)
+    # 3. Remove o prefixo '+psycopg2' que só é usado pelo SQLAlchemy
+    temp_uri = temp_uri.replace('+psycopg2', '')
     
-    if not match:
-        print("❌ Erro ao extrair credenciais da URI.")
-        return
-
-    user, password, host, port = match.groups()
-
-    # Extrai os parâmetros SSL (necessários para a conexão temporária)
-    ssl_params = {}
-    if '?' in full_uri:
-        query_string = full_uri.split('?', 1)[1]
-        for pair in query_string.split('&'):
-            if '=' in pair:
-                key, value = pair.split('=', 1)
-                if 'sslrootcert' in key or 'sslcert' in key or 'sslkey' in key or 'sslmode' in key:
-                    ssl_params[key] = value
-
     conn = None
     try:
-        # Tenta conectar ao DB padrão 'postgres'
         print(f"🔧 Tentando conectar ao banco default ('postgres') para criar '{DB_NAME}'...")
-        conn = psycopg2.connect(
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            database='postgres', # Conecta-se ao banco de dados administrativo
-            **ssl_params
-        )
+        
+        # Conexão usando a URI completa, que inclui todos os parâmetros SSL
+        conn = psycopg2.connect(temp_uri) 
+        
         conn.autocommit = True
         cursor = conn.cursor()
         
@@ -2426,7 +2413,7 @@ def criar_banco_se_nao_existir(app):
 
     finally:
         if conn:
-            conn.close()       
+            conn.close()   
 
 if __name__ == '__main__':
     with app.app_context():
