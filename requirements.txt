@@ -1,6 +1,5 @@
-Flask
-Flask-SQLAlchemy
-psycopg2-binary  # Novo driver PostgreSQL
-openpyxl
-werkzeug
-python-dotenv
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+openpyxl==3.1.2
+Werkzeug==2.3.7
+psycopg2-binary==2.9.7

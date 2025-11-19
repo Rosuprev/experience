@@ -17,19 +17,47 @@ import os
 import stat
 import psycopg2
 
+import os
+import stat
+
+def corrigir_permissoes_certificados():
+    """Corrige permissões dos certificados PostgreSQL"""
+    certificados = {
+        'private-key.key': stat.S_IRUSR | stat.S_IWUSR,  # 600
+        'certificate.pem': stat.S_IRUSR | stat.S_IWUSR,  # 600
+        'ca-certificate.crt': stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH  # 644
+    }
+    
+    for cert_file, perms in certificados.items():
+        if os.path.exists(cert_file):
+            try:
+                os.chmod(cert_file, perms)
+                print(f"✅ Permissões ajustadas para: {cert_file}")
+            except Exception as e:
+                print(f"⚠️ Não foi possível ajustar {cert_file}: {e}")
+
+# Chame esta função ANTES de db.create_all()
+corrigir_permissoes_certificados()
+
 
 # CORREÇÃO DO FUSO HORÁRIO
 def agora():
     """Retorna o horário atual de Brasília (UTC-3)"""
     return datetime.utcnow() - timedelta(hours=3)
 
-# Configurações DEFINITIVAS - SQLite
+# Configurações PostgreSQL
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # SQLite - FUNCIONA 100% no SquareCloud
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///database.db'
+    # String de conexão PostgreSQL
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres'
     
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'connect_args': {
+            'sslmode': 'require'
+        }
+    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
