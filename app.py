@@ -2316,6 +2316,22 @@ def exportar_pesquisas():
 
 if __name__ == '__main__':
     with app.app_context():
+        # --- TENTATIVA DE CORREÇÃO DE PERMISSÕES ---
+        try:
+            print("🔓 Tentando ajustar permissões do Schema...")
+            with db.engine.connect() as conn:
+                # Tenta liberar o esquema public para o usuário 'squarecloud'
+                # Se o seu usuário do banco não for 'squarecloud', altere o nome abaixo
+                conn.execute(db.text("GRANT USAGE, CREATE ON SCHEMA public TO squarecloud"))
+                conn.execute(db.text("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO squarecloud"))
+                conn.execute(db.text("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO squarecloud"))
+                conn.commit()
+            print("✅ Permissões concedidas com sucesso!")
+        except Exception as e:
+            # Se falhar aqui, o código continua tentando criar as tabelas
+            print(f"⚠️ Aviso: Tentativa automática de permissão falhou (verifique se o usuário é admin): {e}")
+        # -------------------------------------------
+
         db.create_all()
         criar_usuario_admin()
         migrar_banco_dados()
