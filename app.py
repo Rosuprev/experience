@@ -19,6 +19,7 @@ import psycopg2
 import re
 import os
 import stat
+import logging
 
 def verificar_certificados():
     """Verifica se os certificados existem e estão corretos"""
@@ -83,6 +84,9 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 
+# CONFIGURAÇÃO DE LOGGING
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Modelos
 class Usuario(db.Model):
@@ -2126,14 +2130,21 @@ def exportar_logs():
 def pesquisa_publica():
     if request.method == 'POST':
         try:
-            # NOVAS PERGUNTAS
+            print("\n" + "="*60)
+            print("🔍 DEBUG - INICIANDO PROCESSAMENTO DA PESQUISA")
+            print("="*60)
+            
+            # DEBUG: Verificar todos os dados recebidos
+            print("📦 DADOS RECEBIDOS DO FORMULÁRIO:")
+            for key, value in request.form.items():
+                print(f"   {key}: {value}")
+            
+            # NOVAS PERGUNTAS (1-14)
             comunicacao = int(request.form.get('comunicacao'))
             formato_evento = int(request.form.get('formato_evento'))
             alimentacao = int(request.form.get('alimentacao'))
             palestra_reforma = int(request.form.get('palestra_reforma'))
             palestra_estrategia = int(request.form.get('palestra_estrategia'))
-            
-            # PERGUNTAS EXISTENTES
             organizacao = int(request.form.get('organizacao'))
             interacao_brother = int(request.form.get('interacao_brother'))
             interacao_canon = int(request.form.get('interacao_canon'))
@@ -2147,6 +2158,9 @@ def pesquisa_publica():
             comentarios = request.form.get('comentarios', '').strip()
             cnpj = request.form.get('cnpj', '').strip()
             
+            print(f"📝 CNPJ RECEBIDO: '{cnpj}'")
+            print(f"📏 Tamanho do CNPJ: {len(cnpj)}")
+            
             # Validação de todas as questões obrigatórias
             campos_obrigatorios = [
                 comunicacao, formato_evento, alimentacao, palestra_reforma, palestra_estrategia,
@@ -2158,32 +2172,78 @@ def pesquisa_publica():
                 flash('Por favor, responda todas as questões obrigatórias', 'error')
                 return render_template('pesquisa_publica.html', enviado=False)
             
-            # Lógica de identificação (mantida igual)
+            # LÓGICA DE IDENTIFICAÇÃO CORRIGIDA
             anonima = True
             cnpj_identificado = None
             razao_social = None
             
-            if cnpj:
+            if cnpj and cnpj.strip():
                 cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
+                print(f"🔧 CNPJ LIMPO: '{cnpj_limpo}'")
+                print(f"📏 Tamanho CNPJ limpo: {len(cnpj_limpo)}")
+                
                 if len(cnpj_limpo) == 14:
+                    # BUSCA 1: Busca exata pelo CNPJ limpo
                     cliente = Cliente.query.filter_by(cnpj=cnpj_limpo).first()
-                    if cliente and cliente.checkin_realizado:
-                        anonima = False
-                        cnpj_identificado = cnpj_limpo
-                        razao_social = cliente.razao_social
+                    print(f"🔎 Busca 1 (CNPJ limpo): {'ENCONTRADO' if cliente else 'NÃO ENCONTRADO'}")
+                    
+                    if not cliente:
+                        # BUSCA 2: Busca com CNPJ formatado
+                        cnpj_formatado = normalizar_cnpj(cnpj_limpo)
+                        cliente = Cliente.query.filter_by(cnpj=cnpj_formatado).first()
+                        print(f"🔎 Busca 2 (CNPJ formatado '{cnpj_formatado}'): {'ENCONTRADO' if cliente else 'NÃO ENCONTRADO'}")
+                    
+                    if not cliente:
+                        # BUSCA 3: Busca em todos os clientes
+                        todos_clientes = Cliente.query.all()
+                        print(f"🔎 Busca 3 (em {len(todos_clientes)} clientes)")
+                        for cli in todos_clientes:
+                            cli_cnpj_limpo = ''.join(filter(str.isdigit, cli.cnpj))
+                            if cli_cnpj_limpo == cnpj_limpo:
+                                cliente = cli
+                                print(f"   ✅ Cliente encontrado: {cli.razao_social}")
+                                print(f"   📋 CNPJ no banco: '{cli.cnpj}'")
+                                break
+                    
+                    if cliente:
+                        print(f"🎯 CLIENTE ENCONTRADO: {cliente.razao_social}")
+                        print(f"✅ Check-in: {cliente.checkin_realizado}")
+                        print(f"📋 CNPJ no banco: '{cliente.cnpj}'")
+                        
+                        if cliente.checkin_realizado:
+                            anonima = False
+                            cnpj_identificado = cliente.cnpj  # USA O CNPJ LIMPO
+                            razao_social = cliente.razao_social
+                            print(f"🎉 PESQUISA IDENTIFICADA: {razao_social}")
+                        else:
+                            print("⚠️ Cliente SEM check-in")
+                    else:
+                        print("❌ Cliente NÃO encontrado")
+                        # Debug adicional: mostra alguns clientes
+                        alguns_clientes = Cliente.query.filter_by(checkin_realizado=True).limit(3).all()
+                        print("📋 Clientes com check-in no banco:")
+                        for cli in alguns_clientes:
+                            print(f"   - {cli.cnpj} | {cli.razao_social}")
+                else:
+                    print(f"❌ CNPJ inválido: {len(cnpj_limpo)} dígitos (precisa 14)")
+            else:
+                print("📝 CNPJ vazio - resposta ANÔNIMA")
+            
+            print(f"📊 STATUS FINAL: {'ANÔNIMA' if anonima else 'IDENTIFICADA'}")
+            print(f"📦 CNPJ que será salvo: {cnpj_identificado}")
+            print(f"🏢 Razão Social: {razao_social}")
+            print("="*60)
             
             resposta = PesquisaResposta(
                 cnpj_identificado=cnpj_identificado,
                 razao_social=razao_social,
                 
-                # NOVAS PERGUNTAS
+                # NOVAS PERGUNTAS (1-14)
                 comunicacao=comunicacao,
                 formato_evento=formato_evento,
                 alimentacao=alimentacao,
                 palestra_reforma=palestra_reforma,
                 palestra_estrategia=palestra_estrategia,
-                
-                # PERGUNTAS EXISTENTES
                 organizacao=organizacao,
                 interacao_brother=interacao_brother,
                 interacao_canon=interacao_canon,
@@ -2205,13 +2265,17 @@ def pesquisa_publica():
             registrar_log('pesquisa_respondida', 'pesquisa', {
                 'resposta_id': resposta.id,
                 'anonima': anonima,
-                'cnpj': cnpj_identificado
+                'cnpj': cnpj_identificado,
+                'razao_social': razao_social
             })
             
             return render_template('pesquisa_publica.html', enviado=True)
             
         except Exception as e:
             db.session.rollback()
+            print(f"❌ Erro ao salvar pesquisa: {str(e)}")
+            import traceback
+            traceback.print_exc()
             flash(f'Erro ao enviar pesquisa: {str(e)}', 'error')
             return render_template('pesquisa_publica.html', enviado=False)
     
@@ -2231,17 +2295,17 @@ def api_validar_cnpj_pesquisa(cnpj):
         if len(cnpj_limpo) != 14:
             return jsonify({'valido': False, 'mensagem': 'CNPJ deve ter 14 dígitos'})
         
-        cnpj_formatado = normalizar_cnpj_pesquisa(cnpj_limpo)
-        
+        # Busca exata pelo CNPJ limpo
         cliente = Cliente.query.filter_by(cnpj=cnpj_limpo).first()
         
         if not cliente:
-            cliente = Cliente.query.filter_by(cnpj=normalizar_cnpj(cnpj_limpo)).first()
-        
-        if not cliente:
+            # Tenta com CNPJ formatado
+            cnpj_formatado = normalizar_cnpj(cnpj_limpo)
             cliente = Cliente.query.filter_by(cnpj=cnpj_formatado).first()
+            print(f"🔍 Tentando busca com formato: {cnpj_formatado}")
         
         if not cliente:
+            # Busca em todos os clientes (fallback)
             todos_clientes = Cliente.query.all()
             for cli in todos_clientes:
                 cli_cnpj_limpo = ''.join(filter(str.isdigit, cli.cnpj))
@@ -2257,7 +2321,8 @@ def api_validar_cnpj_pesquisa(cnpj):
             if cliente.checkin_realizado:
                 return jsonify({
                     'valido': True, 
-                    'mensagem': f'CNPJ validado - {cliente.razao_social}'
+                    'mensagem': f'CNPJ validado - {cliente.razao_social}',
+                    'cnpj_correto': cliente.cnpj  # Retorna o CNPJ exato do banco
                 })
             else:
                 return jsonify({
@@ -2274,6 +2339,8 @@ def api_validar_cnpj_pesquisa(cnpj):
         print(f"❌ Erro na validação: {str(e)}")
         return jsonify({'valido': False, 'mensagem': f'Erro na validação: {str(e)}'})
     
+    
+    
 @app.route('/relatorio-pesquisas')
 @login_required
 @permissao_required('relatorios')
@@ -2284,7 +2351,7 @@ def relatorio_pesquisas():
     pesquisas_identificadas = len([p for p in pesquisas if not p.anonima])
     pesquisas_anonimas = len([p for p in pesquisas if p.anonima])
     
-    # Calcular médias para todas as questões
+    # Calcular médias para todas as NOVAS questões
     campos = [
         'comunicacao', 'formato_evento', 'alimentacao', 'palestra_reforma', 'palestra_estrategia',
         'organizacao', 'interacao_brother', 'interacao_canon', 'interacao_epson', 'interacao_hp',

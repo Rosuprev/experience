@@ -840,155 +840,198 @@
     <script src="{{ url_for('static', filename='js/libs/bootstrap/bootstrap.bundle.min.js') }}"></script>
     
     <script>
-        let tipoIdentificacao = null;
-        let cnpjValidado = false;
-    
-        function selecionarIdentificacao(tipo) {
-            tipoIdentificacao = tipo;
-            
-            // Resetar seleções
-            document.getElementById('btnCnpj').classList.remove('selected');
-            document.getElementById('btnAnonimo').classList.remove('selected');
-            document.getElementById('campoCnpj').style.display = 'none';
-            document.getElementById('resultadoValidacao').innerHTML = '';
-            cnpjValidado = false;
-            
-            // Selecionar o tipo escolhido
-            if (tipo === 'cnpj') {
-                document.getElementById('btnCnpj').classList.add('selected');
-                document.getElementById('campoCnpj').style.display = 'block';
-            } else {
-                document.getElementById('btnAnonimo').classList.add('selected');
-            }
-            
-            verificarFormularioCompleto();
-        }
-    
-        function selecionarAvaliacao(botao) {
-            const questao = botao.getAttribute('data-questao');
-            const valor = botao.getAttribute('data-valor');
-            
-            // Remover seleção de todos os botões desta questão
-            const botoes = document.querySelectorAll(`[data-questao="${questao}"]`);
-            botoes.forEach(btn => btn.classList.remove('selected'));
-            
-            // Selecionar o botão clicado
-            botao.classList.add('selected');
-            
-            // Atualizar o campo hidden
-            document.getElementById(questao).value = valor;
-            
-            verificarFormularioCompleto();
-        }
-    
-        async function validarCnpj() {
-            const cnpj = document.getElementById('cnpj').value;
-            const btnValidar = document.getElementById('btnValidarCnpj');
-            const textoValidar = document.getElementById('textoValidar');
-            const loadingValidar = document.getElementById('loadingValidar');
-            const resultado = document.getElementById('resultadoValidacao');
-            
-            if (!cnpj) {
-                resultado.innerHTML = '<small class="cnpj-invalido">⚠️ Digite um CNPJ para validar</small>';
-                return;
-            }
-            
-            // Mostrar loading
-            textoValidar.classList.add('d-none');
-            loadingValidar.classList.remove('d-none');
-            btnValidar.disabled = true;
-            
-            try {
-                const response = await fetch(`/api/validar-cnpj-pesquisa/${encodeURIComponent(cnpj)}`);
-                const data = await response.json();
-                
-                if (data.valido) {
-                    resultado.innerHTML = `<small class="cnpj-validado">✅ ${data.mensagem}</small>`;
-                    cnpjValidado = true;
-                } else {
-                    resultado.innerHTML = `<small class="cnpj-invalido">❌ ${data.mensagem}</small>`;
-                    cnpjValidado = false;
-                }
-            } catch (error) {
-                resultado.innerHTML = '<small class="cnpj-invalido">❌ Erro na validação</small>';
-                cnpjValidado = false;
-            } finally {
-                textoValidar.classList.remove('d-none');
-                loadingValidar.classList.add('d-none');
-                btnValidar.disabled = false;
-                verificarFormularioCompleto();
-            }
-        }
-    
-        function verificarFormularioCompleto() {
-            // Lista de TODOS os campos obrigatórios (14 questões)
-            const camposObrigatorios = [
-                'comunicacao', 'formato_evento', 'alimentacao', 'palestra_reforma', 'palestra_estrategia',
-                'organizacao', 'interacao_brother', 'interacao_canon', 'interacao_epson', 'interacao_hp',
-                'interacao_konica', 'interacao_kyocera', 'prazo_entrega', 'frete'
-            ];
-            
-            const todosPreenchidos = camposObrigatorios.every(campo => {
-                return document.getElementById(campo).value !== '';
-            });
-            
-            // Verificar identificação
-            let identificacaoValida = false;
-            if (tipoIdentificacao === 'anonimo') {
-                identificacaoValida = true;
-            } else if (tipoIdentificacao === 'cnpj') {
-                identificacaoValida = cnpjValidado;
-            }
-            
-            const btnEnviar = document.getElementById('btnEnviar');
-            btnEnviar.disabled = !(todosPreenchidos && identificacaoValida);
-        }
-    
-        // Máscara para CNPJ
-        document.getElementById('cnpj').addEventListener('input', function(e) {
-            let value = this.value.replace(/\D/g, '');
-            
-            if (value.length > 2) {
-                value = value.slice(0, 2) + '.' + value.slice(2);
-            }
-            if (value.length > 6) {
-                value = value.slice(0, 6) + '.' + value.slice(6);
-            }
-            if (value.length > 10) {
-                value = value.slice(0, 10) + '/' + value.slice(10);
-            }
-            if (value.length > 15) {
-                value = value.slice(0, 15) + '-' + value.slice(15, 17);
-            }
-            
-            this.value = value;
-            
-            // Resetar validação quando o CNPJ for alterado
-            cnpjValidado = false;
-            document.getElementById('resultadoValidacao').innerHTML = '';
-            verificarFormularioCompleto();
-        });
-    
-        // Submit do formulário
-        document.getElementById('formPesquisa').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const btnEnviar = document.getElementById('btnEnviar');
-            const textoEnviar = document.getElementById('textoEnviar');
-            const loadingEnviar = document.getElementById('loadingEnviar');
-            
-            // Mostrar loading
-            textoEnviar.classList.add('d-none');
-            loadingEnviar.classList.remove('d-none');
-            btnEnviar.disabled = true;
-            
-            // Enviar formulário
-            this.submit();
-        });
-
-        // Verificar formulário ao carregar a página
+        // Aguardar o DOM carregar completamente
         document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 DOM carregado - Inicializando pesquisa...");
+            
+            let tipoIdentificacao = null;
+            let cnpjValidado = false;
+
+            // Funções
+            window.selecionarIdentificacao = function(tipo) {
+                console.log("👤 Selecionando identificação:", tipo);
+                tipoIdentificacao = tipo;
+                
+                // Resetar seleções
+                document.getElementById('btnCnpj').classList.remove('selected');
+                document.getElementById('btnAnonimo').classList.remove('selected');
+                document.getElementById('campoCnpj').style.display = 'none';
+                document.getElementById('resultadoValidacao').innerHTML = '';
+                cnpjValidado = false;
+                
+                // Selecionar o tipo escolhido
+                if (tipo === 'cnpj') {
+                    document.getElementById('btnCnpj').classList.add('selected');
+                    document.getElementById('campoCnpj').style.display = 'block';
+                } else {
+                    document.getElementById('btnAnonimo').classList.add('selected');
+                }
+                
+                verificarFormularioCompleto();
+            };
+
+            window.selecionarAvaliacao = function(botao) {
+                const questao = botao.getAttribute('data-questao');
+                const valor = botao.getAttribute('data-valor');
+                
+                console.log("⭐ Selecionando avaliação:", questao, valor);
+                
+                // Remover seleção de todos os botões desta questão
+                const botoes = document.querySelectorAll(`[data-questao="${questao}"]`);
+                botoes.forEach(btn => btn.classList.remove('selected'));
+                
+                // Selecionar o botão clicado
+                botao.classList.add('selected');
+                
+                // Atualizar o campo hidden
+                document.getElementById(questao).value = valor;
+                
+                verificarFormularioCompleto();
+            };
+
+            window.validarCnpj = async function() {
+                const cnpj = document.getElementById('cnpj').value;
+                const btnValidar = document.getElementById('btnValidarCnpj');
+                const textoValidar = document.getElementById('textoValidar');
+                const loadingValidar = document.getElementById('loadingValidar');
+                const resultado = document.getElementById('resultadoValidacao');
+                
+                console.log("🔍 Validando CNPJ:", cnpj);
+                
+                if (!cnpj) {
+                    resultado.innerHTML = '<small class="cnpj-invalido">⚠️ Digite um CNPJ para validar</small>';
+                    return;
+                }
+                
+                // Mostrar loading
+                textoValidar.classList.add('d-none');
+                loadingValidar.classList.remove('d-none');
+                btnValidar.disabled = true;
+                
+                try {
+                    console.log("📡 Enviando requisição para API...");
+                    const response = await fetch(`/api/validar-cnpj-pesquisa/${encodeURIComponent(cnpj)}`);
+                    const data = await response.json();
+                    
+                    console.log("📨 Resposta da API:", data);
+                    
+                    if (data.valido) {
+                        resultado.innerHTML = `<small class="cnpj-validado">✅ ${data.mensagem}</small>`;
+                        cnpjValidado = true;
+                        console.log("✅ CNPJ validado com sucesso");
+                    } else {
+                        resultado.innerHTML = `<small class="cnpj-invalido">❌ ${data.mensagem}</small>`;
+                        cnpjValidado = false;
+                        console.log("❌ CNPJ inválido");
+                    }
+                } catch (error) {
+                    resultado.innerHTML = '<small class="cnpj-invalido">❌ Erro na validação</small>';
+                    cnpjValidado = false;
+                    console.log("❌ Erro na validação:", error);
+                } finally {
+                    textoValidar.classList.remove('d-none');
+                    loadingValidar.classList.add('d-none');
+                    btnValidar.disabled = false;
+                    verificarFormularioCompleto();
+                    console.log("📊 Status final - CNPJ válido:", cnpjValidado);
+                }
+            };
+
+            function verificarFormularioCompleto() {
+                // Lista de TODOS os campos obrigatórios (14 questões)
+                const camposObrigatorios = [
+                    'comunicacao', 'formato_evento', 'alimentacao', 'palestra_reforma', 'palestra_estrategia',
+                    'organizacao', 'interacao_brother', 'interacao_canon', 'interacao_epson', 'interacao_hp',
+                    'interacao_konica', 'interacao_kyocera', 'prazo_entrega', 'frete'
+                ];
+                
+                const todosPreenchidos = camposObrigatorios.every(campo => {
+                    const valor = document.getElementById(campo).value;
+                    const preenchido = valor !== '';
+                    if (!preenchido) {
+                        console.log(`❌ Campo não preenchido: ${campo}`);
+                    }
+                    return preenchido;
+                });
+                
+                // Verificar identificação
+                let identificacaoValida = false;
+                if (tipoIdentificacao === 'anonimo') {
+                    identificacaoValida = true;
+                    console.log("👤 Identificação: Anônimo");
+                } else if (tipoIdentificacao === 'cnpj') {
+                    identificacaoValida = cnpjValidado;
+                    console.log(`👤 Identificação: CNPJ (válido: ${cnpjValidado})`);
+                } else {
+                    console.log("❌ Tipo de identificação não selecionado");
+                }
+                
+                const btnEnviar = document.getElementById('btnEnviar');
+                const habilitado = todosPreenchidos && identificacaoValida;
+                btnEnviar.disabled = !habilitado;
+                
+                console.log(`📊 Status formulário - Preenchido: ${todosPreenchidos}, Identificação: ${identificacaoValida}, Habilitado: ${habilitado}`);
+            }
+
+            // Máscara para CNPJ
+            document.getElementById('cnpj').addEventListener('input', function(e) {
+                let value = this.value.replace(/\D/g, '');
+                
+                if (value.length > 2) {
+                    value = value.slice(0, 2) + '.' + value.slice(2);
+                }
+                if (value.length > 6) {
+                    value = value.slice(0, 6) + '.' + value.slice(6);
+                }
+                if (value.length > 10) {
+                    value = value.slice(0, 10) + '/' + value.slice(10);
+                }
+                if (value.length > 15) {
+                    value = value.slice(0, 15) + '-' + value.slice(15, 17);
+                }
+                
+                this.value = value;
+                
+                // Resetar validação quando o CNPJ for alterado
+                cnpjValidado = false;
+                document.getElementById('resultadoValidacao').innerHTML = '';
+                verificarFormularioCompleto();
+            });
+
+            // Submit do formulário COM DEBUG
+            document.getElementById('formPesquisa').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const btnEnviar = document.getElementById('btnEnviar');
+                const textoEnviar = document.getElementById('textoEnviar');
+                const loadingEnviar = document.getElementById('loadingEnviar');
+                const cnpjField = document.getElementById('cnpj');
+                
+                // DEBUG: Verificar o que está sendo enviado
+                console.log("🚀 ENVIANDO FORMULÁRIO");
+                console.log("📝 CNPJ no campo:", cnpjField ? cnpjField.value : "CAMPO NÃO ENCONTRADO");
+                console.log("✅ CNPJ validado:", cnpjValidado);
+                console.log("👤 Tipo identificação:", tipoIdentificacao);
+                
+                const formData = new FormData(this);
+                console.log("📦 Dados do formulário:");
+                for (let [key, value] of formData.entries()) {
+                    console.log(`   ${key}: ${value}`);
+                }
+                
+                // Mostrar loading
+                textoEnviar.classList.add('d-none');
+                loadingEnviar.classList.remove('d-none');
+                btnEnviar.disabled = true;
+                
+                // Enviar formulário
+                this.submit();
+            });
+
+            // Verificar formulário ao carregar a página
             verificarFormularioCompleto();
+            
+            console.log("✅ Pesquisa inicializada com sucesso!");
         });
     </script>
     
