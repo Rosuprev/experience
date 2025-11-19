@@ -59,18 +59,22 @@ def agora():
     return datetime.utcnow() - timedelta(hours=3)
 
 # Configurações PostgreSQL COM CERTIFICADOS
+# app.py - na seção da classe Config
+
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # 1. URI DE CONEXÃO CORRIGIDA:
+    # 1. URI DE CONEXÃO CORRIGIDA E ATUALIZADA:
     # - Usa o driver +psycopg2
+    # - Usa a senha nova: RGil4Y8VE9M5znboTfwHInhm
     # - Aponta para o DB final (dbexperience)
-    # - Inclui TODOS os parâmetros SSL na query string (sslmode, sslrootcert, sslcert, sslkey)
+    # - Inclui TODOS os parâmetros SSL na query string (obrigatórios pelo servidor)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
+        'postgresql+psycopg2://squarecloud:RGil4Y8VE9M5znboTfwHInhm@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
     
     # 2. REMOVA SQLALCHEMY_ENGINE_OPTIONS:
-    # A configuração SSL está na URI, este bloco NÃO é mais necessário e causa conflito.
+    # Este bloco é desnecessário e causa conflitos quando o SSL está na URI.
+    # Certifique-se de que ele não existe mais.
     # SQLALCHEMY_ENGINE_OPTIONS = { ... } <-- REMOVA!
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
