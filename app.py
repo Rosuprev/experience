@@ -73,8 +73,12 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 
+# 🔥 ADICIONE ESTA LINHA - Configurar schema padrão
+Base = db.Model
+Base.metadata.schema = 'squarecloud'
+
 # Modelos
-class Usuario(db.Model):
+class Usuario(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -85,7 +89,7 @@ class Usuario(db.Model):
     data_criacao = db.Column(db.DateTime, default=agora)
     permissoes = db.Column(db.Text, default='{}')
 
-class LogAuditoria(db.Model):
+class LogAuditoria(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
@@ -97,7 +101,7 @@ class LogAuditoria(db.Model):
     
     usuario = db.relationship('Usuario', backref='logs')
 
-class Cliente(db.Model):
+class Cliente(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj = db.Column(db.String(18), nullable=False)
@@ -115,7 +119,7 @@ class Cliente(db.Model):
 
     __table_args__ = (db.UniqueConstraint('cnpj', 'responsavel', name='uq_cnpj_responsavel'),)
 
-class Venda(db.Model):
+class Venda(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj_compra = db.Column(db.String(18), nullable=False)
@@ -127,7 +131,7 @@ class Venda(db.Model):
     
     equipamentos = db.relationship('VendaEquipamento', backref='venda', lazy=True)
 
-class Brinde(db.Model):
+class Brinde(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     tipo_sorteio = db.Column(db.String(10), nullable=False)
@@ -138,7 +142,7 @@ class Brinde(db.Model):
     quantidade_disponivel = db.Column(db.Integer, nullable=False, default=1)
     ativo = db.Column(db.Boolean, default=True)
 
-class Sorteio(db.Model):
+class Sorteio(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     tipo_brinde = db.Column(db.String(50), nullable=False)
@@ -154,7 +158,7 @@ class Sorteio(db.Model):
     responsavel_entrega = db.Column(db.String(200))
     observacao_entrega = db.Column(db.Text)
 
-class FaturamentoSorteio(db.Model):
+class FaturamentoSorteio(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj = db.Column(db.String(18), nullable=False)
@@ -162,7 +166,7 @@ class FaturamentoSorteio(db.Model):
     ultima_atualizacao = db.Column(db.DateTime, default=agora)
     participacoes_utilizadas = db.Column(db.Integer, default=0)
 
-class Estoque(db.Model):
+class Estoque(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     fabricante = db.Column(db.String(100), nullable=False)
@@ -174,14 +178,14 @@ class Estoque(db.Model):
     
     vendas = db.relationship('VendaEquipamento', backref='equipamento', lazy=True)
 
-class VendaEquipamento(db.Model):
+class VendaEquipamento(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     venda_id = db.Column(db.Integer, db.ForeignKey('venda.id'))
     equipamento_id = db.Column(db.Integer, db.ForeignKey('estoque.id'))
     quantidade = db.Column(db.Integer, nullable=False, default=1)
 
-class PesquisaResposta(db.Model):
+class PesquisaResposta(Base):
     __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj_identificado = db.Column(db.String(18))
