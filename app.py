@@ -62,18 +62,17 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão PostgreSQL COM CERTIFICADOS
+    # 1. URI DE CONEXÃO CORRIGIDA:
+    # - Usa o driver +psycopg2
+    # - Aponta para o DB final (dbexperience)
+    # - Inclui TODOS os parâmetros SSL na query string (sslmode, sslrootcert, sslcert, sslkey)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres'
+        'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
     
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'connect_args': {
-            'sslmode': 'verify-ca',
-            'sslrootcert': 'ca-certificate.crt',
-            'sslcert': 'certificate.pem',
-            'sslkey': 'private-key.key'
-        }
-    }
+    # 2. REMOVA SQLALCHEMY_ENGINE_OPTIONS:
+    # A configuração SSL está na URI, este bloco NÃO é mais necessário e causa conflito.
+    # SQLALCHEMY_ENGINE_OPTIONS = { ... } <-- REMOVA!
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
@@ -2357,18 +2356,14 @@ def testar_permissoes():
         print(f"❌ Erro de conexão: {e}")
 
  
-
-
-
 def criar_banco_se_nao_existir(app):
     """
     Cria o banco de dados alvo ('dbexperience') se não existir, conectando-se 
-    ao banco padrão 'postgres' com as mesmas configurações SSL.
+    ao banco padrão 'postgres' com as mesmas configurações SSL e credenciais.
     """
     full_uri = app.config['SQLALCHEMY_DATABASE_URI']
     
     # 1. Isola o nome do banco de dados alvo ('dbexperience')
-    # O nome do banco está depois do último '/' e antes do '?'
     db_name_and_query = full_uri.split('/')[-1]
     DB_NAME = db_name_and_query.split('?')[0]
 
@@ -2404,6 +2399,7 @@ def criar_banco_se_nao_existir(app):
         cursor.close()
 
     except psycopg2.OperationalError as e:
+        # Se falhar aqui, o erro é de conexão ou certificado
         print(f"❌ Erro crítico ao criar/verificar o banco de dados: {e}")
         raise Exception("Conexão ao DB default falhou. Verifique as credenciais, certificados e permissões.") from e
         
@@ -2413,15 +2409,15 @@ def criar_banco_se_nao_existir(app):
 
     finally:
         if conn:
-            conn.close()   
+            conn.close()  
 
 if __name__ == '__main__':
     with app.app_context():
         try:
-            # 1. PASSO ADICIONAL: Cria o banco de dados alvo se não existir (instrução do suporte)
+            # 1. PASSO CRÍTICO: Cria o banco de dados alvo se não existir
             criar_banco_se_nao_existir(app) 
             
-            # 2. Cria as tabelas (agora no banco criado com permissão)
+            # 2. Cria as tabelas na DB 'dbexperience' que agora existe
             db.create_all()
             
             # 3. Execuções de inicialização normais
@@ -2435,7 +2431,7 @@ if __name__ == '__main__':
             print(f"❌ Erro ao conectar com PostgreSQL: {e}")
             print("🔧 Verifique a string de conexão, certificados e permissões.")
     
-    # Configurações de HOST/PORTA para execução do servidor
+    # Configurações de HOST/PORTA para execução do servidor (Mantenha o seu código original abaixo)
     host = '0.0.0.0'
     
     if os.environ.get('SQUARECLOUD') or os.environ.get('PORT'):
