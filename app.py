@@ -68,7 +68,6 @@ class Config:
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    print(f"🔧 Certificado configurado em: {cert_path}")
 
 app = Flask(__name__)
 app.config.from_object(Config)
