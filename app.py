@@ -50,14 +50,17 @@ class Config:
     
     # String de conexão PostgreSQL com pg8000 - SSL na própria URL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql+pg8000://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?ssl=true'
+    'postgresql+pg8000://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgre'
     
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'connect_args': {
-            # pg8000 não usa sslmode, usa ssl=True diretamente
-            # Removemos completamente os argumentos SSL
-        }
+    'connect_args': {
+        # O pg8000 espera os argumentos ssl_ca, ssl_cert e ssl_key para SSL.
+        # Isso resolve o erro "unexpected keyword argument 'ssl'".
+        'ssl_ca': 'ca-certificate.crt', 
+        'ssl_cert': 'certificate.pem',
+        'ssl_key': 'private-key.key'
     }
+}
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
