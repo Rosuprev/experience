@@ -50,7 +50,7 @@ class Config:
     
     # String de conexão PostgreSQL com pg8000
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql+pg8000://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience'
+        'postgresql+pg8000://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres'
     
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
