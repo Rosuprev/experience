@@ -42,7 +42,11 @@
     <div class="col-md-3 mb-3">
         <div class="card bg-primary-custom text-white text-center">
             <div class="card-body">
-                <h3 class="display-4">{{ "%.1f"|format((media_organizacao + media_palestras + media_atendimento + media_futuro) / 4) }}</h3>
+                {% set soma_medias = medias.comunicacao + medias.formato_evento + medias.alimentacao + medias.palestra_reforma + 
+                                      medias.palestra_estrategia + medias.organizacao + medias.interacao_brother + medias.interacao_canon +
+                                      medias.interacao_epson + medias.interacao_hp + medias.interacao_konica + medias.interacao_kyocera +
+                                      medias.prazo_entrega + medias.frete %}
+                <h3 class="display-4">{{ "%.1f"|format(soma_medias / 14) }}</h3>
                 <p class="mb-0">Média Geral</p>
             </div>
         </div>
@@ -58,32 +62,114 @@
             </div>
             <div class="card-body">
                 <div class="row text-center">
-                    <div class="col-md-3 mb-3">
+                    <!-- Comunicação e Formato -->
+                    <div class="col-md-2 mb-3">
                         <div class="p-3 border rounded">
-                            <h3 class="text-primary">{{ "%.1f"|format(media_organizacao) }}</h3>
+                            <h3 class="text-primary">{{ "%.1f"|format(medias.comunicacao) }}</h3>
+                            <p class="mb-1"><strong>Comunicação</strong></p>
+                            <small class="text-muted">Antes do evento</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-primary">{{ "%.1f"|format(medias.formato_evento) }}</h3>
+                            <p class="mb-1"><strong>Formato</strong></p>
+                            <small class="text-muted">Local do evento</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Alimentação e Palestras -->
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-success">{{ "%.1f"|format(medias.alimentacao) }}</h3>
+                            <p class="mb-1"><strong>Alimentação</strong></p>
+                            <small class="text-muted">Serviços oferecidos</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-success">{{ "%.1f"|format(medias.palestra_reforma) }}</h3>
+                            <p class="mb-1"><strong>Reforma</strong></p>
+                            <small class="text-muted">Tributária</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-success">{{ "%.1f"|format(medias.palestra_estrategia) }}</h3>
+                            <p class="mb-1"><strong>Estratégia</strong></p>
+                            <small class="text-muted">Faturamento</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-warning">{{ "%.1f"|format(medias.organizacao) }}</h3>
                             <p class="mb-1"><strong>Organização</strong></p>
-                            <small class="text-muted">Avaliação geral do evento</small>
+                            <small class="text-muted">Geral do evento</small>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
+                </div>
+                
+                <!-- Segunda linha de médias -->
+                <div class="row text-center mt-3">
+                    <!-- Interações com Equipes -->
+                    <div class="col-md-2 mb-3">
                         <div class="p-3 border rounded">
-                            <h3 class="text-success">{{ "%.1f"|format(media_palestras) }}</h3>
-                            <p class="mb-1"><strong>Palestras</strong></p>
-                            <small class="text-muted">Qualidade do conteúdo</small>
+                            <h3 class="text-info">{{ "%.1f"|format(medias.interacao_brother) }}</h3>
+                            <p class="mb-1"><strong>Brother</strong></p>
+                            <small class="text-muted">Interação</small>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <div class="p-3 border rounded">
-                            <h3 class="text-warning">{{ "%.1f"|format(media_atendimento) }}</h3>
-                            <p class="mb-1"><strong>Atendimento</strong></p>
-                            <small class="text-muted">Suporte e atendimento</small>
+                            <h3 class="text-info">{{ "%.1f"|format(medias.interacao_canon) }}</h3>
+                            <p class="mb-1"><strong>Canon</strong></p>
+                            <small class="text-muted">Interação</small>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <div class="p-3 border rounded">
-                            <h3 class="text-info">{{ "%.1f"|format(media_futuro) }}</h3>
-                            <p class="mb-1"><strong>Futuro</strong></p>
-                            <small class="text-muted">Intenção de participar novamente</small>
+                            <h3 class="text-info">{{ "%.1f"|format(medias.interacao_epson) }}</h3>
+                            <p class="mb-1"><strong>Epson</strong></p>
+                            <small class="text-muted">Interação</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-info">{{ "%.1f"|format(medias.interacao_hp) }}</h3>
+                            <p class="mb-1"><strong>HP</strong></p>
+                            <small class="text-muted">Interação</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-info">{{ "%.1f"|format(medias.interacao_konica) }}</h3>
+                            <p class="mb-1"><strong>Konica</strong></p>
+                            <small class="text-muted">Interação</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-info">{{ "%.1f"|format(medias.interacao_kyocera) }}</h3>
+                            <p class="mb-1"><strong>Kyocera</strong></p>
+                            <small class="text-muted">Interação</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Terceira linha de médias -->
+                <div class="row text-center mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-danger">{{ "%.1f"|format(medias.prazo_entrega) }}</h3>
+                            <p class="mb-1"><strong>Prazo Entrega</strong></p>
+                            <small class="text-muted">Reis Office</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-danger">{{ "%.1f"|format(medias.frete) }}</h3>
+                            <p class="mb-1"><strong>Frete</strong></p>
+                            <small class="text-muted">Comparação</small>
                         </div>
                     </div>
                 </div>
@@ -111,10 +197,12 @@
                                 <th>Data/Hora</th>
                                 <th>Tipo</th>
                                 <th>CNPJ/Razão Social</th>
+                                <th>Com.</th>
+                                <th>Form.</th>
+                                <th>Alim.</th>
+                                <th>Ref.</th>
+                                <th>Estr.</th>
                                 <th>Org.</th>
-                                <th>Pal.</th>
-                                <th>Atend.</th>
-                                <th>Futuro</th>
                                 <th>Comentários</th>
                             </tr>
                         </thead>
@@ -138,16 +226,22 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <span class="badge bg-primary">{{ pesquisa.organizacao }}</span>
+                                    <span class="badge bg-primary">{{ pesquisa.comunicacao }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-success">{{ pesquisa.palestras }}</span>
+                                    <span class="badge bg-primary">{{ pesquisa.formato_evento }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-warning">{{ pesquisa.atendimento }}</span>
+                                    <span class="badge bg-success">{{ pesquisa.alimentacao }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info">{{ pesquisa.futuro }}</span>
+                                    <span class="badge bg-success">{{ pesquisa.palestra_reforma }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ pesquisa.palestra_estrategia }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning">{{ pesquisa.organizacao }}</span>
                                 </td>
                                 <td>
                                     {% if pesquisa.comentarios %}
@@ -201,10 +295,25 @@
                 <div class="mb-3">
                     <strong>Avaliações:</strong>
                     <div class="mt-2">
-                        <span class="badge bg-primary me-2">Organização: {{ pesquisa.organizacao }}/10</span>
-                        <span class="badge bg-success me-2">Palestras: {{ pesquisa.palestras }}/10</span>
-                        <span class="badge bg-warning me-2">Atendimento: {{ pesquisa.atendimento }}/10</span>
-                        <span class="badge bg-info">Futuro: {{ pesquisa.futuro }}/10</span>
+                        <!-- Comunicação e Formato -->
+                        <span class="badge bg-primary me-1 mb-1">Comunicação: {{ pesquisa.comunicacao }}/5</span>
+                        <span class="badge bg-primary me-1 mb-1">Formato: {{ pesquisa.formato_evento }}/5</span>
+                        <span class="badge bg-success me-1 mb-1">Alimentação: {{ pesquisa.alimentacao }}/5</span>
+                        <span class="badge bg-success me-1 mb-1">Reforma: {{ pesquisa.palestra_reforma }}/5</span>
+                        <span class="badge bg-success me-1 mb-1">Estratégia: {{ pesquisa.palestra_estrategia }}/5</span>
+                        <span class="badge bg-warning me-1 mb-1">Organização: {{ pesquisa.organizacao }}/5</span>
+                        
+                        <!-- Interações -->
+                        <span class="badge bg-info me-1 mb-1">Brother: {{ pesquisa.interacao_brother }}/5</span>
+                        <span class="badge bg-info me-1 mb-1">Canon: {{ pesquisa.interacao_canon }}/5</span>
+                        <span class="badge bg-info me-1 mb-1">Epson: {{ pesquisa.interacao_epson }}/5</span>
+                        <span class="badge bg-info me-1 mb-1">HP: {{ pesquisa.interacao_hp }}/5</span>
+                        <span class="badge bg-info me-1 mb-1">Konica: {{ pesquisa.interacao_konica }}/5</span>
+                        <span class="badge bg-info me-1 mb-1">Kyocera: {{ pesquisa.interacao_kyocera }}/5</span>
+                        
+                        <!-- Logística -->
+                        <span class="badge bg-danger me-1 mb-1">Prazo: {{ pesquisa.prazo_entrega }}/5</span>
+                        <span class="badge bg-danger me-1 mb-1">Frete: {{ pesquisa.frete }}/5</span>
                     </div>
                 </div>
                 <div>
@@ -227,6 +336,10 @@
         background-color: #f8f9fa !important;
         border-left: 4px solid var(--accent-green);
         font-style: italic;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
     }
 </style>
 

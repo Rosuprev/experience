@@ -187,10 +187,25 @@ class PesquisaResposta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cnpj_identificado = db.Column(db.String(18))
     razao_social = db.Column(db.String(200))
-    organizacao = db.Column(db.Integer, nullable=False)
-    palestras = db.Column(db.Integer, nullable=False)
-    atendimento = db.Column(db.Integer, nullable=False)
-    futuro = db.Column(db.Integer, nullable=False)
+    
+    # NOVAS PERGUNTAS (1-5)
+    comunicacao = db.Column(db.Integer, nullable=False)  # 1-5
+    formato_evento = db.Column(db.Integer, nullable=False)  # 1-5
+    alimentacao = db.Column(db.Integer, nullable=False)  # 1-5
+    palestra_reforma = db.Column(db.Integer, nullable=False)  # 1-5
+    palestra_estrategia = db.Column(db.Integer, nullable=False)  # 1-5
+    
+    # PERGUNTAS EXISTENTES ATUALIZADAS (6-15)
+    organizacao = db.Column(db.Integer, nullable=False)  # 1-5
+    interacao_brother = db.Column(db.Integer, nullable=False)  # 1-5
+    interacao_canon = db.Column(db.Integer, nullable=False)  # 1-5
+    interacao_epson = db.Column(db.Integer, nullable=False)  # 1-5
+    interacao_hp = db.Column(db.Integer, nullable=False)  # 1-5
+    interacao_konica = db.Column(db.Integer, nullable=False)  # 1-5
+    interacao_kyocera = db.Column(db.Integer, nullable=False)  # 1-5
+    prazo_entrega = db.Column(db.Integer, nullable=False)  # 1-5
+    frete = db.Column(db.Integer, nullable=False)  # 1-5
+    
     comentarios = db.Column(db.Text)
     data_resposta = db.Column(db.DateTime, default=agora)
     ip = db.Column(db.String(45))
@@ -2111,64 +2126,74 @@ def exportar_logs():
 def pesquisa_publica():
     if request.method == 'POST':
         try:
+            # NOVAS PERGUNTAS
+            comunicacao = int(request.form.get('comunicacao'))
+            formato_evento = int(request.form.get('formato_evento'))
+            alimentacao = int(request.form.get('alimentacao'))
+            palestra_reforma = int(request.form.get('palestra_reforma'))
+            palestra_estrategia = int(request.form.get('palestra_estrategia'))
+            
+            # PERGUNTAS EXISTENTES
             organizacao = int(request.form.get('organizacao'))
-            palestras = int(request.form.get('palestras'))
-            atendimento = int(request.form.get('atendimento'))
-            futuro = int(request.form.get('futuro'))
+            interacao_brother = int(request.form.get('interacao_brother'))
+            interacao_canon = int(request.form.get('interacao_canon'))
+            interacao_epson = int(request.form.get('interacao_epson'))
+            interacao_hp = int(request.form.get('interacao_hp'))
+            interacao_konica = int(request.form.get('interacao_konica'))
+            interacao_kyocera = int(request.form.get('interacao_kyocera'))
+            prazo_entrega = int(request.form.get('prazo_entrega'))
+            frete = int(request.form.get('frete'))
+            
             comentarios = request.form.get('comentarios', '').strip()
             cnpj = request.form.get('cnpj', '').strip()
             
-            print(f"📝 Dados recebidos - CNPJ: '{cnpj}'")
+            # Validação de todas as questões obrigatórias
+            campos_obrigatorios = [
+                comunicacao, formato_evento, alimentacao, palestra_reforma, palestra_estrategia,
+                organizacao, interacao_brother, interacao_canon, interacao_epson, interacao_hp,
+                interacao_konica, interacao_kyocera, prazo_entrega, frete
+            ]
             
-            if not all([organizacao, palestras, atendimento, futuro]):
+            if not all(campos_obrigatorios):
                 flash('Por favor, responda todas as questões obrigatórias', 'error')
                 return render_template('pesquisa_publica.html', enviado=False)
             
+            # Lógica de identificação (mantida igual)
             anonima = True
             cnpj_identificado = None
             razao_social = None
             
             if cnpj:
-                print(f"🔍 Validando CNPJ: {cnpj}")
                 cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
-                
                 if len(cnpj_limpo) == 14:
                     cliente = Cliente.query.filter_by(cnpj=cnpj_limpo).first()
-                    
-                    if not cliente:
-                        cliente = Cliente.query.filter_by(cnpj=normalizar_cnpj(cnpj_limpo)).first()
-                    
-                    if not cliente:
-                        todos_clientes = Cliente.query.all()
-                        for cli in todos_clientes:
-                            cli_cnpj_limpo = ''.join(filter(str.isdigit, cli.cnpj))
-                            if cli_cnpj_limpo == cnpj_limpo:
-                                cliente = cli
-                                break
-                    
-                    if cliente:
-                        print(f"✅ Cliente encontrado: {cliente.razao_social}")
-                        if cliente.checkin_realizado:
-                            anonima = False
-                            cnpj_identificado = cnpj_limpo
-                            razao_social = cliente.razao_social
-                            print(f"📋 Resposta IDENTIFICADA: {razao_social}")
-                        else:
-                            print("⚠️ Cliente encontrado mas sem check-in")
-                    else:
-                        print("❌ Cliente não encontrado")
-                else:
-                    print("❌ CNPJ inválido (não tem 14 dígitos)")
-            
-            print(f"🎯 Tipo de resposta: {'ANÔNIMA' if anonima else 'IDENTIFICADA'}")
+                    if cliente and cliente.checkin_realizado:
+                        anonima = False
+                        cnpj_identificado = cnpj_limpo
+                        razao_social = cliente.razao_social
             
             resposta = PesquisaResposta(
                 cnpj_identificado=cnpj_identificado,
                 razao_social=razao_social,
+                
+                # NOVAS PERGUNTAS
+                comunicacao=comunicacao,
+                formato_evento=formato_evento,
+                alimentacao=alimentacao,
+                palestra_reforma=palestra_reforma,
+                palestra_estrategia=palestra_estrategia,
+                
+                # PERGUNTAS EXISTENTES
                 organizacao=organizacao,
-                palestras=palestras,
-                atendimento=atendimento,
-                futuro=futuro,
+                interacao_brother=interacao_brother,
+                interacao_canon=interacao_canon,
+                interacao_epson=interacao_epson,
+                interacao_hp=interacao_hp,
+                interacao_konica=interacao_konica,
+                interacao_kyocera=interacao_kyocera,
+                prazo_entrega=prazo_entrega,
+                frete=frete,
+                
                 comentarios=comentarios if comentarios else None,
                 ip=request.remote_addr,
                 anonima=anonima
@@ -2180,19 +2205,13 @@ def pesquisa_publica():
             registrar_log('pesquisa_respondida', 'pesquisa', {
                 'resposta_id': resposta.id,
                 'anonima': anonima,
-                'cnpj': cnpj_identificado,
-                'razao_social': razao_social,
-                'organizacao': organizacao,
-                'palestras': palestras,
-                'atendimento': atendimento,
-                'futuro': futuro
+                'cnpj': cnpj_identificado
             })
             
             return render_template('pesquisa_publica.html', enviado=True)
             
         except Exception as e:
             db.session.rollback()
-            print(f"❌ Erro ao salvar pesquisa: {str(e)}")
             flash(f'Erro ao enviar pesquisa: {str(e)}', 'error')
             return render_template('pesquisa_publica.html', enviado=False)
     
@@ -2265,23 +2284,26 @@ def relatorio_pesquisas():
     pesquisas_identificadas = len([p for p in pesquisas if not p.anonima])
     pesquisas_anonimas = len([p for p in pesquisas if p.anonima])
     
-    if total_pesquisas > 0:
-        media_organizacao = sum(p.organizacao for p in pesquisas) / total_pesquisas
-        media_palestras = sum(p.palestras for p in pesquisas) / total_pesquisas
-        media_atendimento = sum(p.atendimento for p in pesquisas) / total_pesquisas
-        media_futuro = sum(p.futuro for p in pesquisas) / total_pesquisas
-    else:
-        media_organizacao = media_palestras = media_atendimento = media_futuro = 0
+    # Calcular médias para todas as questões
+    campos = [
+        'comunicacao', 'formato_evento', 'alimentacao', 'palestra_reforma', 'palestra_estrategia',
+        'organizacao', 'interacao_brother', 'interacao_canon', 'interacao_epson', 'interacao_hp',
+        'interacao_konica', 'interacao_kyocera', 'prazo_entrega', 'frete'
+    ]
+    
+    medias = {}
+    for campo in campos:
+        if total_pesquisas > 0:
+            medias[campo] = sum(getattr(p, campo) for p in pesquisas) / total_pesquisas
+        else:
+            medias[campo] = 0
     
     return render_template('relatorio_pesquisas.html',
                          pesquisas=pesquisas,
                          total_pesquisas=total_pesquisas,
                          pesquisas_identificadas=pesquisas_identificadas,
                          pesquisas_anonimas=pesquisas_anonimas,
-                         media_organizacao=media_organizacao,
-                         media_palestras=media_palestras,
-                         media_atendimento=media_atendimento,
-                         media_futuro=media_futuro)
+                         medias=medias)
 
 @app.route('/exportar-pesquisas')
 @login_required

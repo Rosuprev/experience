@@ -505,14 +505,22 @@
             <!-- Header da Pesquisa -->
             <div class="pesquisa-header">
                 
-                <h1 class="display-5 fw-bold mb-3">📊Pesquisa de Satisfação</h1>
-                <p class="lead mb-0">Experience 2025</p>
+                <h1 class="display-5 fw-bold mb-3">📊 Pesquisa de Satisfação</h1>
+                <p class="lead mb-0">R.O Experience 2025</p>
                 <small class="opacity-75">Sua opinião é muito importante para nós!</small>
             </div>
 
             <!-- Corpo da Pesquisa -->
             <div class="pesquisa-body">
                 {% if not enviado %}
+                <!-- Introdução -->
+                <div class="alert alert-info mb-4">
+                    <h5>🎯 Obrigado por fazer parte do nosso evento!</h5>
+                    <p class="mb-2">Sua presença é essencial para tornar este encontro um sucesso! Nada nos motiva mais do que conectar grandes parceiros, compartilhar conhecimentos, novidades e criar novas oportunidades juntos.</p>
+                    <p class="mb-0">Para continuarmos aprimorando nossos eventos, gostaríamos de saber sua opinião que é muito importante para nós! Responder essa pesquisa levará apenas alguns minutos e nos ajudará a aprimorar futuras edições.</p>
+                    <p class="mb-0 mt-2"><strong>Agradecemos seu tempo e parceria. Contamos com você nessa jornada!</strong></p>
+                </div>
+
                 <form id="formPesquisa" method="POST">
                     <!-- Seção de Identificação Opcional -->
                     <div class="identificacao-section">
@@ -569,14 +577,89 @@
                         </div>
                     </div>
 
-                    <!-- Questões de Avaliação -->
+                    <!-- Questões de Avaliação ATUALIZADAS -->
                     <div class="questao-card">
                         <div class="questao-numero">1</div>
-                        <h4>Como você avalia a organização geral do evento?</h4>
-                        <p class="text-muted">Avalie de 1 (Péssimo) a 10 (Excelente)</p>
+                        <h4>Como você avalia a comunicação antes do evento?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
                         
                         <div class="rating-stars">
-                            {% for i in range(1, 11) %}
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="comunicacao" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="comunicacao" id="comunicacao" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">2</div>
+                        <h4>O que você achou do formato do evento considerando o local em que foi realizado?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="formato_evento" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="formato_evento" id="formato_evento" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">3</div>
+                        <h4>Na sua opinião, como foi a experiência geral com os serviços de alimentação oferecidos pela REIS OFFICE no evento?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="alimentacao" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="alimentacao" id="alimentacao" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">4</div>
+                        <h4>Qual seu nível de satisfação com a palestra NOVA REFORMA TRIBUTÁRIA em relação à clareza e utilidade das informações apresentadas?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="palestra_reforma" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="palestra_reforma" id="palestra_reforma" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">5</div>
+                        <h4>Como você avalia a palestra sobre ESTRATÉGIA PARA AUMENTAR O FATURAMENTO COM O PORTFÓLIO REIS OFFICE em termos de clareza e aplicabilidade para o seu negócio?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="palestra_estrategia" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="palestra_estrategia" id="palestra_estrategia" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">6</div>
+                        <h4>Qual a sua opinião sobre a organização do evento?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
                             <button type="button" class="star-btn" data-questao="organizacao" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
                                 {{ i }}
                             </button>
@@ -586,55 +669,130 @@
                     </div>
 
                     <div class="questao-card">
-                        <div class="questao-numero">2</div>
-                        <h4>Qual sua satisfação com a qualidade das palestras e conteúdo?</h4>
-                        <p class="text-muted">Avalie de 1 (Muito Insatisfeito) a 10 (Muito Satisfeito)</p>
+                        <div class="questao-numero">7</div>
+                        <h4>Como você classificaria a interação da Equipe BROTHER ao apresentar seus produtos no estande?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
                         
                         <div class="rating-stars">
-                            {% for i in range(1, 11) %}
-                            <button type="button" class="star-btn" data-questao="palestras" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="interacao_brother" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
                                 {{ i }}
                             </button>
                             {% endfor %}
                         </div>
-                        <input type="hidden" name="palestras" id="palestras" required>
+                        <input type="hidden" name="interacao_brother" id="interacao_brother" required>
                     </div>
 
                     <div class="questao-card">
-                        <div class="questao-numero">3</div>
-                        <h4>Como avalia o atendimento e suporte durante o evento?</h4>
-                        <p class="text-muted">Avalie de 1 (Muito Ruim) a 10 (Excelente)</p>
+                        <div class="questao-numero">8</div>
+                        <h4>Como você classificaria a interação da Equipe CANON ao apresentar seus produtos no estande?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
                         
                         <div class="rating-stars">
-                            {% for i in range(1, 11) %}
-                            <button type="button" class="star-btn" data-questao="atendimento" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="interacao_canon" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
                                 {{ i }}
                             </button>
                             {% endfor %}
                         </div>
-                        <input type="hidden" name="atendimento" id="atendimento" required>
+                        <input type="hidden" name="interacao_canon" id="interacao_canon" required>
                     </div>
 
                     <div class="questao-card">
-                        <div class="questao-numero">4</div>
-                        <h4>Qual a probabilidade de você participar de futuros eventos?</h4>
-                        <p class="text-muted">Avalie de 1 (Muito Improvável) a 10 (Muito Provável)</p>
+                        <div class="questao-numero">9</div>
+                        <h4>Como você classificaria a interação da Equipe EPSON ao apresentar seus produtos no estande?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
                         
                         <div class="rating-stars">
-                            {% for i in range(1, 11) %}
-                            <button type="button" class="star-btn" data-questao="futuro" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="interacao_epson" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
                                 {{ i }}
                             </button>
                             {% endfor %}
                         </div>
-                        <input type="hidden" name="futuro" id="futuro" required>
+                        <input type="hidden" name="interacao_epson" id="interacao_epson" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">10</div>
+                        <h4>Como você classificaria a interação da Equipe HP ao apresentar seus produtos no estande?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="interacao_hp" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="interacao_hp" id="interacao_hp" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">11</div>
+                        <h4>Como você classificaria a interação da Equipe KONICA MINOLTA ao apresentar seus produtos no estande?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="interacao_konica" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="interacao_konica" id="interacao_konica" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">12</div>
+                        <h4>Como você classificaria a interação da Equipe KYOCERA ao apresentar seus produtos no estande?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="interacao_kyocera" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="interacao_kyocera" id="interacao_kyocera" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">13</div>
+                        <h4>Como você avalia o prazo de entrega da Reis Office em seus pedidos?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="prazo_entrega" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="prazo_entrega" id="prazo_entrega" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">14</div>
+                        <h4>Comparado a outros distribuidores com os quais você trabalha, como você avalia o frete da Reis Office?</h4>
+                        <p class="text-muted">Sendo: 1 (Ruim) a 5 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="star-btn" data-questao="frete" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="frete" id="frete" required>
                     </div>
 
                     <!-- Questão Dissertativa -->
                     <div class="questao-card">
-                        <div class="questao-numero">5</div>
+                        <div class="questao-numero">15</div>
                         <h4>Comentários e Sugestões</h4>
-                        <p class="text-muted">Compartilhe suas impressões, sugestões de melhoria ou qualquer outro comentário sobre o evento.</p>
+                        <p class="text-muted">Utilize esse espaço para seus comentários, críticas, sugestões ou elogios sobre o Evento Reis Office Experience</p>
                         
                         <textarea class="form-control textarea-dissertativa" name="comentarios" id="comentarios" 
                                   placeholder="Escreva aqui seus comentários, sugestões ou impressões sobre o evento..."></textarea>
@@ -763,14 +921,16 @@
         }
     
         function verificarFormularioCompleto() {
-            const organizacao = document.getElementById('organizacao').value;
-            const palestras = document.getElementById('palestras').value;
-            const atendimento = document.getElementById('atendimento').value;
-            const futuro = document.getElementById('futuro').value;
-            const btnEnviar = document.getElementById('btnEnviar');
+            // Lista de TODOS os campos obrigatórios (14 questões)
+            const camposObrigatorios = [
+                'comunicacao', 'formato_evento', 'alimentacao', 'palestra_reforma', 'palestra_estrategia',
+                'organizacao', 'interacao_brother', 'interacao_canon', 'interacao_epson', 'interacao_hp',
+                'interacao_konica', 'interacao_kyocera', 'prazo_entrega', 'frete'
+            ];
             
-            // Verificar se todas as questões obrigatórias foram respondidas
-            const questoesCompletas = organizacao && palestras && atendimento && futuro;
+            const todosPreenchidos = camposObrigatorios.every(campo => {
+                return document.getElementById(campo).value !== '';
+            });
             
             // Verificar identificação
             let identificacaoValida = false;
@@ -780,7 +940,8 @@
                 identificacaoValida = cnpjValidado;
             }
             
-            btnEnviar.disabled = !(questoesCompletas && identificacaoValida);
+            const btnEnviar = document.getElementById('btnEnviar');
+            btnEnviar.disabled = !(todosPreenchidos && identificacaoValida);
         }
     
         // Máscara para CNPJ
@@ -823,6 +984,11 @@
             
             // Enviar formulário
             this.submit();
+        });
+
+        // Verificar formulário ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarFormularioCompleto();
         });
     </script>
     
