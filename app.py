@@ -47,7 +47,7 @@ class Config:
         print("🚀 Configurando PostgreSQL...")
         
         # Alterei o usuário (início) e o banco (final) para 'Dbexperience'
-        SQLALCHEMY_DATABASE_URI = 'postgresql://Dbexperience:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/Dbexperience'
+        SQLALCHEMY_DATABASE_URI = 'postgresql://Rosuprev:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/Dbexperience'
         
         SQLALCHEMY_ENGINE_OPTIONS = {
             'connect_args': {
