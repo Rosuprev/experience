@@ -2348,6 +2348,52 @@ def exportar_pesquisas():
                     as_attachment=True,
                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+# Arquivo: test_postgres.py
+import psycopg2
+import os
+
+def testar_permissoes():
+    try:
+        conn = psycopg2.connect(
+            host="square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app",
+            port=7091,
+            user="squarecloud",
+            password="5W3Ww67llyHrBmcutvyL5xXO",
+            database="postgres",
+            sslmode="require",
+            sslrootcert="ca-certificate.crt",
+            sslcert="certificate.pem", 
+            sslkey="private-key.key"
+        )
+        
+        cursor = conn.cursor()
+        
+        # Testa permissões básicas
+        cursor.execute("SELECT current_user, current_database()")
+        print(f"✅ Conectado como: {cursor.fetchone()}")
+        
+        # Testa criar schema
+        try:
+            cursor.execute("CREATE SCHEMA IF NOT EXISTS test_permissions")
+            print("✅ Pode criar schemas")
+        except Exception as e:
+            print(f"❌ NÃO pode criar schemas: {e}")
+            
+        # Testa criar tabela
+        try:
+            cursor.execute("CREATE TABLE test_table (id SERIAL PRIMARY KEY, name TEXT)")
+            print("✅ Pode criar tabelas")
+        except Exception as e:
+            print(f"❌ NÃO pode criar tabelas: {e}")
+            
+        conn.close()
+        
+    except Exception as e:
+        print(f"❌ Erro de conexão: {e}")
+
+if __name__ == "__main__":
+    testar_permissoes()
+
 if __name__ == '__main__':
     with app.app_context():
         try:
