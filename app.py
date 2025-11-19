@@ -15,10 +15,8 @@ import ssl
 import tempfile
 import os
 import stat
+import psycopg2
 
-# Ajustar permissões dos certificados SSL para PostgreSQL
-import os
-import stat
 
 def ajustar_permissoes_certificados():
     """Ajusta permissões dos certificados para PostgreSQL"""
