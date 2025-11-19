@@ -48,20 +48,9 @@ class Config:
     
     # String de conexão PostgreSQL com pg8000 - SSL na própria URL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-    'postgresql+pg8000://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgre'
+        'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
     
-    # Configuração de opções do motor SQLAlchemy para passar argumentos para a função connect() do driver.
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'connect_args': {
-            'ssl': {
-                # Caminhos para seus certificados. 
-                # Esta é a forma esperada pelo SQLAlchemy para o driver pg8000.
-                'cafile': 'ca-certificate.crt', 
-                'certfile': 'certificate.pem',
-                'keyfile': 'private-key.key'
-            }
-        }
-    }
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
