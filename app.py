@@ -20,6 +20,19 @@ import psycopg2
 import os
 import stat
 
+def verificar_certificados():
+    """Verifica se os certificados existem e estão corretos"""
+    certificados = ['ca-certificate.crt', 'certificate.pem', 'private-key.key']
+    
+    for cert in certificados:
+        if not os.path.exists(cert):
+            print(f"❌ Certificado não encontrado: {cert}")
+            return False
+        else:
+            print(f"✅ Certificado encontrado: {cert}")
+    
+    return True
+
 def corrigir_permissoes_certificados():
     """Corrige permissões dos certificados PostgreSQL"""
     certificados = {
@@ -45,17 +58,20 @@ def agora():
     """Retorna o horário atual de Brasília (UTC-3)"""
     return datetime.utcnow() - timedelta(hours=3)
 
-# Configurações PostgreSQL
+# Configurações PostgreSQL COM CERTIFICADOS
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão PostgreSQL
+    # String de conexão PostgreSQL COM CERTIFICADOS
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres'
     
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
-            'sslmode': 'require'
+            'sslmode': 'verify-ca',
+            'sslrootcert': 'ca-certificate.crt',
+            'sslcert': 'certificate.pem',
+            'sslkey': 'private-key.key'
         }
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -2340,37 +2356,97 @@ def testar_permissoes():
     except Exception as e:
         print(f"❌ Erro de conexão: {e}")
 
-if __name__ == "__main__":
-    testar_permissoes()
-
 if __name__ == '__main__':
-    # Corrige permissões dos certificados primeiro
+    # 1. CORRIGIR PERMISSÕES DOS CERTIFICADOS PRIMEIRO
+    import os
+    import stat
+    
+    def corrigir_permissoes_certificados():
+        """Corrige permissões dos certificados PostgreSQL"""
+        certificados = {
+            'private-key.key': stat.S_IRUSR | stat.S_IWUSR,  # 600
+            'certificate.pem': stat.S_IRUSR | stat.S_IWUSR,  # 600
+            'ca-certificate.crt': stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH  # 644
+        }
+        
+        for cert_file, perms in certificados.items():
+            if os.path.exists(cert_file):
+                try:
+                    os.chmod(cert_file, perms)
+                    print(f"✅ Permissões ajustadas para: {cert_file}")
+                except Exception as e:
+                    print(f"⚠️ Não foi possível ajustar {cert_file}: {e}")
+            else:
+                print(f"❌ Certificado não encontrado: {cert_file}")
+    
+    # Executa correção de permissões
     corrigir_permissoes_certificados()
     
+    # 2. VERIFICAR SE CERTIFICADOS EXISTEM
+    def verificar_certificados():
+        certificados = ['ca-certificate.crt', 'certificate.pem', 'private-key.key']
+        todos_existem = all(os.path.exists(cert) for cert in certificados)
+        
+        if todos_existem:
+            print("✅ Todos os certificados encontrados!")
+            return True
+        else:
+            print("❌ Alguns certificados não foram encontrados")
+            return False
+    
+    certificados_ok = verificar_certificados()
+    
+    # 3. CONFIGURAÇÃO DO BANCO DE DADOS
     with app.app_context():
+        postgresql_funcionando = False
+        
+        if certificados_ok:
+            try:
+                print("🔄 Tentando conectar ao PostgreSQL...")
+                
+                # Testa a conexão com PostgreSQL
+                with db.engine.connect() as conn:
+                    result = conn.execute(db.text("SELECT version(), current_user, current_database()"))
+                    versao, usuario, banco = result.fetchone()
+                    print(f"✅ PostgreSQL conectado!")
+                    print(f"   📋 Versão: {versao.split(',')[0]}")
+                    print(f"   👤 Usuário: {usuario}")
+                    print(f"   🗄️  Banco: {banco}")
+                
+                postgresql_funcionando = True
+                
+            except Exception as e:
+                print(f"❌ Erro ao conectar com PostgreSQL: {e}")
+                print("🔄 PostgreSQL não disponível, usando SQLite...")
+        
+        # SE POSTGRESQL FALHOU, USA SQLITE
+        if not postgresql_funcionando:
+            print("🔧 Configurando SQLite...")
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
+        
+        # 4. INICIALIZAÇÃO DO BANCO DE DADOS
         try:
-            print("🔄 Iniciando configuração do PostgreSQL...")
-            
-            # Cria todas as tabelas
+            print("🔄 Criando tabelas...")
             db.create_all()
-            print("✅ Tabelas criadas com sucesso!")
+            print("✅ Tabelas criadas/verificadas com sucesso!")
             
-            # Cria usuário admin
+            # Criar usuário admin
             criar_usuario_admin()
             
-            # Executa migração se necessário
+            # Migração do banco (se necessário)
             migrar_banco_dados()
             
-            # Atualiza faturamento para sorteios
+            # Atualizar faturamento para sorteios
             atualizar_faturamento_sorteio()
             
-            print("✅ Banco de dados PostgreSQL configurado com sucesso!")
+            print("🎉 Sistema inicializado com sucesso!")
             
         except Exception as e:
-            print(f"❌ Erro ao configurar PostgreSQL: {e}")
-            print("🔧 Verifique as permissões do usuário no banco de dados")
-
-    # Configurações do servidor
+            print(f"❌ Erro crítico na inicialização: {e}")
+            print("💥 Sistema pode não funcionar corretamente!")
+    
+    # 5. CONFIGURAÇÃO DO SERVIDOR
     host = '0.0.0.0'
     
     if os.environ.get('SQUARECLOUD') or os.environ.get('PORT'):
@@ -2381,14 +2457,27 @@ if __name__ == '__main__':
         port = 33053
         debug = True
         environment = "Desenvolvimento Local"
-
-    print(f"🎯 R.O Experience 2025 - Servidor Iniciado!")
+    
+    # 6. INFORMAÇÕES FINAIS
+    print("\n" + "="*50)
+    print("🎯 R.O Experience 2025 - Servidor Iniciado!")
+    print("="*50)
     print(f"📍 Host: {host}")
     print(f"🔧 Porta: {port}")
     print(f"🌐 Ambiente: {environment}")
     print(f"🐛 Debug: {debug}")
-    print(f"🗄️  Banco: PostgreSQL")
+    
+    # Mostra qual banco está sendo usado
+    with app.app_context():
+        banco_em_uso = db.engine.url.drivername
+        if banco_em_uso == 'sqlite':
+            print(f"🗄️  Banco: SQLite (database.db)")
+        else:
+            print(f"🗄️  Banco: PostgreSQL")
+    
     print("🚀 Aplicação rodando!")
+    print("="*50)
     print("")
-
+    
+    # 7. INICIAR SERVIDOR
     app.run(host=host, port=port, debug=debug)
