@@ -149,15 +149,6 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('pesquisa_publica') }}" class="card menu-card-standard text-decoration-none h-100" target="_blank">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-info mb-2">📝</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Pesquisa Pública</h6>
-                                <small class="menu-desc text-muted">Avaliação do evento</small>
-                            </div>
-                        </a>
-                    </div>
                     {% if tem_permissao('relatorios') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('relatorio_pesquisas') }}" class="card menu-card-standard text-decoration-none h-100">
@@ -168,6 +159,16 @@
                             </div>
                         </a>
                     </div>
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('pesquisa_publica') }}" class="card menu-card-standard text-decoration-none h-100" target="_blank">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-info mb-2">📝</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Pesquisa Pública</h6>
+                                <small class="menu-desc text-muted">Avaliação do evento</small>
+                            </div>
+                        </a>
+                    </div>
+                    
                     {% endif %}
                     {% endif %}
                 </div><!-- Adicionar este card após o último módulo existente -->
