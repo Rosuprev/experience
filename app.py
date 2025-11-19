@@ -19,7 +19,7 @@ def agora():
 
 # Configurações
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'k8!v9#m2$p5&z1@x4*q7(w0)n3^b6-j9_l2+o5=r8t1}y4[u7]i0'
     
     # Garante que o diretório existe
     db_path = 'database.db'
