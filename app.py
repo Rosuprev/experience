@@ -48,7 +48,7 @@ class Config:
     
     # String de conexão PostgreSQL com pg8000 - SSL na própria URL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgre?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
+        'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
     
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
