@@ -50,7 +50,7 @@ class Config:
 # Senha: IPL4v0u4mXNdzyTkrEhSnTBh
 # Banco: Dbexperience
         # Trocando o final para /postgres
-        SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres?options=-c%20search_path%3Dsquarecloud'
+        SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres'
         
         SQLALCHEMY_ENGINE_OPTIONS = {
             'connect_args': {
@@ -75,6 +75,7 @@ db = SQLAlchemy(app)
 
 # Modelos
 class Usuario(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
@@ -85,6 +86,7 @@ class Usuario(db.Model):
     permissoes = db.Column(db.Text, default='{}')
 
 class LogAuditoria(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     acao = db.Column(db.String(100), nullable=False)
@@ -96,6 +98,7 @@ class LogAuditoria(db.Model):
     usuario = db.relationship('Usuario', backref='logs')
 
 class Cliente(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj = db.Column(db.String(18), nullable=False)
     razao_social = db.Column(db.String(200), nullable=False)
@@ -113,6 +116,7 @@ class Cliente(db.Model):
     __table_args__ = (db.UniqueConstraint('cnpj', 'responsavel', name='uq_cnpj_responsavel'),)
 
 class Venda(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj_compra = db.Column(db.String(18), nullable=False)
     numero_pedido = db.Column(db.String(50), unique=True, nullable=False)
@@ -124,6 +128,7 @@ class Venda(db.Model):
     equipamentos = db.relationship('VendaEquipamento', backref='venda', lazy=True)
 
 class Brinde(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     tipo_sorteio = db.Column(db.String(10), nullable=False)
     nome = db.Column(db.String(200), nullable=False)
@@ -134,6 +139,7 @@ class Brinde(db.Model):
     ativo = db.Column(db.Boolean, default=True)
 
 class Sorteio(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     tipo_brinde = db.Column(db.String(50), nullable=False)
     cnpj_vencedor = db.Column(db.String(18), nullable=False)
@@ -149,6 +155,7 @@ class Sorteio(db.Model):
     observacao_entrega = db.Column(db.Text)
 
 class FaturamentoSorteio(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj = db.Column(db.String(18), nullable=False)
     faturamento_acumulado = db.Column(db.Float, nullable=False, default=0.0)
@@ -156,6 +163,7 @@ class FaturamentoSorteio(db.Model):
     participacoes_utilizadas = db.Column(db.Integer, default=0)
 
 class Estoque(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     fabricante = db.Column(db.String(100), nullable=False)
     modelo = db.Column(db.String(100), nullable=False)
@@ -167,12 +175,14 @@ class Estoque(db.Model):
     vendas = db.relationship('VendaEquipamento', backref='equipamento', lazy=True)
 
 class VendaEquipamento(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     venda_id = db.Column(db.Integer, db.ForeignKey('venda.id'))
     equipamento_id = db.Column(db.Integer, db.ForeignKey('estoque.id'))
     quantidade = db.Column(db.Integer, nullable=False, default=1)
 
 class PesquisaResposta(db.Model):
+    __table_args__ = {'schema': 'squarecloud'}
     id = db.Column(db.Integer, primary_key=True)
     cnpj_identificado = db.Column(db.String(18))
     razao_social = db.Column(db.String(200))
