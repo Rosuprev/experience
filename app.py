@@ -18,6 +18,7 @@ import stat
 import psycopg2
 
 
+
 def ajustar_permissoes_certificados():
     """Ajusta permissões dos certificados para PostgreSQL"""
     certificados = {
@@ -36,6 +37,22 @@ def ajustar_permissoes_certificados():
 
 # Chamar antes de criar o app
 ajustar_permissoes_certificados()
+
+def criar_schema_publico():
+    """Garante que o schema public existe e tem permissões"""
+    try:
+        with db.engine.connect() as conn:
+            # Tenta criar o schema se não existir
+            conn.execute(db.text("CREATE SCHEMA IF NOT EXISTS public"))
+            # Concede permissões ao usuário atual
+            conn.execute(db.text("GRANT USAGE ON SCHEMA public TO CURRENT_USER"))
+            conn.execute(db.text("GRANT CREATE ON SCHEMA public TO CURRENT_USER"))
+            conn.commit()
+            print("✅ Schema public configurado com sucesso!")
+    except Exception as e:
+        print(f"⚠️ Aviso ao configurar schema: {e}")
+
+# Chame esta função ANTES de db.create_all()
 
 # CORREÇÃO DO FUSO HORÁRIO
 def agora():
