@@ -21,22 +21,28 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ro-experience-2025-super-secure-key-12345'
     
-    # PostgreSQL com SSL - usando arquivo cert.crt
-    SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/squarecloud'
-    
-    # Caminho do certificado - DEVE estar na pasta application/
+    # Verifica SE o certificado existe
     cert_path = '/application/cert.crt'
     
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_size': 5,
-        'max_overflow': 10,
-        'pool_pre_ping': True,
-        'pool_recycle': 3600,
-        'connect_args': {
-            'sslmode': 'verify-full',
-            'sslrootcert': cert_path
+    if os.path.exists(cert_path):
+        print(f"✅ CERTIFICADO ENCONTRADO: {cert_path}")
+        print(f"✅ Tamanho do arquivo: {os.path.getsize(cert_path)} bytes")
+        
+        # PostgreSQL COM certificado
+        SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/squarecloud'
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'connect_args': {
+                'sslmode': 'verify-full',
+                'sslrootcert': cert_path
+            }
         }
-    }
+    else:
+        print(f"❌ CERTIFICADO NÃO ENCONTRADO: {cert_path}")
+        # Fallback - SQLite
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
+        SQLALCHEMY_ENGINE_OPTIONS = {}
+        print("🔧 Usando SQLite como fallback")
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     print(f"🔧 Certificado configurado em: {cert_path}")
