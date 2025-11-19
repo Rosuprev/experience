@@ -3,14 +3,14 @@ import csv
 import os
 import json
 from pathlib import Path
-from functools import wraps  # ← ADICIONAR ESTA
-from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, flash  # ← ADICIONAR session, redirect, url_for
+from functools import wraps
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta  # ← ADICIONAR timedelta
+from datetime import datetime, timedelta
 import random
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill
-from werkzeug.security import generate_password_hash, check_password_hash  # ← ADICIONAR ESTAS
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # CORREÇÃO DO FUSO HORÁRIO
 def agora():
@@ -21,31 +21,32 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'k8!v9#m2$p5&z1@x4*q7(w0)n3^b6-j9_l2+o5=r8t1}y4[u7]i0'
     
-    # Garante que o diretório existe
-    db_path = 'database.db'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{db_path}'
+    # PostgreSQL do SquareCloud
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://squarecloud:<password>@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091'
+    
+    # Configurações de performance para PostgreSQL
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 10,
+        'max_overflow': 20,
+        'pool_pre_ping': True,
+        'pool_recycle': 3600,
+    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 
-# ... (o resto do código permanece igual) ...
-
 # Modelos
-
-# Modelos existentes (Cliente, Venda, Brinde, etc.)...
-
-# NOVOS MODELOS PARA LOGIN E AUDITORIA
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     nome = db.Column(db.String(100), nullable=False)
-    nivel_acesso = db.Column(db.String(20), default='operador')  # admin/operador
+    nivel_acesso = db.Column(db.String(20), default='operador')
     ativo = db.Column(db.Boolean, default=True)
     data_criacao = db.Column(db.DateTime, default=agora)
-    permissoes = db.Column(db.Text, default='{}')  # JSON com permissões por módulo
+    permissoes = db.Column(db.Text, default='{}')
 
 class LogAuditoria(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -67,10 +68,9 @@ class Cliente(db.Model):
     checkin_realizado = db.Column(db.Boolean, default=False)
     horario_checkin = db.Column(db.DateTime)
     responsavel_checkin = db.Column(db.String(200))
-    # NOVOS CAMPOS
-    direito_imagem = db.Column(db.Boolean, default=False)  # Se assinou o termo de direito de imagem
-    veio_carro = db.Column(db.Boolean, default=False)      # Se veio de carro
-    placa_veiculo = db.Column(db.String(10))               # Placa do veículo
+    direito_imagem = db.Column(db.Boolean, default=False)
+    veio_carro = db.Column(db.Boolean, default=False)
+    placa_veiculo = db.Column(db.String(10))
     
     vendas = db.relationship('Venda', backref='cliente', lazy=True)
 
@@ -85,7 +85,6 @@ class Venda(db.Model):
     cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
     cnpj_checkin_vinculado = db.Column(db.String(18))
     
-    # Novo relacionamento com equipamentos
     equipamentos = db.relationship('VendaEquipamento', backref='venda', lazy=True)
 
 class Brinde(db.Model):
@@ -118,6 +117,7 @@ class FaturamentoSorteio(db.Model):
     cnpj = db.Column(db.String(18), nullable=False)
     faturamento_acumulado = db.Column(db.Float, nullable=False, default=0.0)
     ultima_atualizacao = db.Column(db.DateTime, default=agora)
+    participacoes_utilizadas = db.Column(db.Integer, default=0)
 
 class Estoque(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -128,7 +128,6 @@ class Estoque(db.Model):
     data_cadastro = db.Column(db.DateTime, default=agora)
     ativo = db.Column(db.Boolean, default=True)
     
-    # Relacionamento com vendas
     vendas = db.relationship('VendaEquipamento', backref='equipamento', lazy=True)
 
 class VendaEquipamento(db.Model):
@@ -137,20 +136,18 @@ class VendaEquipamento(db.Model):
     equipamento_id = db.Column(db.Integer, db.ForeignKey('estoque.id'))
     quantidade = db.Column(db.Integer, nullable=False, default=1)
 
-# NOVO MODELO PARA PESQUISA
 class PesquisaResposta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cnpj_identificado = db.Column(db.String(18))  # Opcional - pode ser null
-    razao_social = db.Column(db.String(200))      # Preenchido se CNPJ validado
-    organizacao = db.Column(db.Integer, nullable=False)  # 1-10
-    palestras = db.Column(db.Integer, nullable=False)    # 1-10
-    atendimento = db.Column(db.Integer, nullable=False)  # 1-10
-    futuro = db.Column(db.Integer, nullable=False)       # 1-10
-    comentarios = db.Column(db.Text)              # Opcional
+    cnpj_identificado = db.Column(db.String(18))
+    razao_social = db.Column(db.String(200))
+    organizacao = db.Column(db.Integer, nullable=False)
+    palestras = db.Column(db.Integer, nullable=False)
+    atendimento = db.Column(db.Integer, nullable=False)
+    futuro = db.Column(db.Integer, nullable=False)
+    comentarios = db.Column(db.Text)
     data_resposta = db.Column(db.DateTime, default=agora)
     ip = db.Column(db.String(45))
     anonima = db.Column(db.Boolean, default=False)
-
 
 MODULOS_SISTEMA = {
     'dashboard': {'nome': '📊 Dashboard', 'descricao': 'Página inicial do sistema'},
@@ -158,7 +155,7 @@ MODULOS_SISTEMA = {
     'vendas': {'nome': '💰 Vendas', 'descricao': 'Registro de vendas'},
     'estoque': {'nome': '📦 Estoque', 'descricao': 'Gestão de estoque'},
     'sorteio': {'nome': '🎁 Sorteio', 'descricao': 'Realizar sorteios de brindes'},
-    'entrega_brindes': {'nome': '✅ Entrega Brindes', 'descricao': 'Confirmar entrega de brindes sorteados'},  # ← NOVO MÓDULO
+    'entrega_brindes': {'nome': '✅ Entrega Brindes', 'descricao': 'Confirmar entrega de brindes sorteados'},
     'relatorios': {'nome': '📈 Relatórios', 'descricao': 'Relatórios do sistema'},
     'importacao': {'nome': '📤 Importação', 'descricao': 'Importar dados'},
     'exportacao': {'nome': '📥 Exportação', 'descricao': 'Exportar dados'},
@@ -167,20 +164,15 @@ MODULOS_SISTEMA = {
     'logs': {'nome': '📊 Logs', 'descricao': 'Logs de auditoria'}
 }
 
-# Função Login
-
 def permissao_required(modulo):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            # Admin tem acesso a tudo
             if session.get('nivel_acesso') == 'admin':
                 return f(*args, **kwargs)
             
-            # Verificar permissão do usuário
             if not tem_permissao(modulo):
                 flash(f'❌ Acesso negado. Permissão necessária para: {MODULOS_SISTEMA[modulo]["nome"]}', 'error')
-                # Redirecionar para index em vez de dashboard
                 return redirect(url_for('index'))
             
             return f(*args, **kwargs)
@@ -190,12 +182,11 @@ def permissao_required(modulo):
 def migrar_banco_dados():
     """Adiciona o campo participacoes_utilizadas se não existir"""
     try:
-        # Verificar se a coluna já existe
         with db.engine.connect() as conn:
-            result = conn.execute(db.text("PRAGMA table_info(faturamento_sorteio)"))
-            colunas_existentes = [row[1] for row in result]
+            result = conn.execute(db.text("SELECT column_name FROM information_schema.columns WHERE table_name='faturamento_sorteio' AND column_name='participacoes_utilizadas'"))
+            coluna_existe = result.fetchone() is not None
             
-            if 'participacoes_utilizadas' not in colunas_existentes:
+            if not coluna_existe:
                 print("🔄 Adicionando campo 'participacoes_utilizadas' à tabela faturamento_sorteio...")
                 conn.execute(db.text("ALTER TABLE faturamento_sorteio ADD COLUMN participacoes_utilizadas INTEGER DEFAULT 0"))
                 conn.commit()
@@ -233,8 +224,6 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'usuario_id' not in session or session.get('nivel_acesso') != 'admin':
-            # Se não for admin, redireciona para dashboard com mensagem de erro
-            from flask import flash
             flash('Acesso negado. Permissão de administrador necessária.', 'error')
             return redirect(url_for('dashboard'))
         return f(*args, **kwargs)
@@ -254,8 +243,6 @@ def criar_usuario_admin():
         db.session.commit()
         print("✅ Usuário admin criado: admin / admin123")
 
-# Funções auditoria
-
 def registrar_log(acao, modulo, dados=None):
     """Registra uma ação no log de auditoria"""
     log = LogAuditoria(
@@ -268,7 +255,6 @@ def registrar_log(acao, modulo, dados=None):
     db.session.add(log)
     db.session.commit()
 
-# Funções auxiliares
 def normalizar_cnpj(cnpj):
     if not cnpj:
         return ""
@@ -278,22 +264,15 @@ def normalizar_cnpj(cnpj):
     return cnpj_limpo
 
 def normalizar_cnpj_pesquisa(cnpj):
-    """Normaliza CNPJ especificamente para a pesquisa - NÃO altera a função original"""
     if not cnpj:
         return ""
-    
-    # Remover todos os caracteres não numéricos
     cnpj_limpo = ''.join(filter(str.isdigit, str(cnpj)))
-    
-    # Verificar se tem 14 dígitos
     if len(cnpj_limpo) == 14:
         return f"{cnpj_limpo[:2]}.{cnpj_limpo[2:5]}.{cnpj_limpo[5:8]}/{cnpj_limpo[8:12]}-{cnpj_limpo[12:]}"
     else:
-        # Retornar o CNPJ limpo mesmo sem formatação completa
         return cnpj_limpo
 
 def format_currency(value):
-    """Formata valor para o padrão brasileiro: 00.000,00"""
     if value is None or value == 0:
         return "0,00"
     try:
@@ -311,7 +290,6 @@ def get_faturamento_para_sorteio(cnpj):
         return faturamento.faturamento_acumulado
     return 0.0
 
-# MODIFICAR A FUNÇÃO get_revendas_para_sorteio
 def get_revendas_para_sorteio(tipo_brinde):
     revendas_unicas = db.session.query(
         Cliente.cnpj,
@@ -324,17 +302,14 @@ def get_revendas_para_sorteio(tipo_brinde):
         faturamento = get_faturamento_para_sorteio(cnpj)
         
         if tipo_brinde == '50k':
-            # Calcular participações totais baseadas no faturamento
             participacoes_totais = int(faturamento // 50000) if faturamento >= 50000 else 0
             
             if participacoes_totais > 0:
-                # Contar quantos sorteios JÁ foram realizados
                 sorteios_realizados = Sorteio.query.filter_by(
                     cnpj_vencedor=cnpj, 
                     tipo_brinde='50k'
                 ).count()
                 
-                # Participações restantes = total - já realizados
                 participacoes_restantes = participacoes_totais - sorteios_realizados
                 
                 if participacoes_restantes > 0:
@@ -342,12 +317,11 @@ def get_revendas_para_sorteio(tipo_brinde):
                         'cnpj': cnpj,
                         'razao_social': razao_social,
                         'faturamento_total': faturamento,
-                        'participacoes': participacoes_restantes,  # Já mostra as RESTANTES
+                        'participacoes': participacoes_restantes,
                         'sorteios_realizados': sorteios_realizados
                     })
                     
         elif tipo_brinde == '20k' and faturamento >= 20000:
-            # Para 20k, verificar se já não foi sorteado
             sorteios_realizados = Sorteio.query.filter_by(
                 cnpj_vencedor=cnpj, 
                 tipo_brinde='20k'
@@ -373,13 +347,12 @@ def atualizar_faturamento_sorteio():
     ).join(Venda).group_by(Cliente.cnpj).all()
     
     for cnpj, faturamento_total in faturamento_por_cnpj:
-        # Contar quantos sorteios já foram realizados para este CNPJ (50k apenas)
         sorteios_realizados = Sorteio.query.filter_by(cnpj_vencedor=cnpj, tipo_brinde='50k').count()
         
         faturamento_entry = FaturamentoSorteio(
             cnpj=cnpj,
             faturamento_acumulado=float(faturamento_total) if faturamento_total else 0.0,
-            participacoes_utilizadas=sorteios_realizados  # Inicializar com sorteios já realizados
+            participacoes_utilizadas=sorteios_realizados
         )
         db.session.add(faturamento_entry)
     
@@ -401,14 +374,11 @@ def get_estatisticas_avancadas():
         'revendas_presentes': revendas_presentes
     }
 
-# Funções de exportação SEM PANDAS
 def export_to_excel(data, filename, sheet_name="Dados"):
-    """Exporta dados para Excel usando openpyxl"""
     wb = Workbook()
     ws = wb.active
     ws.title = sheet_name
     
-    # Escreve cabeçalho
     if data:
         headers = list(data[0].keys())
         for col, header in enumerate(headers, 1):
@@ -416,12 +386,10 @@ def export_to_excel(data, filename, sheet_name="Dados"):
             cell.font = Font(bold=True)
             cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
         
-        # Escreve dados
         for row_num, row_data in enumerate(data, 2):
             for col_num, key in enumerate(headers, 1):
                 ws.cell(row=row_num, column=col_num, value=row_data.get(key, ''))
     
-    # Ajusta largura das colunas
     for column in ws.columns:
         max_length = 0
         column_letter = column[0].column_letter
@@ -441,7 +409,6 @@ def export_to_excel(data, filename, sheet_name="Dados"):
     return output
 
 def read_excel_file(file_stream):
-    """Lê arquivo Excel sem pandas"""
     wb = load_workbook(filename=file_stream)
     ws = wb.active
     
@@ -456,14 +423,12 @@ def read_excel_file(file_stream):
             for col_num, value in enumerate(row):
                 if col_num < len(headers):
                     row_data[headers[col_num]] = value
-            if any(row_data.values()):  # Não adiciona linhas vazias
+            if any(row_data.values()):
                 data.append(row_data)
     
     return data
 
-# NOVA FUNÇÃO PARA CALCULAR PARTICIPAÇÕES NO SORTEIO DE 50K
 def get_participacoes_50k(cnpj):
-    """Calcula quantas participações RESTANTES no sorteio de 50k a revenda tem"""
     faturamento = get_faturamento_para_sorteio(cnpj)
     if faturamento < 50000:
         return 0
@@ -476,11 +441,9 @@ def get_participacoes_50k(cnpj):
 # Rotas principais
 @app.route('/')
 def index():
-    """Página inicial do sistema - acessível a todos os usuários logados"""
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
     
-    # Buscar estatísticas apenas se usuário tem permissão para dashboard
     if tem_permissao('dashboard'):
         total_vendas = db.session.query(db.func.sum(Venda.valor_pedido)).scalar() or 0
         estatisticas = get_estatisticas_avancadas()
@@ -501,12 +464,10 @@ def index():
 @login_required
 @permissao_required('dashboard')
 def dashboard():
-    """Dashboard AVANÇADO - apenas para usuários com permissão"""
     total_vendas = db.session.query(db.func.sum(Venda.valor_pedido)).scalar() or 0
     estatisticas = get_estatisticas_avancadas()
     consultores_count = db.session.query(Cliente.consultor).distinct().count()
     
-    # Dados EXCLUSIVOS do dashboard
     vendas_por_revenda = db.session.query(
         Cliente.razao_social,
         db.func.sum(Venda.valor_pedido).label('total_vendas')
@@ -563,7 +524,6 @@ def importar_clientes():
                         responsavel=row.get('RESPONSÁVEL', '')
                     ).first()
                     
-                    # Verificar direito de imagem (nova coluna)
                     direito_imagem = False
                     if 'DIREITO IMAGEM' in row:
                         direito_imagem_val = str(row.get('DIREITO IMAGEM', '')).upper().strip()
@@ -587,7 +547,6 @@ def importar_clientes():
                 
                 db.session.commit()
                 
-                # Registrar log de importação
                 registrar_log('importacao_clientes', 'importacao', {
                     'clientes_importados': clientes_importados,
                     'clientes_atualizados': clientes_atualizados,
@@ -603,7 +562,6 @@ def importar_clientes():
                 return mensagem
                 
             except Exception as e:
-                # Registrar log de erro na importação
                 registrar_log('erro_importacao_clientes', 'importacao', {
                     'erro': str(e),
                     'arquivo': file.filename
@@ -643,7 +601,6 @@ def checkin():
         if len(clientes) == 1:
             cliente = clientes[0]
             
-            # Verificar direito de imagem
             if not cliente.direito_imagem:
                 return jsonify({
                     'success': False, 
@@ -655,7 +612,6 @@ def checkin():
                 })
             
             if not cliente.checkin_realizado:
-                # Processar informações do veículo
                 veio_carro = request.form.get('veio_carro') == 'true'
                 placa_veiculo = request.form.get('placa_veiculo', '').upper().strip() if veio_carro else None
                 
@@ -667,7 +623,6 @@ def checkin():
                 
                 db.session.commit()
                 
-                # Registrar log de check-in
                 registrar_log('checkin_realizado', 'checkin', {
                     'cliente_id': cliente.id,
                     'cnpj': cliente.cnpj,
@@ -702,7 +657,6 @@ def checkin():
                 } for c in clientes]
             })
     
-    # MÉTODO GET - Renderizar a página
     total_clientes = Cliente.query.count()
     total_checkins = Cliente.query.filter_by(checkin_realizado=True).count()
     
@@ -723,7 +677,6 @@ def confirmar_direito_imagem():
     cliente.direito_imagem = True
     db.session.commit()
     
-    # Registrar log de confirmação de direito de imagem
     registrar_log('direito_imagem_confirmado', 'checkin', {
         'cliente_id': cliente.id,
         'cnpj': cliente.cnpj,
@@ -768,7 +721,6 @@ def checkin_responsavel():
     cliente = Cliente.query.get(cliente_id)
     if cliente:
         if not cliente.checkin_realizado:
-            # Verificar direito de imagem
             if not cliente.direito_imagem:
                 return jsonify({
                     'success': False, 
@@ -782,7 +734,6 @@ def checkin_responsavel():
             cliente.placa_veiculo = placa_veiculo
             db.session.commit()
             
-            # Registrar log de check-in por responsável
             registrar_log('checkin_responsavel', 'checkin', {
                 'cliente_id': cliente.id,
                 'cnpj': cliente.cnpj,
@@ -821,18 +772,15 @@ def cadastro_rapido_checkin():
     if not direito_imagem:
         return jsonify({'success': False, 'message': 'É necessário confirmar o termo de direito de imagem'})
     
-    # Normalizar CNPJ
     cnpj_normalizado = normalizar_cnpj(cnpj)
     
     try:
-        # Verificar se já existe um cliente com este CNPJ e responsável
         cliente_existente = Cliente.query.filter_by(
             cnpj=cnpj_normalizado,
             responsavel=responsavel
         ).first()
         
         if cliente_existente:
-            # Cliente já existe - apenas fazer check-in
             if not cliente_existente.checkin_realizado:
                 cliente_existente.checkin_realizado = True
                 cliente_existente.horario_checkin = agora()
@@ -840,7 +788,6 @@ def cadastro_rapido_checkin():
                 cliente_existente.direito_imagem = True
                 db.session.commit()
                 
-                # Registrar log de cadastro rápido
                 registrar_log('cadastro_rapido_checkin', 'checkin', {
                     'tipo': 'cliente_existente',
                     'cliente_id': cliente_existente.id,
@@ -859,11 +806,9 @@ def cadastro_rapido_checkin():
                     'message': f'Check-in já realizado para {responsavel}'
                 })
         else:
-            # Verificar se a revenda já existe com outro responsável
             revenda_existente = Cliente.query.filter_by(cnpj=cnpj_normalizado).first()
             
             if revenda_existente:
-                # Revenda existe - criar novo responsável
                 novo_cliente = Cliente(
                     cnpj=cnpj_normalizado,
                     razao_social=razao_social,
@@ -877,7 +822,6 @@ def cadastro_rapido_checkin():
                 db.session.add(novo_cliente)
                 db.session.commit()
                 
-                # Registrar log de cadastro rápido
                 registrar_log('cadastro_rapido_checkin', 'checkin', {
                     'tipo': 'novo_responsavel',
                     'cliente_id': novo_cliente.id,
@@ -891,7 +835,6 @@ def cadastro_rapido_checkin():
                     'message': f'Novo responsável {responsavel} cadastrado e check-in realizado para {razao_social}!'
                 })
             else:
-                # Nova revenda - criar e fazer check-in
                 novo_cliente = Cliente(
                     cnpj=cnpj_normalizado,
                     razao_social=razao_social,
@@ -905,7 +848,6 @@ def cadastro_rapido_checkin():
                 db.session.add(novo_cliente)
                 db.session.commit()
                 
-                # Registrar log de cadastro rápido
                 registrar_log('cadastro_rapido_checkin', 'checkin', {
                     'tipo': 'nova_revenda',
                     'cliente_id': novo_cliente.id,
@@ -920,7 +862,6 @@ def cadastro_rapido_checkin():
                 })
                 
     except Exception as e:
-        # Registrar log de erro no cadastro rápido
         registrar_log('erro_cadastro_rapido', 'checkin', {
             'cnpj': cnpj,
             'razao_social': razao_social,
@@ -939,7 +880,6 @@ def registrar_venda():
         valor_pedido = request.form.get('valor_pedido')
         produtos_data = request.form.get('produtos_data')
         
-        # Validação extra: verificar se contém apenas números
         if not numero_pedido.isdigit():
             return jsonify({'success': False, 'message': 'Número do pedido deve conter apenas números'})
         
@@ -949,7 +889,6 @@ def registrar_venda():
         except (ValueError, json.JSONDecodeError):
             return jsonify({'success': False, 'message': 'Dados inválidos'})
         
-        # Validação dupla para garantir que não há duplicação
         pedido_existente = Venda.query.filter_by(numero_pedido=numero_pedido).first()
         if pedido_existente:
             return jsonify({'success': False, 'message': 'Número de pedido já registrado'})
@@ -957,7 +896,6 @@ def registrar_venda():
         cliente = Cliente.query.filter_by(cnpj=cnpj_compra, checkin_realizado=True).first()
         
         if cliente:
-            # Criar a venda
             venda = Venda(
                 cnpj_compra=cnpj_compra,
                 numero_pedido=numero_pedido,
@@ -967,7 +905,6 @@ def registrar_venda():
             db.session.add(venda)
             db.session.flush()
             
-            # Processar produtos (se houver)
             produtos_vendidos = []
             for produto in produtos:
                 equipamento_id = produto['equipamento_id']
@@ -994,7 +931,6 @@ def registrar_venda():
             
             db.session.commit()
             
-            # Registrar log de venda
             registrar_log('venda_registrada', 'vendas', {
                 'venda_id': venda.id,
                 'numero_pedido': numero_pedido,
@@ -1027,7 +963,6 @@ def vincular_cnpj():
     valor_pedido = request.form.get('valor_pedido')
     produtos_data = request.form.get('produtos_data')
     
-    # Validação: verificar se contém apenas números
     if not numero_pedido.isdigit():
         return jsonify({'success': False, 'message': 'Número do pedido deve conter apenas números'})
     
@@ -1036,7 +971,6 @@ def vincular_cnpj():
     except json.JSONDecodeError:
         return jsonify({'success': False, 'message': 'Dados de produtos inválidos'})
     
-    # Validação dupla para garantir que não há duplicação
     pedido_existente = Venda.query.filter_by(numero_pedido=numero_pedido).first()
     if pedido_existente:
         return jsonify({'success': False, 'message': 'Número de pedido já registrado'})
@@ -1080,7 +1014,6 @@ def vincular_cnpj():
         
         db.session.commit()
         
-        # Registrar log de venda vinculada
         registrar_log('venda_vinculada', 'vendas', {
             'venda_id': venda.id,
             'numero_pedido': numero_pedido,
@@ -1096,19 +1029,16 @@ def vincular_cnpj():
     else:
         return jsonify({'success': False, 'message': 'CNPJ de check-in não encontrado'})
     
-# API para verificar se pedido já existe
 @app.route('/api/verificar-pedido/<numero_pedido>')
 @login_required
 def api_verificar_pedido(numero_pedido):
     pedido_existente = Venda.query.filter_by(numero_pedido=numero_pedido).first()
     return jsonify({'existe': pedido_existente is not None})
     
-# Rotas de Estoque
 @app.route('/estoque')
 def estoque():
     equipamentos = Estoque.query.filter_by(ativo=True).order_by(Estoque.fabricante, Estoque.modelo).all()
     
-    # Estatísticas do estoque
     total_equipamentos = len(equipamentos)
     total_disponivel = sum(e.quantidade_disponivel for e in equipamentos)
     total_estoque = sum(e.quantidade_total for e in equipamentos)
@@ -1134,7 +1064,6 @@ def adicionar_equipamento():
     try:
         quantidade_int = int(quantidade)
         
-        # Verificar se equipamento já existe
         equipamento_existente = Estoque.query.filter_by(
             fabricante=fabricante.upper(),
             modelo=modelo.upper(),
@@ -1142,11 +1071,9 @@ def adicionar_equipamento():
         ).first()
         
         if equipamento_existente:
-            # Atualizar estoque existente
             equipamento_existente.quantidade_total += quantidade_int
             equipamento_existente.quantidade_disponivel += quantidade_int
             
-            # Registrar log de atualização de estoque
             registrar_log('estoque_atualizado', 'estoque', {
                 'equipamento_id': equipamento_existente.id,
                 'fabricante': fabricante,
@@ -1157,7 +1084,6 @@ def adicionar_equipamento():
                 'tipo': 'atualizacao'
             })
         else:
-            # Criar novo equipamento
             equipamento = Estoque(
                 fabricante=fabricante.upper(),
                 modelo=modelo.upper(),
@@ -1167,7 +1093,6 @@ def adicionar_equipamento():
             db.session.add(equipamento)
             db.session.flush()
             
-            # Registrar log de novo equipamento
             registrar_log('equipamento_adicionado', 'estoque', {
                 'equipamento_id': equipamento.id,
                 'fabricante': fabricante,
@@ -1180,7 +1105,6 @@ def adicionar_equipamento():
         return jsonify({'success': True, 'message': 'Equipamento adicionado ao estoque com sucesso!'})
         
     except Exception as e:
-        # Registrar log de erro
         registrar_log('erro_adicionar_equipamento', 'estoque', {
             'fabricante': fabricante,
             'modelo': modelo,
@@ -1197,7 +1121,6 @@ def remover_equipamento(equipamento_id):
         equipamento.ativo = False
         db.session.commit()
         
-        # Registrar log de remoção de equipamento
         registrar_log('equipamento_removido', 'estoque', {
             'equipamento_id': equipamento_id,
             'fabricante': equipamento.fabricante,
@@ -1236,7 +1159,6 @@ def estoque_publico():
 @login_required
 def api_vendas_hoje():
     hoje = agora().date()
-    # Contar quantidade de vendas, não somar valor
     quantidade_vendas_hoje = Venda.query.filter(
         db.func.date(Venda.data_hora_venda) == hoje
     ).count()
@@ -1262,9 +1184,6 @@ def api_total_pedidos():
     total_pedidos = Venda.query.count()
     return jsonify({'total': total_pedidos})
 
-
-
-# Rotas de Sorteio
 @app.route('/sorteio')
 @login_required
 @permissao_required('sorteio')
@@ -1275,15 +1194,12 @@ def sorteio():
     brindes_20k = Brinde.query.filter_by(tipo_sorteio='20k', ativo=True).all()
     brindes_50k = Brinde.query.filter_by(tipo_sorteio='50k', ativo=True).all()
     
-    # Calcular total de participações (não apenas revendas)
-    total_participacoes_20k = len(revendas_20k)  # Cada revenda tem 1 participação
-    total_participacoes_50k = sum(revenda['participacoes'] for revenda in revendas_50k)  # Soma todas as participações
+    total_participacoes_20k = len(revendas_20k)
+    total_participacoes_50k = sum(revenda['participacoes'] for revenda in revendas_50k)
     
-    # Contar brindes disponíveis
     brindes_20k_disponiveis = sum(1 for b in brindes_20k if b.quantidade_disponivel > 0)
     brindes_50k_disponiveis = sum(1 for b in brindes_50k if b.quantidade_disponivel > 0)
     
-    # Buscar últimos sorteios
     ultimos_sorteios = Sorteio.query.order_by(Sorteio.data_sorteio.desc()).limit(10).all()
     
     return render_template('sorteio.html', 
@@ -1299,7 +1215,6 @@ def sorteio():
                          brindes_50k_disponiveis=brindes_50k_disponiveis,
                          ultimos_sorteios=ultimos_sorteios)
 
-# MODIFICAR A ROTA DE REALIZAR SORTEIO PARA CONSIDERAR PARTICIPAÇÕES MÚLTIPLAS
 @app.route('/realizar-sorteio', methods=['POST'])
 @login_required
 def realizar_sorteio():
@@ -1346,20 +1261,16 @@ def realizar_sorteio():
                                        .order_by(Venda.data_hora_venda.asc())\
                                        .all()
     
-    # Calcular participações restantes de forma SIMPLES
     participacoes_restantes = 0
     if tipo_brinde == '50k':
-        # Buscar TODOS os sorteios já realizados para esta revenda
         sorteios_realizados = Sorteio.query.filter_by(
             cnpj_vencedor=cnpj_vencedor, 
             tipo_brinde='50k'
         ).count()
         
-        # Calcular quantas participações ainda restam
         participacoes_totais = revenda_vencedora.get('participacoes', 0)
         participacoes_restantes = max(0, participacoes_totais - sorteios_realizados)
     
-    # Registrar log de sorteio
     registrar_log('sorteio_realizado', 'sorteio', {
         'sorteio_id': sorteio.id,
         'tipo_brinde': tipo_brinde,
@@ -1397,14 +1308,12 @@ def realizar_sorteio():
         } for p in pedidos_qualificadores]
     })
 
-# Rota para a página de confirmação de entrega
 @app.route('/confirmar-entrega')
 @login_required
-@permissao_required('entrega_brindes')  # ← NOVA PERMISSÃO
+@permissao_required('entrega_brindes')
 def confirmar_entrega_page():
     return render_template('confirmar_entrega.html')
 
-# API para buscar brindes sorteados completos
 @app.route('/api/brindes-sorteados-completo')
 @login_required
 def api_brindes_sorteados_completo():
@@ -1432,7 +1341,6 @@ def api_brindes_sorteados_completo():
     
     return jsonify(result)
 
-# Rota para confirmar entrega
 @app.route('/confirmar-entrega', methods=['POST'])
 @login_required
 def confirmar_entrega():
@@ -1451,7 +1359,6 @@ def confirmar_entrega():
         if sorteio.entregue:
             return jsonify({'success': False, 'message': 'Este brinde já foi entregue'})
         
-        # Atualizar dados de entrega
         sorteio.entregue = True
         sorteio.data_entrega = agora()
         sorteio.responsavel_entrega = responsavel_entrega
@@ -1459,7 +1366,6 @@ def confirmar_entrega():
         
         db.session.commit()
         
-        # Registrar log de entrega de brinde
         registrar_log('entrega_brinde_confirmada', 'entrega_brindes', {
             'sorteio_id': sorteio_id,
             'cnpj_vencedor': sorteio.cnpj_vencedor,
@@ -1472,7 +1378,6 @@ def confirmar_entrega():
         return jsonify({'success': True, 'message': 'Entrega confirmada com sucesso!'})
         
     except Exception as e:
-        # Registrar log de erro na entrega
         registrar_log('erro_confirmar_entrega', 'entrega_brindes', {
             'sorteio_id': sorteio_id,
             'erro': str(e)
@@ -1496,7 +1401,6 @@ def atualizar_faturamento_sorteio():
     
     db.session.commit()
 
-# Rotas de Brindes
 @app.route('/brindes')
 @login_required
 @permissao_required('brindes')
@@ -1527,7 +1431,6 @@ def adicionar_brinde():
     db.session.add(brinde)
     db.session.commit()
     
-    # Registrar log de adição de brinde
     registrar_log('brinde_adicionado', 'brindes', {
         'brinde_id': brinde.id,
         'tipo_sorteio': tipo_sorteio,
@@ -1546,7 +1449,6 @@ def remover_brinde(brinde_id):
         brinde.ativo = False
         db.session.commit()
         
-        # Registrar log de remoção de brinde
         registrar_log('brinde_removido', 'brindes', {
             'brinde_id': brinde_id,
             'nome': brinde.nome,
@@ -1556,12 +1458,10 @@ def remover_brinde(brinde_id):
         return jsonify({'success': True, 'message': 'Brinde removido com sucesso!'})
     return jsonify({'success': False, 'message': 'Brinde não encontrado'})
 
-# Rotas de Relatórios
 @app.route('/relatorios')
 @login_required
 @permissao_required('relatorios')
 def relatorios():
-    # Buscar todos os dados
     sorteios = Sorteio.query.order_by(Sorteio.data_sorteio.desc()).all()
     checkins = Cliente.query.filter_by(checkin_realizado=True)\
                           .order_by(Cliente.horario_checkin.desc())\
@@ -1570,12 +1470,10 @@ def relatorios():
                        .order_by(Venda.data_hora_venda.desc())\
                        .all()
     
-    # Estatísticas Sorteios
     sorteios_20k = [s for s in sorteios if s.tipo_brinde == '20k']
     sorteios_50k = [s for s in sorteios if s.tipo_brinde == '50k']
     total_faturamento_sorteios = sum(s.valor_acumulado_revenda for s in sorteios)
     
-    # Estatísticas Check-ins
     revendas_unicas_checkin = db.session.query(Cliente.cnpj)\
                                        .filter(Cliente.checkin_realizado == True)\
                                        .distinct()\
@@ -1586,7 +1484,6 @@ def relatorios():
                                            .count()
     total_clientes = Cliente.query.count()
     
-    # Estatísticas Vendas
     total_vendas_valor = sum(v.valor_pedido for v in vendas)
     revendas_compradoras = db.session.query(Venda.cnpj_compra).distinct().count()
     ticket_medio = total_vendas_valor / len(vendas) if vendas else 0
@@ -1627,7 +1524,6 @@ def exportar_relatorio(sorteio_id):
     
     output = export_to_excel(data, f'relatorio_sorteio_{sorteio_id}.xlsx', 'Sorteio')
     
-    # Registrar log de exportação
     registrar_log('relatorio_exportado', 'exportacao', {
         'sorteio_id': sorteio_id,
         'tipo_relatorio': 'sorteio',
@@ -1639,7 +1535,6 @@ def exportar_relatorio(sorteio_id):
                     as_attachment=True,
                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-# APIs
 @app.route('/api/total-vendas')
 @login_required
 def api_total_vendas():
@@ -1659,7 +1554,7 @@ def api_ultimos_checkins():
             'cnpj': cliente.cnpj,
             'razao_social': cliente.razao_social,
             'responsavel_checkin': cliente.responsavel_checkin or cliente.responsavel,
-            'consultor': cliente.consultor,  # ← ADICIONAR ESTA LINHA
+            'consultor': cliente.consultor,
             'horario_checkin': cliente.horario_checkin.isoformat() if cliente.horario_checkin else '',
             'veio_carro': cliente.veio_carro,
             'placa_veiculo': cliente.placa_veiculo
@@ -1670,13 +1565,11 @@ def api_ultimos_checkins():
 @app.route('/api/buscar-veiculo/<placa>')
 @login_required
 def api_buscar_veiculo(placa):
-    """Busca veículo pela placa"""
     if not placa or len(placa.strip()) < 3:
         return jsonify({'success': False, 'message': 'Digite pelo menos 3 caracteres da placa'})
     
     placa_busca = placa.upper().strip()
     
-    # Buscar clientes que fizeram check-in e têm veículo com placa
     clientes = Cliente.query.filter(
         Cliente.checkin_realizado == True,
         Cliente.veio_carro == True,
@@ -1716,7 +1609,6 @@ def api_ultimos_clientes():
     
     return jsonify(result)
 
-# Rotas de Exportação
 @app.route('/exportar-clientes')
 @login_required
 @permissao_required('exportacao')
@@ -1737,7 +1629,6 @@ def exportar_clientes():
     
     output = export_to_excel(data, 'clientes_ro_experience.xlsx', 'Clientes')
     
-    # Registrar log de exportação
     registrar_log('exportacao_clientes', 'exportacao', {
         'quantidade_clientes': len(clientes),
         'tipo_exportacao': 'clientes'
@@ -1768,7 +1659,6 @@ def exportar_vendas():
     
     output = export_to_excel(data, 'vendas_ro_experience.xlsx', 'Vendas')
     
-    # Registrar log de exportação
     registrar_log('exportacao_vendas', 'exportacao', {
         'quantidade_vendas': len(vendas),
         'tipo_exportacao': 'vendas'
@@ -1796,7 +1686,6 @@ def exportar_checkins():
     
     output = export_to_excel(data, 'checkins_ro_experience.xlsx', 'Check-ins')
     
-    # Registrar log de exportação
     registrar_log('exportacao_checkins', 'exportacao', {
         'quantidade_checkins': len(checkins),
         'tipo_exportacao': 'checkins'
@@ -1849,7 +1738,6 @@ def download_template():
     
     output = export_to_excel(data, 'template_clientes_ro_experience.xlsx', 'Template_Clientes')
     
-    # Registrar log de download de template
     registrar_log('template_download', 'exportacao', {
         'tipo_template': 'clientes_com_direito_imagem'
     })
@@ -1861,15 +1749,10 @@ def download_template():
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
 
-# =============================================
-# ROTAS DE AUTENTICAÇÃO
-# =============================================
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Se já estiver logado, redireciona para a página inicial
     if 'usuario_id' in session:
-        return redirect(url_for('index'))  # ← Mudar para 'index' em vez de 'dashboard'
+        return redirect(url_for('index'))
     
     if request.method == 'POST':
         username = request.form.get('username')
@@ -1878,21 +1761,18 @@ def login():
         usuario = Usuario.query.filter_by(username=username, ativo=True).first()
         
         if usuario and check_password_hash(usuario.password_hash, password):
-            # Login bem-sucedido
             session['usuario_id'] = usuario.id
             session['username'] = usuario.username
             session['nome'] = usuario.nome
             session['nivel_acesso'] = usuario.nivel_acesso
             
-            # Registrar log de login
             registrar_log('login', 'autenticacao', {
                 'usuario': usuario.username,
                 'nivel_acesso': usuario.nivel_acesso
             })
             
-            return redirect(url_for('index'))  # ← Mudar para 'index' em vez de 'dashboard'
+            return redirect(url_for('index'))
         else:
-            # Login falhou
             return render_template('login.html', error='Credenciais inválidas')
     
     return render_template('login.html')
@@ -1900,12 +1780,10 @@ def login():
 @app.route('/logout')
 def logout():
     if 'usuario_id' in session:
-        # Registrar log de logout
         registrar_log('logout', 'autenticacao', {
             'usuario': session.get('username')
         })
         
-        # Limpar sessão
         session.clear()
     
     return redirect(url_for('login'))
@@ -1929,11 +1807,9 @@ def alterar_senha():
         if len(nova_senha) < 6:
             return jsonify({'success': False, 'message': 'A senha deve ter pelo menos 6 caracteres'})
         
-        # Atualizar senha
         usuario.password_hash = generate_password_hash(nova_senha)
         db.session.commit()
         
-        # Registrar log
         registrar_log('alteracao_senha', 'autenticacao', {
             'usuario': usuario.username
         })
@@ -1941,10 +1817,6 @@ def alterar_senha():
         return jsonify({'success': True, 'message': 'Senha alterada com sucesso!'})
     
     return render_template('alterar_senha.html')
-
-# =============================================
-# ROTAS DE GESTÃO DE USUÁRIOS (APENAS ADMIN)
-# =============================================
 
 @app.route('/gestao-usuarios')
 @login_required
@@ -1963,9 +1835,8 @@ def criar_usuario():
     nome = request.form.get('nome')
     password = request.form.get('password')
     nivel_acesso = request.form.get('nivel_acesso', 'operador')
-    permissoes_selecionadas = request.form.getlist('permissoes')  # Lista de módulos selecionados
+    permissoes_selecionadas = request.form.getlist('permissoes')
     
-    # Verificar se usuário já existe
     if Usuario.query.filter_by(username=username).first():
         flash('Usuário já existe', 'error')
         return redirect(url_for('gestao_usuarios'))
@@ -1974,13 +1845,10 @@ def criar_usuario():
         flash('A senha deve ter pelo menos 6 caracteres', 'error')
         return redirect(url_for('gestao_usuarios'))
     
-    # Construir objeto de permissões
     permissoes = {}
     if nivel_acesso == 'admin':
-        # Admin tem todas as permissões
         permissoes = {modulo: True for modulo in MODULOS_SISTEMA.keys()}
     else:
-        # Operador: apenas os módulos selecionados
         permissoes = {modulo: (modulo in permissoes_selecionadas) for modulo in MODULOS_SISTEMA.keys()}
     
     usuario = Usuario(
@@ -1994,7 +1862,6 @@ def criar_usuario():
     db.session.add(usuario)
     db.session.commit()
     
-    # Registrar log
     registrar_log('criacao_usuario', 'usuarios', {
         'usuario_criado': username,
         'nivel_acesso': nivel_acesso,
@@ -2013,7 +1880,7 @@ def editar_usuario():
     nome = request.form.get('nome')
     nivel_acesso = request.form.get('nivel_acesso')
     password = request.form.get('password')
-    permissoes_selecionadas = request.form.getlist('permissoes')  # Lista de módulos selecionados
+    permissoes_selecionadas = request.form.getlist('permissoes')
     
     usuario = Usuario.query.get(usuario_id)
     if not usuario:
@@ -2023,7 +1890,6 @@ def editar_usuario():
     usuario.nome = nome
     usuario.nivel_accesso = nivel_acesso
     
-    # Atualizar permissões
     if nivel_acesso == 'admin':
         permissoes = {modulo: True for modulo in MODULOS_SISTEMA.keys()}
     else:
@@ -2036,7 +1902,6 @@ def editar_usuario():
     
     db.session.commit()
     
-    # Registrar log
     registrar_log('edicao_usuario', 'usuarios', {
         'usuario_editado': usuario.username,
         'nivel_acesso': nivel_acesso,
@@ -2055,7 +1920,6 @@ def alternar_status_usuario(usuario_id):
     if not usuario:
         return jsonify({'success': False, 'message': 'Usuário não encontrado'})
     
-    # Não permitir inativar a si mesmo
     if usuario.id == session['usuario_id']:
         return jsonify({'success': False, 'message': 'Não é possível inativar seu próprio usuário'})
     
@@ -2064,7 +1928,6 @@ def alternar_status_usuario(usuario_id):
     
     acao = 'ativado' if usuario.ativo else 'inativado'
     
-    # Registrar log
     registrar_log(f'usuario_{acao}', 'usuarios', {
         'usuario': usuario.username,
         'acao': acao,
@@ -2096,17 +1959,14 @@ def excluir_usuario(usuario_id):
     if not usuario:
         return jsonify({'success': False, 'message': 'Usuário não encontrado'})
     
-    # Não permitir excluir a si mesmo
     if usuario.id == session['usuario_id']:
         return jsonify({'success': False, 'message': 'Não é possível excluir seu próprio usuário'})
     
-    # Não permitir excluir o último admin
     if usuario.nivel_acesso == 'admin':
         total_admins = Usuario.query.filter_by(nivel_acesso='admin', ativo=True).count()
         if total_admins <= 1:
             return jsonify({'success': False, 'message': 'Não é possível excluir o último administrador do sistema'})
     
-    # Registrar log antes de excluir
     registrar_log('exclusao_usuario', 'usuarios', {
         'usuario_excluido': usuario.username,
         'nome': usuario.nome,
@@ -2114,7 +1974,6 @@ def excluir_usuario(usuario_id):
         'excluido_por': session.get('username')
     })
     
-    # Excluir o usuário
     db.session.delete(usuario)
     db.session.commit()
     
@@ -2132,7 +1991,6 @@ def api_log_detalhes(log_id):
         })
     return jsonify({'error': 'Log não encontrado'}), 404
 
-# Adicionar função tem_permissao como template filter
 @app.context_processor
 def utility_processor():
     def check_permission_template(modulo):
@@ -2142,7 +2000,6 @@ def utility_processor():
 @app.route('/api/metricas-ultima-hora')
 @login_required
 def api_metricas_ultima_hora():
-    """Retorna métricas das últimas horas"""
     uma_hora_atras = agora() - timedelta(hours=1)
     
     checkins_ultima_hora = Cliente.query.filter(
@@ -2163,10 +2020,6 @@ def api_metricas_ultima_hora():
         'sorteios': sorteios_ultima_hora
     })
 
-# =============================================
-# ROTA PÚBLICA PARA LOGS (APENAS ADMIN)
-# =============================================
-
 @app.route('/logs-auditoria')
 @login_required
 @admin_required
@@ -2179,12 +2032,10 @@ def logs_auditoria():
 @login_required
 @admin_required
 def exportar_logs():
-    """Exporta todos os logs para Excel"""
     logs = LogAuditoria.query.order_by(LogAuditoria.data_hora.desc()).all()
     
     data = []
     for log in logs:
-        # Parse dos dados JSON se existirem
         dados_formatados = ""
         if log.dados:
             try:
@@ -2206,7 +2057,6 @@ def exportar_logs():
     
     output = export_to_excel(data, 'logs_auditoria_ro_experience.xlsx', 'Logs de Auditoria')
     
-    # Registrar log da exportação
     registrar_log('exportacao_logs', 'logs', {
         'quantidade_logs': len(logs),
         'tipo_exportacao': 'excel'
@@ -2221,10 +2071,8 @@ def exportar_logs():
 
 @app.route('/pesquisa', methods=['GET', 'POST'])
 def pesquisa_publica():
-    """Página pública de pesquisa de satisfação"""
     if request.method == 'POST':
         try:
-            # Coletar dados do formulário
             organizacao = int(request.form.get('organizacao'))
             palestras = int(request.form.get('palestras'))
             atendimento = int(request.form.get('atendimento'))
@@ -2232,33 +2080,27 @@ def pesquisa_publica():
             comentarios = request.form.get('comentarios', '').strip()
             cnpj = request.form.get('cnpj', '').strip()
             
-            print(f"📝 Dados recebidos - CNPJ: '{cnpj}'")  # Debug
+            print(f"📝 Dados recebidos - CNPJ: '{cnpj}'")
             
-            # Validar se todas as questões foram respondidas
             if not all([organizacao, palestras, atendimento, futuro]):
                 flash('Por favor, responda todas as questões obrigatórias', 'error')
                 return render_template('pesquisa_publica.html', enviado=False)
             
-            # Verificar se é anônimo ou identificado
             anonima = True
             cnpj_identificado = None
             razao_social = None
             
             if cnpj:
-                print(f"🔍 Validando CNPJ: {cnpj}")  # Debug
-                # Limpar CNPJ
+                print(f"🔍 Validando CNPJ: {cnpj}")
                 cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
                 
                 if len(cnpj_limpo) == 14:
-                    # Buscar cliente
                     cliente = Cliente.query.filter_by(cnpj=cnpj_limpo).first()
                     
-                    # Tentar outras formatações se não encontrou
                     if not cliente:
                         cliente = Cliente.query.filter_by(cnpj=normalizar_cnpj(cnpj_limpo)).first()
                     
                     if not cliente:
-                        # Buscar por similaridade
                         todos_clientes = Cliente.query.all()
                         for cli in todos_clientes:
                             cli_cnpj_limpo = ''.join(filter(str.isdigit, cli.cnpj))
@@ -2267,22 +2109,21 @@ def pesquisa_publica():
                                 break
                     
                     if cliente:
-                        print(f"✅ Cliente encontrado: {cliente.razao_social}")  # Debug
+                        print(f"✅ Cliente encontrado: {cliente.razao_social}")
                         if cliente.checkin_realizado:
                             anonima = False
                             cnpj_identificado = cnpj_limpo
                             razao_social = cliente.razao_social
-                            print(f"📋 Resposta IDENTIFICADA: {razao_social}")  # Debug
+                            print(f"📋 Resposta IDENTIFICADA: {razao_social}")
                         else:
-                            print("⚠️ Cliente encontrado mas sem check-in")  # Debug
+                            print("⚠️ Cliente encontrado mas sem check-in")
                     else:
-                        print("❌ Cliente não encontrado")  # Debug
+                        print("❌ Cliente não encontrado")
                 else:
-                    print("❌ CNPJ inválido (não tem 14 dígitos)")  # Debug
+                    print("❌ CNPJ inválido (não tem 14 dígitos)")
             
-            print(f"🎯 Tipo de resposta: {'ANÔNIMA' if anonima else 'IDENTIFICADA'}")  # Debug
+            print(f"🎯 Tipo de resposta: {'ANÔNIMA' if anonima else 'IDENTIFICADA'}")
             
-            # Salvar resposta
             resposta = PesquisaResposta(
                 cnpj_identificado=cnpj_identificado,
                 razao_social=razao_social,
@@ -2298,7 +2139,6 @@ def pesquisa_publica():
             db.session.add(resposta)
             db.session.commit()
             
-            # Registrar log
             registrar_log('pesquisa_respondida', 'pesquisa', {
                 'resposta_id': resposta.id,
                 'anonima': anonima,
@@ -2314,7 +2154,7 @@ def pesquisa_publica():
             
         except Exception as e:
             db.session.rollback()
-            print(f"❌ Erro ao salvar pesquisa: {str(e)}")  # Debug
+            print(f"❌ Erro ao salvar pesquisa: {str(e)}")
             flash(f'Erro ao enviar pesquisa: {str(e)}', 'error')
             return render_template('pesquisa_publica.html', enviado=False)
     
@@ -2323,35 +2163,27 @@ def pesquisa_publica():
 @app.route('/api/validar-cnpj-pesquisa/', defaults={'cnpj': ''})
 @app.route('/api/validar-cnpj-pesquisa/<path:cnpj>')
 def api_validar_cnpj_pesquisa(cnpj):
-    """API para validar CNPJ na pesquisa - usa path para aceitar barras"""
     try:
-        # Decodificar URL se necessário
         from urllib.parse import unquote
         cnpj = unquote(cnpj)
         
-        # Limpar e normalizar CNPJ
         cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
         
-        print(f"🔍 Validando CNPJ: {cnpj} -> {cnpj_limpo}")  # Debug
+        print(f"🔍 Validando CNPJ: {cnpj} -> {cnpj_limpo}")
         
         if len(cnpj_limpo) != 14:
             return jsonify({'valido': False, 'mensagem': 'CNPJ deve ter 14 dígitos'})
         
-        # Buscar cliente de várias formas
         cnpj_formatado = normalizar_cnpj_pesquisa(cnpj_limpo)
         
-        # Tentativa 1: Buscar exatamente como está no banco
         cliente = Cliente.query.filter_by(cnpj=cnpj_limpo).first()
         
-        # Tentativa 2: Buscar com formatação original
         if not cliente:
             cliente = Cliente.query.filter_by(cnpj=normalizar_cnpj(cnpj_limpo)).first()
         
-        # Tentativa 3: Buscar com formatação da pesquisa
         if not cliente:
             cliente = Cliente.query.filter_by(cnpj=cnpj_formatado).first()
         
-        # Tentativa 4: Buscar por similaridade
         if not cliente:
             todos_clientes = Cliente.query.all()
             for cli in todos_clientes:
@@ -2389,15 +2221,12 @@ def api_validar_cnpj_pesquisa(cnpj):
 @login_required
 @permissao_required('relatorios')
 def relatorio_pesquisas():
-    """Relatório das pesquisas respondidas"""
     pesquisas = PesquisaResposta.query.order_by(PesquisaResposta.data_resposta.desc()).all()
     
-    # Estatísticas
     total_pesquisas = len(pesquisas)
     pesquisas_identificadas = len([p for p in pesquisas if not p.anonima])
     pesquisas_anonimas = len([p for p in pesquisas if p.anonima])
     
-    # Médias
     if total_pesquisas > 0:
         media_organizacao = sum(p.organizacao for p in pesquisas) / total_pesquisas
         media_palestras = sum(p.palestras for p in pesquisas) / total_pesquisas
@@ -2420,7 +2249,6 @@ def relatorio_pesquisas():
 @login_required
 @permissao_required('exportacao')
 def exportar_pesquisas():
-    """Exportar pesquisas para Excel"""
     pesquisas = PesquisaResposta.query.order_by(PesquisaResposta.data_resposta.desc()).all()
     
     data = []
@@ -2441,7 +2269,6 @@ def exportar_pesquisas():
     
     output = export_to_excel(data, 'pesquisas_satisfacao.xlsx', 'Pesquisas')
     
-    # Registrar log
     registrar_log('exportacao_pesquisas', 'exportacao', {
         'quantidade_pesquisas': len(pesquisas)
     })
@@ -2451,24 +2278,21 @@ def exportar_pesquisas():
                     as_attachment=True,
                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         criar_usuario_admin()
-        migrar_banco_dados()  # ADICIONAR ESTA LINHA
-        atualizar_faturamento_sorteio()  # Atualizar para inicializar o novo campo
+        migrar_banco_dados()
+        atualizar_faturamento_sorteio()
     
-    # Configurações para desenvolvimento local
     host = '0.0.0.0'
     
-    # Verifica se está no SquareCloud (porta 80) ou local (porta 33053)
     if os.environ.get('SQUARECLOUD') or os.environ.get('PORT'):
         port = int(os.environ.get('PORT', 80))
         debug = False
         environment = "SquareCloud"
     else:
-        port = 33053  # Porta local
+        port = 33053
         debug = True
         environment = "Desenvolvimento Local"
     
