@@ -17,20 +17,26 @@ import os
 import stat
 
 # Ajustar permissões dos certificados SSL para PostgreSQL
+import os
+import stat
+
 def ajustar_permissoes_certificados():
-    """Ajusta as permissões dos arquivos de certificado para PostgreSQL"""
-    certificados = ['private-key.key', 'certificate.pem', 'ca-certificate.crt']
+    """Ajusta permissões dos certificados para PostgreSQL"""
+    certificados = {
+        'private-key.key': stat.S_IRUSR | stat.S_IWUSR,  # 600
+        'certificate.pem': stat.S_IRUSR | stat.S_IWUSR,  # 600  
+        'ca-certificate.crt': stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH  # 644
+    }
     
-    for cert_file in certificados:
+    for cert_file, perms in certificados.items():
         if os.path.exists(cert_file):
             try:
-                # PostgreSQL requer permissões restritas para arquivos de chave
-                os.chmod(cert_file, stat.S_IRUSR | stat.S_IWUSR)  # 600
+                os.chmod(cert_file, perms)
                 print(f"✅ Permissões ajustadas para: {cert_file}")
             except Exception as e:
-                print(f"⚠️ Não foi possível ajustar permissões de {cert_file}: {e}")
+                print(f"⚠️ Não foi possível ajustar {cert_file}: {e}")
 
-# Ajustar permissões antes de inicializar o app
+# Chamar antes de criar o app
 ajustar_permissoes_certificados()
 
 # CORREÇÃO DO FUSO HORÁRIO
