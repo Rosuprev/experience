@@ -17,21 +17,39 @@ import os
 import stat
 import psycopg2
 
-def configurar_permissoes_postgres():
-    """Configura permissões no banco postgres"""
+def configurar_schema_dedicado():
+    """Configura schema dedicado e permissões"""
     try:
         with db.engine.connect() as conn:
-            # Conecta ao banco postgres e configura permissões
-            conn.execute(db.text("""
-                GRANT ALL ON SCHEMA public TO squarecloud;
-                GRANT ALL ON ALL TABLES IN SCHEMA public TO squarecloud;
-                GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO squarecloud;
-                GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO squarecloud;
-            """))
+            # 1. Cria schema dedicado se não existir
+            conn.execute(db.text("CREATE SCHEMA IF NOT EXISTS ro_experience;"))
+            
+            # 2. Concede todas as permissões no schema
+            conn.execute(db.text("GRANT USAGE ON SCHEMA ro_experience TO squarecloud;"))
+            conn.execute(db.text("GRANT CREATE ON SCHEMA ro_experience TO squarecloud;"))
+            conn.execute(db.text("GRANT ALL ON ALL TABLES IN SCHEMA ro_experience TO squarecloud;"))
+            conn.execute(db.text("GRANT ALL ON ALL SEQUENCES IN SCHEMA ro_experience TO squarecloud;"))
+            
+            # 3. Define o schema padrão para o usuário
+            conn.execute(db.text("ALTER USER squarecloud SET search_path TO ro_experience, public;"))
+            
             conn.commit()
-            print("✅ Permissões configuradas com sucesso para o usuário squarecloud!")
+            print("✅ Schema 'ro_experience' criado e configurado com sucesso!")
+            
+        return True
+        
     except Exception as e:
-        print(f"⚠️ Aviso nas permissões: {e}")
+        print(f"❌ Erro ao configurar schema: {e}")
+        return False
+    
+# Configura todos os modelos para usar o schema ro_experience
+def configurar_schema_modelos():
+    """Define o schema para todas as tabelas"""
+    for table_name, table in db.metadata.tables.items():
+        table.schema = 'ro_experience'
+    print("✅ Todos os modelos configurados para usar schema 'ro_experience'")
+
+# Chame esta função ANTES de db.create_all()
 
 # Chame esta função ANTES de db.create_all()
 
@@ -65,7 +83,7 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão - banco postgres
+    # String de conexão - banco postgres com schema dedicado
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
     
@@ -2393,19 +2411,33 @@ if __name__ == '__main__':
             # 1. Ajusta permissões dos certificados
             ajustar_permissoes_certificados()
             
-            # 2. Configura permissões no PostgreSQL
-            configurar_permissoes_postgres()
+            # 2. Configura schema dedicado
+            if configurar_schema_dedicado():
+                # 3. Configura os modelos para usar o schema
+                configurar_schema_modelos()
+                
+                # 4. Cria as tabelas no schema dedicado
+                db.create_all()
+                criar_usuario_admin()
+                migrar_banco_dados()
+                atualizar_faturamento_sorteio()
+                
+                print("✅ Aplicação configurada com sucesso no schema 'ro_experience'!")
+            else:
+                raise Exception("Não foi possível configurar o schema dedicado")
+                
+        except Exception as e:
+            print(f"❌ Erro crítico: {e}")
+            print("🔄 Tentando usar SQLite como fallback...")
             
-            # 3. Cria as tabelas
+            # Fallback para SQLite
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+            # Remove schema dos modelos para SQLite
+            for table in db.metadata.tables.values():
+                table.schema = None
             db.create_all()
             criar_usuario_admin()
-            migrar_banco_dados()
-            atualizar_faturamento_sorteio()
-            
-            print("✅ Banco de dados PostgreSQL configurado com sucesso!")
-        except Exception as e:
-            print(f"❌ Erro ao conectar com PostgreSQL: {e}")
-            print("🔧 Verifique a string de conexão e permissões")
+            print("✅ SQLite configurado como fallback!")
     
     # Configurações para desenvolvimento local
     host = '0.0.0.0'
