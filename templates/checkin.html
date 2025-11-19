@@ -1,0 +1,1038 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Primeira coluna (agora para Check-in) -->
+    <div class="col-12 col-md-7 order-2 order-md-1">
+        <!-- Busca e Lista de Clientes - AGORA NO TOPO -->
+        <div class="card border-0 shadow-sm card-hover mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">📋</span>
+                    Lista de Clientes - Check-in
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Barra de Busca -->
+                <div class="mb-3">
+                    <label for="buscaCheckin" class="form-label">Buscar Cliente</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="buscaCheckin" 
+                               placeholder="Digite CNPJ, Razão Social ou Responsável...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="buscarClientes()">
+                            🔍 Buscar
+                        </button>
+                    </div>
+                    <div class="form-text">
+                        Busque por CNPJ, Razão Social ou nome do Responsável
+                    </div>
+                </div>
+
+                <!-- Filtros Rápidos -->
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="filtroPendentes" checked>
+                            <label class="form-check-label" for="filtroPendentes">
+                                ⏳ Pendentes ({{ total_clientes - total_checkins }})
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="filtroRealizados">
+                            <label class="form-check-label" for="filtroRealizados">
+                                ✅ Realizados ({{ total_checkins }})
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Clientes -->
+                <div id="listaClientes" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center text-muted py-4">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2">Carregando clientes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Últimos Check-ins Realizados -->
+        <div class="card border-0 shadow-sm card-hover mb-4">
+            <div class="card-header bg-success-custom text-white py-3">
+                <h5 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">🕒</span>
+                    Últimos Check-ins Realizados
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="ultimosCheckins" style="max-height: 200px; overflow-y: auto;">
+                    <div class="text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm text-success"></div>
+                        <p class="mt-2 small">Carregando check-ins...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda coluna (agora para Cadastro Rápido) -->
+    <div class="col-12 col-md-5 order-1 order-md-2">
+        <!-- Cadastro Rápido -->
+        <div class="card border-0 shadow-sm card-hover mb-4">
+            <div class="card-header bg-success-custom text-white py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">🚀</span>
+                    Cadastro Rápido + Check-in
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="cadastroRapidoForm">
+                    <div class="mb-3">
+                        <label for="cnpj_cadastro" class="form-label">CNPJ *</label>
+                        <input type="text" class="form-control cnpj-mask" id="cnpj_cadastro" name="cnpj" 
+                               placeholder="00.000.000/0000-00" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="razao_social" class="form-label">Razão Social *</label>
+                        <input type="text" class="form-control" id="razao_social" name="razao_social" 
+                               placeholder="Nome da empresa" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="responsavel_cadastro" class="form-label">Responsável *</label>
+                        <input type="text" class="form-control" id="responsavel_cadastro" name="responsavel" 
+                               placeholder="Nome do responsável presente" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="consultor_cadastro" class="form-label">Consultor</label>
+                        <input type="text" class="form-control" id="consultor_cadastro" name="consultor" 
+                               placeholder="Nome do consultor (opcional)">
+                    </div>
+                    
+                    <!-- Direito de Imagem no Cadastro Rápido -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="direito_imagem_cadastro" name="direito_imagem" required>
+                            <label class="form-check-label" for="direito_imagem_cadastro">
+                                ✅ <strong>Termo de Direito de Imagem Assinado</strong>
+                            </label>
+                        </div>
+                        <div class="form-text text-warning">
+                            <small>⚠️ O check-in só será permitido com o termo assinado</small>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <small>
+                            💡 <strong>Dica:</strong> Use esta opção para:<br>
+                            • Revendas não cadastradas<br>
+                            • Novos responsáveis de revendas existentes<br>
+                            • Check-in rápido sem busca prévia
+                        </small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success-custom w-100" id="btnCadastroRapido">
+                        ✅ Cadastrar e Fazer Check-in
+                    </button>
+                </form>
+                
+                <div id="resultCadastro" class="mt-3"></div>
+            </div>
+        </div>
+        
+        <!-- Estatísticas -->
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-primary-custom text-white py-3">
+                <h6 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">📊</span>
+                    Estatísticas do Evento
+                </h6>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-4">
+                        <h4 class="text-primary-custom mb-1">{{ total_clientes }}</h4>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-success mb-1">{{ total_checkins }}</h4>
+                        <small class="text-muted">Check-ins</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-warning mb-1">{{ total_clientes - total_checkins }}</h4>
+                        <small class="text-muted">Pendentes</small>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 10px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ (total_checkins / total_clientes * 100) if total_clientes > 0 else 0 }}%">
+                    </div>
+                </div>
+                <small class="text-muted mt-2">
+                    {{ "%.1f"|format((total_checkins/total_clientes)*100) if total_clientes > 0 else 0 }}% de presença
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para seleção de responsável -->
+<div class="modal fade" id="modalResponsavel" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning-custom text-dark py-3">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="me-2">👥</span>
+                    Selecionar Responsável
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Selecione o responsável que está fazendo check-in:</p>
+                <div id="listaResponsaveis"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Check-in -->
+<div class="modal fade" id="modalConfirmacaoCheckin" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary-custom text-white py-3">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="me-2">✅</span>
+                    Confirmar Check-in
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmacaoMessage">Tem certeza que deseja realizar o check-in?</p>
+                
+                <!-- Informações do Veículo -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>🚗 Informações do Veículo</strong></label>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="veio_carro">
+                        <label class="form-check-label" for="veio_carro">
+                            Cliente veio de carro
+                        </label>
+                    </div>
+                    <div id="placa_container" style="display: none;">
+                        <label for="placa_veiculo" class="form-label">Placa do Veículo *</label>
+                        <input type="text" class="form-control" id="placa_veiculo" 
+                               placeholder="ABC-1234 ou ABC1D23" maxlength="8">
+                        <div class="form-text">Informe a placa para controle do estacionamento</div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <small>
+                        <strong>⚠️ Atenção:</strong> Esta ação não pode ser desfeita.
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarCheckin">Confirmar Check-in</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Direito de Imagem -->
+<div class="modal fade" id="modalDireitoImagem" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning text-white py-3">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="me-2">📷</span>
+                    Termo de Direito de Imagem
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">⚠️ Atenção</h6>
+                    <p class="mb-0" id="direitoImagemMessage"></p>
+                </div>
+                
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="confirmar_direito_imagem">
+                    <label class="form-check-label" for="confirmar_direito_imagem">
+                        <strong>✅ Confirmo que o cliente assinou o termo de direito de imagem</strong>
+                    </label>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <small>
+                        💡 <strong>Informação:</strong> O termo de direito de imagem é obrigatório para participação no evento.
+                        Certifique-se que o cliente preencheu e assinou o documento físico.
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="btnConfirmarDireitoImagem">Confirmar Termo</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- jQuery local -->
+<script src="{{ url_for('static', filename='js/libs/jquery/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/libs/jquery/jquery.mask.min.js') }}"></script>
+
+<script>
+// Máscara para CNPJ - COM VERIFICAÇÃO DO JQUERY
+function inicializarMascaras() {
+    if (typeof $ !== 'undefined' && $.fn.mask) {
+        $('.cnpj-mask').mask('00.000.000/0000-00');
+        console.log('Máscaras inicializadas');
+    } else {
+        console.error('jQuery ou jQuery Mask não carregados');
+        // Fallback para máscara manual se jQuery não carregar
+        document.querySelectorAll('.cnpj-mask').forEach(input => {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 14) {
+                    if (value.length <= 2) {
+                        value = value;
+                    } else if (value.length <= 5) {
+                        value = value.replace(/^(\d{2})(\d+)/, '$1.$2');
+                    } else if (value.length <= 8) {
+                        value = value.replace(/^(\d{2})(\d{3})(\d+)/, '$1.$2.$3');
+                    } else if (value.length <= 12) {
+                        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d+)/, '$1.$2.$3/$4');
+                    } else {
+                        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d+)/, '$1.$2.$3/$4-$5');
+                    }
+                    e.target.value = value;
+                }
+            });
+        });
+    }
+}
+
+let todosClientes = [];
+let cnpjParaCheckin = null;
+let clienteIdParaCheckin = null;
+
+// Carregar lista de clientes ao abrir a página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM carregado - iniciando carregamento de clientes');
+    
+    // Inicializar máscaras
+    inicializarMascaras();
+    
+    // Carregar dados
+    carregarTodosClientes();
+    carregarUltimosCheckins();
+    
+    // Configurar event listeners com verificação
+    setTimeout(function() {
+        const veioCarroElement = document.getElementById('veio_carro');
+        if (veioCarroElement) {
+            veioCarroElement.addEventListener('change', function() {
+                const placaContainer = document.getElementById('placa_container');
+                if (placaContainer) {
+                    placaContainer.style.display = this.checked ? 'block' : 'none';
+                }
+            });
+        }
+        
+        const btnConfirmarCheckin = document.getElementById('btnConfirmarCheckin');
+        if (btnConfirmarCheckin) {
+            btnConfirmarCheckin.addEventListener('click', function() {
+                if (cnpjParaCheckin) {
+                    realizarCheckinCliente(cnpjParaCheckin);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacaoCheckin'));
+                    if (modal) modal.hide();
+                }
+            });
+        }
+        
+        const btnConfirmarDireitoImagem = document.getElementById('btnConfirmarDireitoImagem');
+        if (btnConfirmarDireitoImagem) {
+            btnConfirmarDireitoImagem.addEventListener('click', confirmarDireitoImagem);
+        }
+        
+        // Configurar busca em tempo real
+        const buscaInput = document.getElementById('buscaCheckin');
+        if (buscaInput) {
+            buscaInput.addEventListener('input', function() {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    filtrarClientes();
+                }, 500);
+            });
+        }
+        
+        // Configurar filtros
+        document.getElementById('filtroPendentes')?.addEventListener('change', filtrarClientes);
+        document.getElementById('filtroRealizados')?.addEventListener('change', filtrarClientes);
+        
+    }, 100);
+});
+
+// Função para carregar todos os clientes
+function carregarTodosClientes() {
+    console.log('Iniciando carregamento de clientes...');
+    
+    fetch('/api/todos-clientes')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro na resposta da API: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Clientes carregados:', data.length);
+        todosClientes = data;
+        filtrarClientes();
+    })
+    .catch(error => {
+        console.error('Erro ao carregar clientes:', error);
+        const listaClientesDiv = document.getElementById('listaClientes');
+        if (listaClientesDiv) {
+            listaClientesDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    ❌ Erro ao carregar lista de clientes: ${error.message}
+                    <br><small>Tente recarregar a página</small>
+                </div>
+            `;
+        }
+    });
+}
+
+function carregarUltimosCheckins() {
+    console.log('Carregando últimos check-ins...');
+    
+    fetch('/api/ultimos-checkins')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro na resposta da API: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Últimos check-ins carregados:', data.length);
+        const container = document.getElementById('ultimosCheckins');
+        if (!container) return;
+        
+        if (data && data.length > 0) {
+            container.innerHTML = data.slice(0, 8).map(cliente => `
+                <div class="border-bottom p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 text-primary-custom">${cliente.razao_social}</h6>
+                            <p class="mb-1 small">
+                                <strong>Responsável:</strong> ${cliente.responsavel_checkin}
+                                <br>
+                                <strong>Consultor:</strong> ${cliente.consultor || 'Não informado'}
+                                <br>
+                                <strong>CNPJ:</strong> <code>${cliente.cnpj}</code>
+                                ${cliente.veio_carro && cliente.placa_veiculo ? 
+                                    `<br><strong>🚗 Veículo:</strong> ${cliente.placa_veiculo}` : 
+                                    '<br><strong>🚶‍♂️ Sem veículo</strong>'
+                                }
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success-custom mb-2">✅ Check-in</span>
+                            <br>
+                            <small class="text-muted">
+                                ${cliente.horario_checkin ? new Date(cliente.horario_checkin).toLocaleTimeString('pt-BR') : ''}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <div class="display-4 mb-3">⏳</div>
+                    <p>Nenhum check-in recente</p>
+                    <small>Os check-ins aparecerão aqui automaticamente</small>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao carregar últimos check-ins:', error);
+        const container = document.getElementById('ultimosCheckins');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center text-danger py-4">
+                    <span class="me-2">⚠️</span>
+                    Erro ao carregar check-ins
+                </div>
+            `;
+        }
+    });
+}
+
+// Cadastro Rápido
+document.getElementById('cadastroRapidoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const btnCadastro = document.getElementById('btnCadastroRapido');
+    const resultDiv = document.getElementById('resultCadastro');
+    
+    const formData = new FormData(this);
+    const cnpj = formData.get('cnpj');
+    const razaoSocial = formData.get('razao_social');
+    const responsavel = formData.get('responsavel');
+    const consultor = formData.get('consultor');
+    const direitoImagem = document.getElementById('direito_imagem_cadastro').checked;
+    
+    if (!cnpj || !razaoSocial || !responsavel) {
+        resultDiv.innerHTML = `<div class="alert alert-warning">Preencha todos os campos obrigatórios</div>`;
+        return;
+    }
+    
+    if (!direitoImagem) {
+        resultDiv.innerHTML = `<div class="alert alert-warning">É necessário confirmar o termo de direito de imagem</div>`;
+        return;
+    }
+    
+    // Mostrar loading
+    btnCadastro.disabled = true;
+    btnCadastro.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Cadastrando...';
+    
+    fetch('/cadastro-rapido-checkin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            cnpj: cnpj,
+            razao_social: razaoSocial,
+            responsavel: responsavel,
+            consultor: consultor || 'Não Informado',
+            direito_imagem: direitoImagem
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+            // Limpar formulário
+            document.getElementById('cadastroRapidoForm').reset();
+            // Atualizar listas
+            carregarTodosClientes();
+            carregarUltimosCheckins();
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        resultDiv.innerHTML = `<div class="alert alert-danger">Erro ao cadastrar</div>`;
+    })
+    .finally(() => {
+        // Restaurar botão
+        btnCadastro.disabled = false;
+        btnCadastro.innerHTML = '✅ Cadastrar e Fazer Check-in';
+    });
+});
+
+function buscarClientes() {
+    filtrarClientes();
+}
+
+function filtrarClientes() {
+    const termoBusca = document.getElementById('buscaCheckin')?.value.toLowerCase() || '';
+    const mostrarPendentes = document.getElementById('filtroPendentes')?.checked || true;
+    const mostrarRealizados = document.getElementById('filtroRealizados')?.checked || false;
+    
+    const listaClientesDiv = document.getElementById('listaClientes');
+    if (!listaClientesDiv) return;
+    
+    let clientesFiltrados = todosClientes.filter(cliente => {
+        // Filtro por termo de busca
+        const buscaMatch = !termoBusca || 
+            (cliente.cnpj && cliente.cnpj.toLowerCase().includes(termoBusca)) ||
+            (cliente.razao_social && cliente.razao_social.toLowerCase().includes(termoBusca)) ||
+            (cliente.responsavel && cliente.responsavel.toLowerCase().includes(termoBusca));
+        
+        // Filtro por status
+        const statusMatch = (mostrarPendentes && !cliente.checkin_realizado) || 
+                           (mostrarRealizados && cliente.checkin_realizado);
+        
+        return buscaMatch && statusMatch;
+    });
+    
+    // Ordenar: pendentes primeiro, depois por nome
+    clientesFiltrados.sort((a, b) => {
+        if (a.checkin_realizado !== b.checkin_realizado) {
+            return a.checkin_realizado ? 1 : -1;
+        }
+        return a.razao_social.localeCompare(b.razao_social);
+    });
+    
+    if (clientesFiltrados.length > 0) {
+        listaClientesDiv.innerHTML = clientesFiltrados.map(cliente => `
+            <div class="card mb-2 ${cliente.checkin_realizado ? 'border-success' : 'border-warning'} card-hover">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">${cliente.razao_social}</h6>
+                            <p class="card-text mb-1 small">
+                                <strong>CNPJ:</strong> ${cliente.cnpj}<br>
+                                <strong>Responsável:</strong> ${cliente.responsavel}
+                                ${cliente.consultor && cliente.consultor !== 'Não Informado' ? `<br><strong>Consultor:</strong> ${cliente.consultor}` : ''}
+                            </p>
+                            <div class="mt-1">
+                                ${cliente.direito_imagem ? 
+                                    '<span class="badge bg-success">📷 Termo Assinado</span>' : 
+                                    '<span class="badge bg-danger">⚠️ Termo Pendente</span>'
+                                }
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            ${cliente.checkin_realizado ? 
+                                `<span class="badge bg-success">
+                                    ✅ Check-in<br>
+                                    <small>${cliente.horario_checkin ? new Date(cliente.horario_checkin).toLocaleTimeString('pt-BR') : ''}</small>
+                                </span>` : 
+                                `<button class="btn btn-sm ${cliente.direito_imagem ? 'btn-primary' : 'btn-warning'}" 
+                                 onclick="confirmarCheckinCliente('${cliente.cnpj}', '${cliente.razao_social}', '${cliente.responsavel}', ${cliente.direito_imagem}, ${cliente.id})">
+                                    ${cliente.direito_imagem ? 'Fazer Check-in' : 'Verificar Termo'}
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        listaClientesDiv.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <div class="display-4 mb-3">🔍</div>
+                <p>Nenhum cliente encontrado</p>
+                <small>Tente alterar os filtros ou termo de busca</small>
+            </div>
+        `;
+    }
+}
+
+// Função para mostrar confirmação antes do check-in
+function confirmarCheckinCliente(cnpj, razaoSocial, responsavel, direitoImagem, clienteId) {
+    cnpjParaCheckin = cnpj;
+    clienteIdParaCheckin = clienteId;
+    
+    // Verificar se tem direito de imagem
+    if (!direitoImagem) {
+        mostrarModalDireitoImagem(razaoSocial, responsavel, clienteId);
+        return;
+    }
+    
+    const message = document.getElementById('confirmacaoMessage');
+    if (message) {
+        message.innerHTML = `
+            <strong>Confirme os dados do check-in:</strong><br><br>
+            <strong>Revenda:</strong> ${razaoSocial}<br>
+            <strong>CNPJ:</strong> ${cnpj}<br>
+            <strong>Responsável:</strong> ${responsavel}<br><br>
+            Tem certeza que deseja realizar o check-in?
+        `;
+    }
+    
+    // Resetar campos do veículo
+    const veioCarro = document.getElementById('veio_carro');
+    const placaContainer = document.getElementById('placa_container');
+    if (veioCarro) veioCarro.checked = false;
+    if (placaContainer) placaContainer.style.display = 'none';
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalConfirmacaoCheckin'));
+    modal.show();
+}
+
+// Modal de Direito de Imagem
+function mostrarModalDireitoImagem(razaoSocial, responsavel, clienteId) {
+    const message = document.getElementById('direitoImagemMessage');
+    if (message) {
+        message.innerHTML = `
+            <strong>${razaoSocial}</strong> - ${responsavel}<br><br>
+            Não possui termo de direito de imagem assinado. 
+            É necessário que o cliente preencha e assine o termo físico antes do check-in.
+        `;
+    }
+    
+    const confirmCheckbox = document.getElementById('confirmar_direito_imagem');
+    if (confirmCheckbox) confirmCheckbox.checked = false;
+    
+    clienteIdParaCheckin = clienteId;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDireitoImagem'));
+    modal.show();
+}
+
+// Configurar o botão de confirmação do direito de imagem
+function confirmarDireitoImagem() {
+    const confirmado = document.getElementById('confirmar_direito_imagem')?.checked;
+    
+    if (!confirmado) {
+        alert('Por favor, confirme que o cliente assinou o termo de direito de imagem');
+        return;
+    }
+    
+    // Mostrar loading
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    
+    fetch('/confirmar-direito-imagem', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `cliente_id=${clienteIdParaCheckin}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Fechar modal e recarregar lista
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalDireitoImagem'));
+            if (modal) modal.hide();
+            carregarTodosClientes();
+            
+            // Mostrar mensagem de sucesso
+            const resultDiv = document.getElementById('resultCadastro');
+            if (resultDiv) {
+                resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+            }
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao confirmar termo de direito de imagem');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+function realizarCheckinCliente(cnpj) {
+    const resultDiv = document.getElementById('resultCadastro');
+    
+    // Coletar informações do veículo
+    const veioCarro = document.getElementById('veio_carro')?.checked || false;
+    const placaVeiculo = veioCarro ? document.getElementById('placa_veiculo')?.value : '';
+    
+    if (veioCarro && !placaVeiculo) {
+        if (resultDiv) {
+            resultDiv.innerHTML = `<div class="alert alert-warning">Informe a placa do veículo</div>`;
+        }
+        return;
+    }
+    
+    // Criar os parâmetros no formato correto
+    const params = new URLSearchParams();
+    params.append('cnpj', cnpj);
+    params.append('veio_carro', veioCarro.toString());
+    if (veioCarro) {
+        params.append('placa_veiculo', placaVeiculo);
+    }
+    
+    fetch('/checkin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (resultDiv) {
+            if (data.success) {
+                resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                carregarTodosClientes();
+                carregarUltimosCheckins();
+            } else if (data.need_direito_imagem) {
+                mostrarModalDireitoImagem(data.razao_social, data.responsavel, data.cliente_id);
+            } else if (data.multiple) {
+                mostrarModalResponsaveis(data.responsaveis, cnpj);
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        if (resultDiv) {
+            resultDiv.innerHTML = `<div class="alert alert-danger">Erro ao realizar check-in</div>`;
+        }
+    });
+}
+
+function mostrarModalResponsaveis(responsaveis, cnpj) {
+    const lista = document.getElementById('listaResponsaveis');
+    const modalMessage = document.getElementById('modalMessage');
+    
+    if (!lista || !modalMessage) return;
+    
+    lista.innerHTML = '';
+    modalMessage.textContent = `Encontramos ${responsaveis.length} responsáveis para este CNPJ. Selecione quem está fazendo check-in:`;
+    
+    responsaveis.forEach(resp => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `btn ${resp.ja_checkin ? 'btn-secondary' : resp.direito_imagem ? 'btn-primary' : 'btn-warning'} w-100 mb-2`;
+        button.innerHTML = `
+            ${resp.nome}
+            ${resp.ja_checkin ? '<span class="badge bg-warning ms-2">Já fez check-in</span>' : ''}
+            ${!resp.direito_imagem && !resp.ja_checkin ? '<span class="badge bg-danger ms-2">Termo Pendente</span>' : ''}
+        `;
+        button.onclick = () => {
+            if (!resp.ja_checkin) {
+                if (resp.direito_imagem) {
+                    fazerCheckinResponsavel(resp.id);
+                } else {
+                    mostrarModalDireitoImagem('', resp.nome, resp.id);
+                }
+            }
+        };
+        button.disabled = resp.ja_checkin;
+        lista.appendChild(button);
+    });
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalResponsavel'));
+    modal.show();
+}
+
+function fazerCheckinResponsavel(clienteId) {
+    // Coletar informações do veículo do modal principal
+    const veioCarro = document.getElementById('veio_carro')?.checked || false;
+    const placaVeiculo = veioCarro ? document.getElementById('placa_veiculo')?.value : '';
+    
+    if (veioCarro && !placaVeiculo) {
+        const resultDiv = document.getElementById('resultCadastro');
+        if (resultDiv) {
+            resultDiv.innerHTML = `<div class="alert alert-warning">Informe a placa do veículo</div>`;
+        }
+        return;
+    }
+    
+    const params = new URLSearchParams();
+    params.append('cliente_id', clienteId);
+    params.append('veio_carro', veioCarro.toString());
+    if (veioCarro) {
+        params.append('placa_veiculo', placaVeiculo);
+    }
+    
+    fetch('/checkin-responsavel', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resultDiv = document.getElementById('resultCadastro');
+        if (resultDiv) {
+            if (data.success) {
+                resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                carregarTodosClientes();
+                carregarUltimosCheckins();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalResponsavel'));
+                if (modal) modal.hide();
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            }
+        }
+    });
+}
+
+// Máscara para placa de veículo
+function formatarPlaca(placa) {
+    placa = placa.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (placa.length <= 3) {
+        return placa;
+    } else if (placa.length <= 4) {
+        return placa.slice(0, 3) + '-' + placa.slice(3);
+    } else {
+        return placa.slice(0, 3) + '-' + placa.slice(3, 7);
+    }
+}
+
+// Aplicar máscara na placa
+const placaVeiculoInput = document.getElementById('placa_veiculo');
+if (placaVeiculoInput) {
+    placaVeiculoInput.addEventListener('input', function(e) {
+        const cursorPos = this.selectionStart;
+        const originalValue = this.value;
+        
+        this.value = formatarPlaca(originalValue);
+        
+        // Manter a posição do cursor
+        if (originalValue.length < this.value.length && cursorPos === originalValue.length) {
+            this.setSelectionRange(this.value.length, this.value.length);
+        } else {
+            this.setSelectionRange(cursorPos, cursorPos);
+        }
+    });
+}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+}
+
+#listaClientes, #ultimosCheckins {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-green) #f8f9fa;
+}
+
+#listaClientes::-webkit-scrollbar,
+#ultimosCheckins::-webkit-scrollbar {
+    width: 8px;
+}
+
+#listaClientes::-webkit-scrollbar-track,
+#ultimosCheckins::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+#listaClientes::-webkit-scrollbar-thumb,
+#ultimosCheckins::-webkit-scrollbar-thumb {
+    background-color: var(--accent-green);
+    border-radius: 4px;
+}
+
+.border-bottom:last-child {
+    border-bottom: none !important;
+}
+
+.badge {
+    font-size: 0.7em;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Melhorias para dispositivos móveis */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 1rem;
+    }
+    
+    .alert {
+        font-size: 0.85rem;
+        padding: 0.75rem;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+    }
+    
+    h4.card-title {
+        font-size: 1.1rem;
+    }
+    
+    h5.card-title {
+        font-size: 1rem;
+    }
+    
+    h6.card-title {
+        font-size: 0.95rem;
+    }
+    
+    /* Melhorar espaçamento entre cards em mobile */
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Ajustar botões em cards de clientes */
+    #listaClientes .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    /* Melhorar visualização da lista de clientes em mobile */
+    #listaClientes .card-body {
+        padding: 0.75rem;
+    }
+    
+    #listaClientes .card-title {
+        font-size: 0.95rem;
+    }
+    
+    #listaClientes .card-text {
+        font-size: 0.8rem;
+    }
+    
+    /* Ajustar estatísticas para mobile */
+    .card-body.text-center .row .col-4 h4 {
+        font-size: 1.2rem;
+    }
+    
+    .card-body.text-center .row .col-4 small {
+        font-size: 0.75rem;
+    }
+}
+</style>
+{% endblock %}

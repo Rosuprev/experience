@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">👥 Gestão de Usuários</h2>
+            <p class="text-muted mb-0">Gerencie os usuários e suas permissões</p>
+        </div>
+        <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modalNovoUsuario">
+            ➕ Novo Usuário
+        </button>
+    </div>
+
+    <!-- Lista de Usuários -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">Usuários do Sistema</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Nome</th>
+                            <th>Nível de Acesso</th>
+                            <th>Permissões</th>
+                            <th>Status</th>
+                            <th>Data de Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>
+                                <strong>{{ usuario.username }}</strong>
+                                {% if usuario.id == session.usuario_id %}
+                                <span class="badge bg-info ms-1">Você</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.nome }}</td>
+                            <td>
+                                <span class="badge {% if usuario.nivel_acesso == 'admin' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ usuario.nivel_acesso|upper }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if usuario.nivel_acesso == 'admin' %}
+                                <span class="badge bg-success">Todas as permissões</span>
+                                {% else %}
+                                <small>
+                                    {{ usuario.total_permissoes }}/{{ total_modulos }} módulos
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge {% if usuario.ativo %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ 'Ativo' if usuario.ativo else 'Inativo' }}
+                                </span>
+                            </td>
+                            <td>{{ usuario.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" 
+                                            onclick="editarUsuario({{ usuario.id }})"
+                                            {% if usuario.id == session.usuario_id %}disabled{% endif %}>
+                                        ✏️ Editar
+                                    </button>
+                                    {% if usuario.ativo %}
+                                    <button class="btn btn-outline-warning" 
+                                            onclick="alternarStatus({{ usuario.id }}, false)"
+                                            {% if usuario.id == session.usuario_id %}disabled{% endif %}>
+                                        🚫 Inativar
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-outline-success" 
+                                            onclick="alternarStatus({{ usuario.id }}, true)"
+                                            {% if usuario.id == session.usuario_id %}disabled{% endif %}>
+                                        ✅ Ativar
+                                    </button>
+                                    {% endif %}
+                                    <!-- Botão Excluir -->
+                                    <button class="btn btn-outline-danger" 
+                                            onclick="excluirUsuario({{ usuario.id }}, '{{ usuario.username }}')"
+                                            {% if usuario.id == session.usuario_id %}disabled{% endif %}>
+                                        🗑️ Excluir
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card bg-primary-custom text-white">
+                <div class="card-body text-center">
+                    <h4>{{ usuarios|length }}</h4>
+                    <small>Total de Usuários</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>{{ usuarios|selectattr('ativo')|list|length }}</h4>
+                    <small>Usuários Ativos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4>{{ usuarios|selectattr('nivel_acesso', 'equalto', 'admin')|list|length }}</h4>
+                    <small>Administradores</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>{{ usuarios|selectattr('nivel_acesso', 'equalto', 'operador')|list|length }}</h4>
+                    <small>Operadores</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Novo Usuário -->
+<div class="modal fade" id="modalNovoUsuario" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary-custom text-white">
+                <h5 class="modal-title">➕ Novo Usuário</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formNovoUsuario" action="{{ url_for('criar_usuario') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">👤 Usuário *</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nome" class="form-label">👨‍💼 Nome Completo *</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">🔒 Senha *</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="form-text">Mínimo 6 caracteres</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nivel_acesso" class="form-label">🎯 Nível de Acesso</label>
+                                <select class="form-select" id="nivel_acesso" name="nivel_acesso" onchange="togglePermissoes()">
+                                    <option value="operador">Operador</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Permissões (apenas para operadores) -->
+                    <div id="secaoPermissoes">
+                        <hr>
+                        <h6 class="mb-3">🔐 Permissões por Módulo</h6>
+                        <div class="row">
+                            {% for modulo, info in modulos_sistema.items() %}
+                            {% if modulo not in ['usuarios', 'logs'] or session.nivel_acesso == 'admin' %}
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input modulo-checkbox" 
+                                           type="checkbox" 
+                                           id="modulo_{{ modulo }}" 
+                                           name="permissoes" 
+                                           value="{{ modulo }}"
+                                           {% if modulo in ['dashboard', 'checkin', 'vendas', 'estoque', 'sorteio', 'relatorios', 'entrega_brindes'] %}checked{% endif %}>
+                                    <label class="form-check-label" for="modulo_{{ modulo }}">
+                                        <strong>{{ info.nome }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ info.descricao }}</small>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <small>
+                                💡 <strong>Dica:</strong> Administradores têm acesso a todos os módulos automaticamente.
+                                As permissões abaixo se aplicam apenas a usuários operadores.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary-custom">Criar Usuário</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Usuário -->
+<div class="modal fade" id="modalEditarUsuario" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">✏️ Editar Usuário</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditarUsuario" action="{{ url_for('editar_usuario') }}" method="POST">
+                <input type="hidden" id="editar_usuario_id" name="usuario_id">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editar_nome" class="form-label">👨‍💼 Nome Completo *</label>
+                                <input type="text" class="form-control" id="editar_nome" name="nome" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editar_nivel_acesso" class="form-label">🎯 Nível de Acesso</label>
+                                <select class="form-select" id="editar_nivel_acesso" name="nivel_acesso" onchange="togglePermissoesEditar()">
+                                    <option value="operador">Operador</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editar_password" class="form-label">🔒 Nova Senha (opcional)</label>
+                        <input type="password" class="form-control" id="editar_password" name="password">
+                        <div class="form-text">Deixe em branco para manter a senha atual</div>
+                    </div>
+
+                    <!-- Seção de Permissões para Edição -->
+                    <div id="secaoPermissoesEditar">
+                        <hr>
+                        <h6 class="mb-3">🔐 Permissões por Módulo</h6>
+                        <div class="row" id="permissoesEditarContainer">
+                            <!-- Permissões serão carregadas via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Atualizar Usuário</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Manter TODO o JavaScript original aqui
+// Mostrar/ocultar permissões baseado no nível de acesso
+function togglePermissoes() {
+    const nivelAcesso = document.getElementById('nivel_acesso').value;
+    const secaoPermissoes = document.getElementById('secaoPermissoes');
+    
+    if (nivelAcesso === 'admin') {
+        secaoPermissoes.style.display = 'none';
+    } else {
+        secaoPermissoes.style.display = 'block';
+    }
+}
+
+function togglePermissoesEditar() {
+    const nivelAcesso = document.getElementById('editar_nivel_acesso').value;
+    const secaoPermissoes = document.getElementById('secaoPermissoesEditar');
+    
+    if (nivelAcesso === 'admin') {
+        secaoPermissoes.style.display = 'none';
+    } else {
+        secaoPermissoes.style.display = 'block';
+    }
+}
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    togglePermissoes();
+});
+
+function editarUsuario(usuarioId) {
+    fetch(`/api/usuario/${usuarioId}`)
+        .then(response => response.json())
+        .then(usuario => {
+            document.getElementById('editar_usuario_id').value = usuario.id;
+            document.getElementById('editar_nome').value = usuario.nome;
+            document.getElementById('editar_nivel_acesso').value = usuario.nivel_acesso;
+            
+            // Carregar permissões
+            carregarPermissoesEditar(usuario.permissoes);
+            togglePermissoesEditar();
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalEditarUsuario'));
+            modal.show();
+        });
+}
+
+function carregarPermissoesEditar(permissoesJson) {
+    const container = document.getElementById('permissoesEditarContainer');
+    const permissoes = JSON.parse(permissoesJson || '{}');
+    
+    let html = '';
+    {% for modulo, info in modulos_sistema.items() %}
+    {% if modulo not in ['usuarios', 'logs'] or session.nivel_acesso == 'admin' %}
+    html += `
+        <div class="col-md-6 mb-2">
+            <div class="form-check">
+                <input class="form-check-input modulo-checkbox-editar" 
+                       type="checkbox" 
+                       id="editar_modulo_{{ modulo }}" 
+                       name="permissoes" 
+                       value="{{ modulo }}"
+                       ${permissoes['{{ modulo }}'] ? 'checked' : ''}>
+                <label class="form-check-label" for="editar_modulo_{{ modulo }}">
+                    <strong>{{ info.nome }}</strong>
+                    <br>
+                    <small class="text-muted">{{ info.descricao }}</small>
+                </label>
+            </div>
+        </div>
+    `;
+    {% endif %}
+    {% endfor %}
+    
+    container.innerHTML = html;
+}
+
+function alternarStatus(usuarioId, ativar) {
+    const acao = ativar ? 'ativar' : 'inativar';
+    const confirmacao = confirm(`Tem certeza que deseja ${acao} este usuário?`);
+    
+    if (confirmacao) {
+        fetch(`/alternar-status-usuario/${usuarioId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        });
+    }
+}
+
+// Interceptar envio do formulário para evitar JSON
+document.getElementById('formNovoUsuario').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const password = document.getElementById('password').value;
+    
+    if (password.length < 6) {
+        alert('A senha deve ter pelo menos 6 caracteres.');
+        return;
+    }
+    
+    // Mostrar loading
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Criando...';
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            return response.json().then(data => {
+                if (data.success) {
+                    // Fechar modal e recarregar
+                    bootstrap.Modal.getInstance(document.getElementById('modalNovoUsuario')).hide();
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao criar usuário');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'Criar Usuário';
+    });
+});
+
+function excluirUsuario(usuarioId, username) {
+    const confirmacao = confirm(`Tem certeza que deseja EXCLUIR permanentemente o usuário "${username}"?\n\nEsta ação não pode ser desfeita!`);
+    
+    if (confirmacao) {
+        // Mostrar loading
+        const btn = event.target;
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        
+        fetch(`/excluir-usuario/${usuarioId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Recarregar a página para atualizar a lista
+                location.reload();
+            } else {
+                alert(data.message);
+                // Restaurar botão
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao excluir usuário');
+            // Restaurar botão
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+    }
+}
+
+// Fazer o mesmo para o formulário de edição
+document.getElementById('formEditarUsuario').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const password = document.getElementById('editar_password').value;
+    
+    if (password && password.length < 6) {
+        alert('A senha deve ter pelo menos 6 caracteres.');
+        return;
+    }
+    
+    // Mostrar loading
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Atualizando...';
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            return response.json().then(data => {
+                if (data.success) {
+                    // Fechar modal e recarregar
+                    bootstrap.Modal.getInstance(document.getElementById('modalEditarUsuario')).hide();
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao atualizar usuário');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'Atualizar Usuário';
+    });
+});
+</script>
+
+<style>
+/* Manter TODO o CSS adicional original aqui */
+.form-check {
+    padding-left: 2.5em;
+}
+
+.form-check-input {
+    margin-left: -2.5em;
+}
+
+.modulo-checkbox, .modulo-checkbox-editar {
+    transform: scale(1.2);
+}
+
+#secaoPermissoes, #secaoPermissoesEditar {
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary-custom text-white">
+            <div class="card-body text-center py-4">
+                <h1 class="display-5 mb-3">📊 Relatório de Pesquisas</h1>
+                <p class="lead mb-2">Pesquisa de Satisfação R.O Experience 2025</p>
+                <small class="opacity-75">Análise das respostas coletadas</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success-custom text-white text-center">
+            <div class="card-body">
+                <h3 class="display-4">{{ total_pesquisas }}</h3>
+                <p class="mb-0">Total de Pesquisas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info-custom text-white text-center">
+            <div class="card-body">
+                <h3 class="display-4">{{ pesquisas_identificadas }}</h3>
+                <p class="mb-0">Identificadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning-custom text-center">
+            <div class="card-body">
+                <h3 class="display-4">{{ pesquisas_anonimas }}</h3>
+                <p class="mb-0">Anônimas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary-custom text-white text-center">
+            <div class="card-body">
+                <h3 class="display-4">{{ "%.1f"|format((media_organizacao + media_palestras + media_atendimento + media_futuro) / 4) }}</h3>
+                <p class="mb-0">Média Geral</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Médias por Categoria -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">📈 Médias por Categoria</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-primary">{{ "%.1f"|format(media_organizacao) }}</h3>
+                            <p class="mb-1"><strong>Organização</strong></p>
+                            <small class="text-muted">Avaliação geral do evento</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-success">{{ "%.1f"|format(media_palestras) }}</h3>
+                            <p class="mb-1"><strong>Palestras</strong></p>
+                            <small class="text-muted">Qualidade do conteúdo</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-warning">{{ "%.1f"|format(media_atendimento) }}</h3>
+                            <p class="mb-1"><strong>Atendimento</strong></p>
+                            <small class="text-muted">Suporte e atendimento</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="text-info">{{ "%.1f"|format(media_futuro) }}</h3>
+                            <p class="mb-1"><strong>Futuro</strong></p>
+                            <small class="text-muted">Intenção de participar novamente</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Pesquisas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">📝 Respostas Detalhadas</h5>
+                <a href="{{ url_for('exportar_pesquisas') }}" class="btn btn-custom">
+                    📥 Exportar para Excel
+                </a>
+            </div>
+            <div class="card-body">
+                {% if pesquisas %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                                <th>CNPJ/Razão Social</th>
+                                <th>Org.</th>
+                                <th>Pal.</th>
+                                <th>Atend.</th>
+                                <th>Futuro</th>
+                                <th>Comentários</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pesquisa in pesquisas %}
+                            <tr>
+                                <td>{{ pesquisa.data_resposta.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    {% if pesquisa.anonima %}
+                                    <span class="badge bg-secondary">Anônima</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Identificada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if pesquisa.anonima %}
+                                    <em class="text-muted">Anônimo</em>
+                                    {% else %}
+                                    <strong>{{ pesquisa.cnpj_identificado|cnpj }}</strong><br>
+                                    <small>{{ pesquisa.razao_social }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ pesquisa.organizacao }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ pesquisa.palestras }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning">{{ pesquisa.atendimento }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ pesquisa.futuro }}</span>
+                                </td>
+                                <td>
+                                    {% if pesquisa.comentarios %}
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            type="button"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalComentario{{ pesquisa.id }}">
+                                        👁️ Ver
+                                    </button>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted mb-3">📋</div>
+                    <h4 class="text-muted">Nenhuma pesquisa respondida ainda</h4>
+                    <p class="text-muted">As respostas da pesquisa pública aparecerão aqui.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modais para Comentários -->
+{% for pesquisa in pesquisas if pesquisa.comentarios %}
+<div class="modal fade" id="modalComentario{{ pesquisa.id }}" tabindex="-1" aria-labelledby="modalComentarioLabel{{ pesquisa.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalComentarioLabel{{ pesquisa.id }}">
+                    💬 Comentário - {{ pesquisa.data_resposta.strftime('%d/%m/%Y %H:%M') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Participante:</strong>
+                    {% if pesquisa.anonima %}
+                    <span class="text-muted">Anônimo</span>
+                    {% else %}
+                    <span>{{ pesquisa.razao_social }} ({{ pesquisa.cnpj_identificado|cnpj }})</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <strong>Avaliações:</strong>
+                    <div class="mt-2">
+                        <span class="badge bg-primary me-2">Organização: {{ pesquisa.organizacao }}/10</span>
+                        <span class="badge bg-success me-2">Palestras: {{ pesquisa.palestras }}/10</span>
+                        <span class="badge bg-warning me-2">Atendimento: {{ pesquisa.atendimento }}/10</span>
+                        <span class="badge bg-info">Futuro: {{ pesquisa.futuro }}/10</span>
+                    </div>
+                </div>
+                <div>
+                    <strong>Comentário:</strong>
+                    <div class="mt-2 p-3 bg-light rounded">
+                        {{ pesquisa.comentarios }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+    .modal-body .bg-light {
+        background-color: #f8f9fa !important;
+        border-left: 4px solid var(--accent-green);
+        font-style: italic;
+    }
+</style>
+
+{% endblock %}

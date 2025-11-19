@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-warning-custom text-dark py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">🎁</span>
+                    Sorteio R$ 20.000
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <strong>Participantes:</strong>
+                        <span class="badge bg-primary-custom ms-2">{{ total_participacoes_20k }}</span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Brindes Disponíveis:</strong>
+                        <span class="badge bg-info-custom ms-2">{{ brindes_20k_disponiveis }}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="revenda_20k" class="form-label">Selecione o Vencedor</label>
+                    <select class="form-select" id="revenda_20k" required>
+                        <option value="">-- Selecione um participante --</option>
+                        {% for revenda in revendas_20k %}
+                        <option value="{{ revenda.cnpj }}" data-razao-social="{{ revenda.razao_social }}">
+                            {{ revenda.razao_social }} - R$ {{ "%.2f"|format(revenda.faturamento_total) }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="responsavel_20k" class="form-label">Responsável pelo Recebimento</label>
+                    <input type="text" class="form-control" id="responsavel_20k" 
+                           placeholder="Nome do responsável que receberá o brinde" required>
+                </div>
+                
+                <button class="btn btn-warning-custom w-100" onclick="realizarSorteio('20k')">
+                    🎯 Realizar Sorteio
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-danger-custom text-white py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">🎁</span>
+                    Sorteio R$ 50.000
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <strong>Participações:</strong>
+                        <span class="badge bg-primary-custom ms-2">{{ total_participacoes_50k }}</span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Brindes Disponíveis:</strong>
+                        <span class="badge bg-info-custom ms-2">{{ brindes_50k_disponiveis }}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="revenda_50k" class="form-label">Selecione o Vencedor</label>
+                    <select class="form-select" id="revenda_50k" required>
+                        <option value="">-- Selecione um participante --</option>
+                        {% for revenda in revendas_50k %}
+                        <option value="{{ revenda.cnpj }}" 
+                                data-razao-social="{{ revenda.razao_social }}"
+                                data-participacoes="{{ revenda.participacoes }}"
+                                data-faturamento="{{ revenda.faturamento_total }}">
+                            {{ revenda.razao_social }} - {{ revenda.participacoes }} participação(ões)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="responsavel_50k" class="form-label">Responsável pelo Recebimento</label>
+                    <input type="text" class="form-control" id="responsavel_50k" 
+                           placeholder="Nome do responsável que receberá o brinde" required>
+                </div>
+                
+                <div class="alert alert-info">
+                    <small>
+                        <strong>📊Regras:</strong> A cada R$ 50.000 em compras = 1 participação<br>
+                        <strong>Exemplo:</strong> R$ 150.000 = 3 participações no sorteio
+                    </small>
+                </div>
+                
+                <button class="btn btn-warning-custom w-100" onclick="realizarSorteio('50k')">
+                    🎯 Realizar Sorteio
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Saldo de Brindes -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-warning-custom text-dark py-3">
+                <h6 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">📦</span>
+                    Saldo de Brindes - R$ 20.000
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if brindes_20k %}
+                <div class="row">
+                    {% for brinde in brindes_20k %}
+                    <div class="col-md-6 mb-2">
+                        <div class="card h-100 border-warning card-hover">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title mb-1">{{ brinde.nome }}</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge {% if brinde.quantidade_disponivel > 0 %}bg-success-custom{% else %}bg-danger-custom{% endif %}">
+                                        {{ brinde.quantidade_disponivel }}/{{ brinde.quantidade_total }}
+                                    </span>
+                                    <small class="text-muted">
+                                        {% if brinde.quantidade_disponivel > 0 %}
+                                        ✅ Disponível
+                                        {% else %}
+                                        ❌ Esgotado
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center">Nenhum brinde cadastrado</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-danger-custom text-white py-3">
+                <h6 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">📦</span>
+                    Saldo de Brindes - R$ 50.000
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if brindes_50k %}
+                <div class="row">
+                    {% for brinde in brindes_50k %}
+                    <div class="col-md-6 mb-2">
+                        <div class="card h-100 border-danger card-hover">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title mb-1">{{ brinde.nome }}</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge {% if brinde.quantidade_disponivel > 0 %}bg-success-custom{% else %}bg-danger-custom{% endif %}">
+                                        {{ brinde.quantidade_disponivel }}/{{ brinde.quantidade_total }}
+                                    </span>
+                                    <small class="text-muted">
+                                        {% if brinde.quantidade_disponivel > 0 %}
+                                        ✅ Disponível
+                                        {% else %}
+                                        ❌ Esgotado
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center">Nenhum brinde cadastrado</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos Sorteios Realizados -->
+<div class="card mt-4 border-0 shadow-sm">
+    <div class="card-header bg-white border-0 py-3">
+        <h5 class="card-title mb-0 d-flex align-items-center">
+            <span class="me-2">🎉</span>
+            Últimos Sorteios Realizados
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if ultimos_sorteios %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Categoria</th>
+                        <th>Revenda Vencedora</th>
+                        <th>Brinde Sorteado</th>
+                        <th>Responsável</th>
+                        <th>Faturamento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sorteio in ultimos_sorteios %}
+                    <tr>
+                        <td>{{ sorteio.data_sorteio.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <span class="badge {% if sorteio.tipo_brinde == '50k' %}bg-danger-custom{% else %}bg-warning-custom{% endif %}">
+                                R$ {{ sorteio.tipo_brinde }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>{{ sorteio.razao_social_vencedor }}</strong><br>
+                            <small class="text-muted">{{ sorteio.cnpj_vencedor|cnpj }}</small>
+                        </td>
+                        <td>
+                            {% if sorteio.brinde %}
+                            <strong>{{ sorteio.brinde.nome }}</strong>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ sorteio.responsavel_recebimento }}</td>
+                        <td>R$ {{ sorteio.valor_acumulado_revenda|currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center">Nenhum sorteio realizado ainda</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary-custom text-white py-3">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="me-2">🎯</span>
+                    Confirmar Sorteio
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+                <div id="participacoesInfo" class="alert alert-info mt-3" style="display: none;">
+                    <small>
+                        <strong>📊 Informações de Participação:</strong><br>
+                        <span id="participacoesText"></span>
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary-custom" id="confirmSorteio">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Resultado -->
+<div class="modal fade" id="resultModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success-custom text-white py-3">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="me-2">🎉</span>
+                    Sorteio Realizado!
+                </h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="confetti"></div>
+                <h4 class="text-primary-custom mb-3" id="vencedorNome"></h4>
+                
+                <div class="card mb-3 border-success">
+                    <div class="card-body">
+                        <h5 class="card-title text-success" id="brindeNome"></h5>
+                        <p class="card-text" id="brindeDescricao"></p>
+                    </div>
+                </div>
+                
+                <div class="row text-start">
+                    <div class="col-md-6">
+                        <p><strong>Categoria:</strong> <span id="sorteioCategoria"></span></p>
+                        <p><strong>Faturamento:</strong> <span id="vencedorFaturamento"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Responsável:</strong> <span id="vencedorResponsavel"></span></p>
+                        <p><strong>Participações Restantes:</strong> <span id="participacoesRestantes"></span></p>
+                    </div>
+                </div>
+                
+                <div id="pedidosQualificadores" class="mt-3" style="display: none;">
+                    <h6 class="text-start">📋 Pedidos Qualificadores:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Pedido</th>
+                                    <th>Valor</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pedidosList">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <button class="btn btn-success-custom btn-lg mt-3" onclick="fecharResultado()">
+                    ✅ Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resultado do Sorteio (para aparecer na página) -->
+<div id="resultadoSorteio" class="mt-4"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentSorteioData = null;
+
+function realizarSorteio(tipo) {
+    const revendaSelect = document.getElementById(`revenda_${tipo}`);
+    const responsavelInput = document.getElementById(`responsavel_${tipo}`);
+    
+    if (!revendaSelect.value) {
+        alert('Por favor, selecione uma revenda para o sorteio');
+        return;
+    }
+    if (!responsavelInput.value) {
+        alert('Por favor, informe o responsável pelo recebimento do brinde');
+        return;
+    }
+    
+    const selectedRevenda = revendaSelect.options[revendaSelect.selectedIndex];
+    const participacoes = selectedRevenda.getAttribute('data-participacoes') || '1';
+    const faturamento = selectedRevenda.getAttribute('data-faturamento') || '0';
+    
+    currentSorteioData = {
+        tipo: tipo,
+        cnpj_vencedor: revendaSelect.value,
+        responsavel: responsavelInput.value,
+        revenda_nome: selectedRevenda.getAttribute('data-razao-social'),
+        participacoes: participacoes,
+        faturamento: faturamento
+    };
+    
+    // Mostrar modal de confirmação
+    let confirmMessage = `
+        <strong>Confirmar sorteio de R$ ${tipo}?</strong><br><br>
+        <strong>Revenda:</strong> ${currentSorteioData.revenda_nome}<br>
+        <strong>Responsável:</strong> ${currentSorteioData.responsavel}<br>
+        <strong>Faturamento Total:</strong> R$ ${parseFloat(currentSorteioData.faturamento).toLocaleString('pt-BR', {minimumFractionDigits: 2})}<br><br>
+        <span class="text-info">Um brinde será sorteado automaticamente entre os disponíveis.</span>
+    `;
+    
+    document.getElementById('confirmMessage').innerHTML = confirmMessage;
+    
+    // Mostrar informações de participações para 50k
+    const participacoesInfo = document.getElementById('participacoesInfo');
+    const participacoesText = document.getElementById('participacoesText');
+    
+    if (tipo === '50k') {
+        participacoesText.innerHTML = `
+            <strong>Participações:</strong> ${currentSorteioData.participacoes}<br>
+            <strong>Regra:</strong> Cada R$ 50.000 = 1 participação<br>
+            <strong>Após este sorteio:</strong> ${currentSorteioData.participacoes - 1} participação(ões) restante(s)
+        `;
+        participacoesInfo.style.display = 'block';
+    } else {
+        participacoesInfo.style.display = 'none';
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    modal.show();
+}
+
+// Configurar botão de confirmação
+document.getElementById('confirmSorteio').addEventListener('click', function() {
+    const formData = new FormData();
+    formData.append('tipo_brinde', currentSorteioData.tipo);
+    formData.append('cnpj_vencedor', currentSorteioData.cnpj_vencedor);
+    formData.append('responsavel', currentSorteioData.responsavel);
+    
+    fetch('/realizar-sorteio', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+        confirmModal.hide();
+        
+        if (data.success) {
+            mostrarResultado(data);
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao realizar sorteio');
+    });
+});
+
+function mostrarResultado(data) {
+    document.getElementById('vencedorNome').textContent = data.vencedor.razao_social;
+    document.getElementById('vencedorResponsavel').textContent = currentSorteioData.responsavel;
+    document.getElementById('sorteioCategoria').textContent = `R$ ${currentSorteioData.tipo}`;
+    document.getElementById('vencedorFaturamento').textContent = `R$ ${parseFloat(data.vencedor.faturamento).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    
+    document.getElementById('brindeNome').textContent = data.brinde.nome;
+    document.getElementById('brindeDescricao').textContent = data.brinde.descricao || '';
+    
+    // Mostrar participações restantes
+    const participacoesRestantes = document.getElementById('participacoesRestantes');
+    if (currentSorteioData.tipo === '50k') {
+        const restantes = data.participacoes_restantes;
+        participacoesRestantes.textContent = `${restantes} participação(ões)`;
+        if (restantes > 0) {
+            participacoesRestantes.className = 'text-success fw-bold';
+        } else {
+            participacoesRestantes.className = 'text-warning fw-bold';
+        }
+    } else {
+        participacoesRestantes.textContent = '1 participação (regra fixa)';
+        participacoesRestantes.className = 'text-info';
+    }
+    
+    // Mostrar pedidos qualificadores se existirem
+    const pedidosSection = document.getElementById('pedidosQualificadores');
+    const pedidosList = document.getElementById('pedidosList');
+    
+    if (data.pedidos_qualificadores && data.pedidos_qualificadores.length > 0) {
+        pedidosList.innerHTML = '';
+        data.pedidos_qualificadores.forEach(pedido => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${pedido.numero_pedido}</td>
+                <td>R$ ${parseFloat(pedido.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td>${pedido.data}</td>
+            `;
+            pedidosList.appendChild(row);
+        });
+        pedidosSection.style.display = 'block';
+    } else {
+        pedidosSection.style.display = 'none';
+    }
+    
+    const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+    resultModal.show();
+}
+
+function fecharResultado() {
+    const resultModal = bootstrap.Modal.getInstance(document.getElementById('resultModal'));
+    resultModal.hide();
+    location.reload();
+}
+
+// Atualizar informações quando selecionar uma revenda 50k
+document.getElementById('revenda_50k').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    if (selectedOption.value) {
+        const participacoes = selectedOption.getAttribute('data-participacoes');
+        const faturamento = selectedOption.getAttribute('data-faturamento');
+        
+        // Você pode adicionar aqui alguma lógica para mostrar informações extras
+        // sobre as participações quando o usuário seleciona uma revenda
+    }
+});
+</script>
+
+<style>
+.confetti {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    background: 
+        radial-gradient(circle at 20% 20%, #ff9999, transparent 20%),
+        radial-gradient(circle at 80% 20%, #99ff99, transparent 20%),
+        radial-gradient(circle at 40% 70%, #9999ff, transparent 20%),
+        radial-gradient(circle at 60% 70%, #ffff99, transparent 20%);
+    margin-bottom: 20px;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.table-sm th,
+.table-sm td {
+    padding: 0.3rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

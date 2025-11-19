@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Card Principal de Importação -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary-custom text-white py-3">
+                <h4 class="card-title mb-0">📥 Importar Lista de Clientes</h4>
+            </div>
+            <div class="card-body">
+                <!-- Instruções -->
+                <div class="alert alert-info border-0">
+                    <h5 class="d-flex align-items-center">
+                        <span class="me-2">📋</span>
+                        Instruções para Importação:
+                    </h5>
+                    <ul class="mb-0">
+                        <li>O arquivo deve ser em formato Excel (.xlsx)</li>
+                        <li>Deve conter as colunas: <strong>CNPJ, RAZÃO SOCIAL, RESPONSÁVEL, CONSULTOR, DIREITO IMAGEM</strong></li>
+                        <li>Formato do CNPJ: <strong>00.000.000/0000-00</strong> ou <strong>00000000000000</strong></li>
+                        <li>Para "DIREITO IMAGEM": use <strong>SIM</strong> ou <strong>NÃO</strong> (ou TRUE/FALSE, 1/0)</li>
+                        <li>O arquivo não deve conter fórmulas, apenas valores</li>
+                        <li>Clientes com CNPJ já existente serão atualizados</li>
+                    </ul>
+                </div>
+
+                <!-- Exemplo de Estrutura -->
+                <div class="mb-4">
+                    <h5 class="text-primary-custom mb-3">📊 Exemplo da Estrutura do Arquivo:</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="bg-primary-custom text-white">CNPJ</th>
+                                    <th class="bg-primary-custom text-white">RAZÃO SOCIAL</th>
+                                    <th class="bg-primary-custom text-white">RESPONSÁVEL</th>
+                                    <th class="bg-primary-custom text-white">CONSULTOR</th>
+                                    <th class="bg-primary-custom text-white">DIREITO IMAGEM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-monospace">12.345.678/0001-90</td>
+                                    <td>Empresa ABC Ltda</td>
+                                    <td>João Silva</td>
+                                    <td>Maria Santos</td>
+                                    <td><span class="badge bg-success">SIM</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-monospace">98.765.432/0001-10</td>
+                                    <td>Comércio DEF S/A</td>
+                                    <td>Pedro Oliveira</td>
+                                    <td>Ana Costa</td>
+                                    <td><span class="badge bg-danger">NÃO</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-monospace">11.222.333/0001-44</td>
+                                    <td>Indústria GHI ME</td>
+                                    <td>Carlos Souza</td>
+                                    <td>Paula Lima</td>
+                                    <td><span class="badge bg-success">SIM</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Legenda Direito de Imagem -->
+                    <div class="alert alert-warning border-0 mt-3">
+                        <h6 class="mb-2">📝 Sobre o Direito de Imagem:</h6>
+                        <p class="mb-1">Valores aceitos para a coluna "DIREITO IMAGEM":</p>
+                        <ul class="mb-0">
+                            <li><strong>SIM</strong> - Cliente autorizou uso de imagem</li>
+                            <li><strong>NÃO</strong> - Cliente não autorizou uso de imagem</li>
+                            <li>Também aceita: <code>TRUE/FALSE</code>, <code>1/0</code>, <code>YES/NO</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Botão de Download do Template -->
+                <div class="text-center mb-4">
+                    <a href="/download-template" class="btn btn-success-custom btn-lg">
+                        📋 Baixar Template de Exemplo
+                    </a>
+                    <small class="d-block text-muted mt-2">Use este template para garantir o formato correto</small>
+                </div>
+
+                <!-- Formulário de Upload -->
+                <form method="POST" enctype="multipart/form-data" id="uploadForm" class="p-4 border rounded bg-light">
+                    <div class="mb-4">
+                        <label for="file" class="form-label fw-bold text-primary-custom">Selecione o arquivo Excel:</label>
+                        <input type="file" class="form-control form-control-lg" id="file" name="file" accept=".xlsx, .xls" required>
+                        <div class="form-text">Formatos aceitos: .xlsx, .xls (Máx: 10MB)</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <button type="submit" class="btn btn-primary-custom btn-lg px-4" id="submitBtn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            🚀 Importar Clientes
+                        </button>
+                        
+                        <a href="/" class="btn btn-outline-secondary btn-lg ms-2">
+                            ← Voltar ao Dashboard
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Resultado da Importação -->
+                <div id="result" class="mt-4"></div>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="row mt-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 bg-light card-hover">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary-custom">{{ total_clientes|default(0) }}</h3>
+                        <p class="text-muted mb-0">Clientes Cadastrados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 bg-light card-hover">
+                    <div class="card-body text-center">
+                        <h3 class="text-success">{{ total_checkins|default(0) }}</h3>
+                        <p class="text-muted mb-0">Check-ins Realizados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 bg-light card-hover">
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-info">R$ {{ "{:,.2f}".format(total_vendas|default(0)).replace(",", "X").replace(".", ",").replace("X", ".") }}</h3>
+                        <p class="text-muted mb-0">Total em Vendas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 bg-light card-hover">
+                    <div class="card-body text-center">
+                        <h3 class="text-info">{{ consultores_count|default(0) }}</h3>
+                        <p class="text-muted mb-0">Consultores</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Clientes Importados -->
+        <div class="card mt-4 border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0 text-primary-custom">📋 Últimos Clientes Importados</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">CNPJ</th>
+                                <th class="border-0">Razão Social</th>
+                                <th class="border-0">Responsável</th>
+                                <th class="border-0">Consultor</th>
+                                <th class="border-0">Direito Imagem</th>
+                                <th class="border-0">Status Check-in</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaClientes">
+                            <!-- JavaScript vai preencher aqui -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="/exportar-clientes" class="btn btn-outline-primary-custom btn-lg">
+                        📥 Exportar Lista Completa para Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Mantenho o mesmo JavaScript do arquivo original, apenas ajustando classes CSS se necessário
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    const resultDiv = document.getElementById('result');
+    
+    // Validar tamanho do arquivo
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];
+    
+    if (file && file.size > 10 * 1024 * 1024) {
+        resultDiv.innerHTML = `<div class="alert alert-danger border-0">❌ O arquivo é muito grande. Tamanho máximo: 10MB</div>`;
+        return;
+    }
+    
+    // Mostrar loading
+    spinner.classList.remove('d-none');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Importando...';
+    
+    const formData = new FormData(this);
+    
+    fetch('/importar-clientes', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.text();
+    })
+    .then(message => {
+        resultDiv.innerHTML = `<div class="alert alert-success border-0">
+            <h5 class="d-flex align-items-center">
+                <span class="me-2">✅</span>
+                Importação Concluída!
+            </h5>
+            <p class="mb-0">${message}</p>
+        </div>`;
+        carregarUltimosClientes();
+        
+        // Limpar formulário
+        document.getElementById('file').value = '';
+        document.querySelector('label[for="file"]').textContent = 'Selecione o arquivo Excel:';
+    })
+    .catch(error => {
+        resultDiv.innerHTML = `<div class="alert alert-danger border-0">
+            <h5 class="d-flex align-items-center">
+                <span class="me-2">❌</span>
+                Erro na Importação
+            </h5>
+            <p class="mb-0">${error.message}</p>
+        </div>`;
+    })
+    .finally(() => {
+        // Esconder loading
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '🚀 Importar Clientes';
+    });
+});
+
+function carregarUltimosClientes() {
+    fetch('/api/ultimos-clientes')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro ao carregar clientes');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const tbody = document.getElementById('listaClientes');
+        if (data && data.length > 0) {
+            tbody.innerHTML = data.map(cliente => `
+                <tr>
+                    <td class="font-monospace">${cliente.cnpj}</td>
+                    <td><strong>${cliente.razao_social}</strong></td>
+                    <td>${cliente.responsavel}</td>
+                    <td><span class="badge bg-info-custom">${cliente.consultor}</span></td>
+                    <td>
+                        ${cliente.direito_imagem ? 
+                            '<span class="badge bg-success-custom">✅ Autorizado</span>' : 
+                            '<span class="badge bg-danger">❌ Não Autorizado</span>'
+                        }
+                    </td>
+                    <td>
+                        ${cliente.checkin_realizado ? 
+                            '<span class="badge bg-success-custom">✅ Check-in Realizado</span>' : 
+                            '<span class="badge bg-secondary">⏳ Pendente</span>'
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                        <div class="py-3">
+                            <div class="display-4 text-muted mb-3">👥</div>
+                            <p class="mb-2 fs-5">Nenhum cliente importado ainda</p>
+                            <small class="text-muted">Use o formulário acima para importar sua lista de clientes</small>
+                        </div>
+                    </td>
+                </tr>`;
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao carregar clientes:', error);
+        const tbody = document.getElementById('listaClientes');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-danger py-4">
+                    <span class="me-2">⚠️</span>
+                    Erro ao carregar lista de clientes
+                </td>
+            </tr>`;
+    });
+}
+
+// Preview do nome do arquivo
+document.getElementById('file').addEventListener('change', function(e) {
+    const fileName = this.files[0]?.name || 'Nenhum arquivo selecionado';
+    const fileSize = this.files[0] ? ` (${(this.files[0].size / 1024 / 1024).toFixed(2)} MB)` : '';
+    const label = this.previousElementSibling;
+    label.textContent = `Arquivo selecionado: ${fileName}${fileSize}`;
+    
+    // Validar extensão
+    if (this.files[0] && !this.files[0].name.match(/\.(xlsx|xls)$/i)) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<div class="alert alert-warning border-0">
+            ⚠️ Apenas arquivos Excel (.xlsx, .xls) são permitidos
+        </div>`;
+        this.value = '';
+        label.textContent = 'Selecione o arquivo Excel:';
+    }
+});
+
+// Carregar lista de clientes ao abrir a página
+document.addEventListener('DOMContentLoaded', function() {
+    carregarUltimosClientes();
+});
+
+// Drag and drop functionality
+const fileInput = document.getElementById('file');
+const uploadForm = document.getElementById('uploadForm');
+
+uploadForm.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('border-primary', 'bg-light');
+});
+
+uploadForm.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-primary', 'bg-light');
+});
+
+uploadForm.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-primary', 'bg-light');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        
+        // Disparar evento change para atualizar o label
+        const event = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(event);
+    }
+});
+</script>
+
+<style>
+.bg-info-custom {
+    background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-olive) 100%) !important;
+}
+
+.btn-success-custom {
+    background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-olive) 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+}
+
+.btn-success-custom:hover {
+    background: linear-gradient(135deg, var(--accent-olive) 0%, var(--accent-green) 100%);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary-custom {
+    border-color: var(--primary-dark);
+    color: var(--primary-dark);
+}
+
+.btn-outline-primary-custom:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875em;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+</style>
+{% endblock %}

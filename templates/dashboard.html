@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Header do Dashboard -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary-custom text-white">
+            <div class="card-body text-center py-4">
+                <h1 class="display-5 mb-2">📊 Dashboard Exclusivo</h1>
+                <p class="lead mb-0">Dados detalhados do R.O Experience 2025 - Atualizado em tempo real</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Faturamento em Tempo Real -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card stat-card text-white bg-success-custom card-hover">
+            <div class="card-body py-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4 class="card-title mb-2">💰 Faturamento Total em Tempo Real</h4>
+                        <h1 class="card-text mb-2 display-4" id="faturamentoRealTime">R$ {{ total_vendas|currency }}</h1>
+                        <small class="opacity-75">
+                            Atualizado em: <span id="ultimaAtualizacao">{{ now.strftime('%H:%M:%S') }}</span> | 
+                            <span id="statusConexao">🟢 Conectado</span>
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="display-1 opacity-50">📈</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas de Performance -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">🎯 Eficiência do Evento</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3 class="text-primary">{{ "%.1f"|format((total_checkins/total_clientes)*100) if total_clientes > 0 else 0 }}%</h3>
+                        <small class="text-muted">Taxa de Check-in</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ "%.0f"|format((revendas_presentes/revendas_unicas)*100) if revendas_unicas > 0 else 0 }}%</h3>
+                        <small class="text-muted">Presença Revendas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">📦 Capacidade do Sistema</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h4 class="text-info">{{ total_clientes }}</h4>
+                        <small class="text-muted">Clientes</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-success">{{ revendas_unicas }}</h4>
+                        <small class="text-muted">Revendas</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-primary">{{ consultores_count }}</h4>
+                        <small class="text-muted">Consultores</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dados Detalhados em Cards -->
+<div class="row mb-4">
+    <!-- Check-ins Detalhados -->
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">✅ Check-ins</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2 class="text-success">{{ total_checkins }}/{{ total_clientes }}</h2>
+                    <small class="text-muted">Realizados / Total</small>
+                </div>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-success" 
+                         style="width: {{ (total_checkins/total_clientes)*100 if total_clientes > 0 else 0 }}%">
+                        {{ "%.0f"|format((total_checkins/total_clientes)*100) if total_clientes > 0 else 0 }}%
+                    </div>
+                </div>
+                <small class="text-muted">
+                    {{ total_clientes - total_checkins }} check-ins pendentes
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revendas Presentes -->
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">🏢 Revendas</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2 class="text-primary">{{ revendas_presentes }}/{{ revendas_unicas }}</h2>
+                    <small class="text-muted">Presentes / Cadastradas</small>
+                </div>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-primary" 
+                         style="width: {{ (revendas_presentes/revendas_unicas)*100 if revendas_unicas > 0 else 0 }}%">
+                        {{ "%.0f"|format((revendas_presentes/revendas_unicas)*100) if revendas_unicas > 0 else 0 }}%
+                    </div>
+                </div>
+                <small class="text-muted">
+                    {{ revendas_unicas - revendas_presentes }} revendas ausentes
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Financeira -->
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">💰 Performance</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <h4 class="text-warning" id="ticketMedioDash">R$ 0</h4>
+                    <small class="text-muted">Ticket Médio</small>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <h4 class="text-info" id="vendasHojeDash">0</h4>
+                    <small class="text-muted">Vendas Hoje</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas em Tempo Real -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h6 class="mb-0">🔄 Métricas em Tempo Real</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h4 class="text-primary mb-1" id="estoqueTotal">0</h4>
+                                <small class="text-muted">Itens em Estoque</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h4 class="text-success mb-1" id="brindesSorteadosDash">0</h4>
+                                <small class="text-muted">Brindes Sorteados</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h4 class="text-info mb-1" id="totalPedidosDash">0</h4>
+                                <small class="text-muted">Total Pedidos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h4 class="text-warning mb-1" id="checkinsUltimaHora">0</h4>
+                                <small class="text-muted">Check-ins (1h)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h4 class="text-danger mb-1" id="vendasUltimaHora">0</h4>
+                                <small class="text-muted">Vendas (1h)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h4 class="text-purple mb-1" id="sorteiosUltimaHora">0</h4>
+                                <small class="text-muted">Sorteios (1h)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botão Voltar -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-primary-custom btn-lg">
+            🏠 Voltar para Página Inicial
+        </a>
+    </div>
+</div>
+
+<script>
+// Manter TODO o JavaScript original aqui
+// Atualização em tempo real do faturamento
+function atualizarFaturamentoRealTime() {
+    fetch('/api/total-vendas')
+    .then(response => response.json())
+    .then(data => {
+        const elemento = document.getElementById('faturamentoRealTime');
+        const valorAtual = parseFloat(elemento.textContent.replace('R$ ', '').replace('.', '').replace(',', '.'));
+        const valorNovo = data.total_vendas;
+        
+        // Animação suave
+        if (valorAtual !== valorNovo) {
+            elemento.style.color = '#73ff93';
+            setTimeout(() => elemento.style.color = 'white', 1000);
+        }
+        
+        elemento.textContent = 'R$ ' + valorNovo.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('ultimaAtualizacao').textContent = new Date().toLocaleTimeString('pt-BR');
+    })
+    .catch(error => {
+        document.getElementById('statusConexao').innerHTML = '🔴 Offline';
+        document.getElementById('statusConexao').style.color = '#dc3545';
+    });
+}
+
+// Carregar todas as estatísticas
+function carregarEstatisticasDashboard() {
+    // Ticket médio
+    fetch('/api/ticket-medio')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('ticketMedioDash').textContent = 
+            'R$ ' + (data.media || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    });
+
+    // Vendas hoje
+    fetch('/api/vendas-hoje')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('vendasHojeDash').textContent = data.total || 0;
+    });
+
+    // Estoque total
+    fetch('/api/estoque-atual')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('estoqueTotal').textContent = data.length || 0;
+    });
+
+    // Brindes sorteados
+    fetch('/api/brindes-sorteados')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('brindesSorteadosDash').textContent = data.total || 0;
+    });
+
+    // Total de pedidos
+    fetch('/api/total-pedidos')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('totalPedidosDash').textContent = data.total || 0;
+    });
+
+    // Métricas da última hora
+    fetch('/api/metricas-ultima-hora')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('checkinsUltimaHora').textContent = data.checkins || 0;
+        document.getElementById('vendasUltimaHora').textContent = data.vendas || 0;
+        document.getElementById('sorteiosUltimaHora').textContent = data.sorteios || 0;
+    });
+}
+
+// Inicializar dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    atualizarFaturamentoRealTime();
+    carregarEstatisticasDashboard();
+    
+    // Atualizações automáticas
+    setInterval(atualizarFaturamentoRealTime, 3000); // 3 segundos
+    setInterval(carregarEstatisticasDashboard, 10000); // 10 segundos
+});
+</script>
+
+<style>
+/* Manter TODO o CSS adicional original aqui */
+.stat-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.bg-success-custom {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.display-4 {
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.h1, .h2, .h3, .h4 {
+    font-weight: 700;
+}
+</style>
+{% endblock %}

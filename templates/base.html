@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R.O Experience 2025</title>
+    
+    <!-- Bootstrap local -->
+    <link href="{{ url_for('static', filename='js/libs/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    
+    <!-- Fontes locais -->
+    <style>
+        :root {
+            --primary-dark: #043333;
+            --primary-light: #2c5c2c;
+            --accent-green: #64941c;
+            --accent-yellow: #cef005;
+            --accent-olive: #426d23;
+        }
+        
+        .bg-primary-custom {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%) !important;
+        }
+        
+        .bg-success-custom {
+            background: linear-gradient(135deg, var(--accent-olive) 0%, var(--accent-green) 100%) !important;
+        }
+        
+        .bg-warning-custom {
+            background: linear-gradient(135deg, var(--accent-yellow) 0%, #e6ff00 100%) !important;
+            color: #333 !important;
+        }
+        
+        .bg-info-custom {
+            background: linear-gradient(135deg, #2c5c2c 0%, #426d23 100%) !important;
+        }
+
+        .bg-danger-custom {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-right: auto;
+        }
+        
+        .experience-text {
+            font-family: 'Brush Script MT', cursive;
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--accent-yellow) 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .ro-text {
+            font-family: 'Arial', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .year-text {
+            font-family: 'Arial', sans-serif;
+            font-weight: 300;
+            font-size: 1.4rem;
+            color: var(--accent-yellow);
+            margin-left: 5px;
+        }
+        
+        .stat-card {
+            border-radius: 15px;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .menu-card {
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: 0 4px 15px rgba(100, 148, 28, 0.2);
+        }
+        
+        .btn-custom {
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-olive) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-custom:hover {
+            background: linear-gradient(135deg, var(--accent-olive) 0%, var(--accent-green) 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            height: 50px;
+            width: auto;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .logo-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logo-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .title-content {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        /* Novos estilos para o menu de usuário */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-yellow) 0%, var(--accent-green) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .nav-divider {
+            border-left: 1px solid rgba(255,255,255,0.3);
+            height: 30px;
+            margin: 0 10px;
+        }
+
+        /* Estilo para itens de menu desabilitados */
+        .dropdown-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .menu-disabled {
+            color: #6c757d !important;
+            cursor: not-allowed;
+        }
+
+        /* Estilos para o rodapé */
+        .footer-logo {
+            height: 40px;
+            width: auto;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-logo:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .brand-section {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .title-section {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            
+            .navbar-brand {
+                margin-right: 0;
+                text-align: center;
+            }
+            
+            .experience-text {
+                font-size: 1.8rem;
+            }
+            
+            .ro-text {
+                font-size: 1.5rem;
+            }
+            
+            .year-text {
+                font-size: 1.2rem;
+            }
+
+            .footer-content {
+                text-align: center;
+            }
+
+            .footer-logo-container {
+                text-align: center;
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title-content {
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+            
+            .nav-divider {
+                display: none;
+            }
+            
+            .experience-text {
+                font-size: 1.6rem;
+            }
+            
+            .ro-text {
+                font-size: 1.3rem;
+            }
+            
+            .year-text {
+                font-size: 1.1rem;
+                margin-left: 0;
+            }
+        }
+
+        /* Estilos para a busca de veículos no footer */
+        .busca-veiculo-container {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        #resultadoBuscaVeiculo {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+        }
+
+        #resultadoBuscaVeiculo::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #resultadoBuscaVeiculo::-webkit-scrollbar-track {
+            background: #444;
+        }
+
+        #resultadoBuscaVeiculo::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        #resultadoBuscaVeiculo::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .busca-veiculo-container {
+                max-width: 250px;
+                margin-top: 15px;
+            }
+            
+            .footer-content {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            
+            .footer-logo-container {
+                text-align: center !important;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+
+<script>
+    // Função para buscar veículo por placa
+    function buscarVeiculo() {
+        const placa = document.getElementById('buscaPlaca').value.trim();
+        const resultadoDiv = document.getElementById('resultadoBuscaVeiculo');
+        
+        if (!placa) {
+            resultadoDiv.innerHTML = '<small class="text-warning">Digite uma placa para buscar</small>';
+            return;
+        }
+        
+        // Mostrar loading
+        resultadoDiv.innerHTML = '<small class="text-white-50">🔍 Buscando...</small>';
+        
+        fetch(`/api/buscar-veiculo/${encodeURIComponent(placa)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.veiculos && data.veiculos.length > 0) {
+                        let html = '<div class="text-start">';
+                        data.veiculos.forEach(veiculo => {
+                            html += `
+                                <div class="border-bottom border-secondary pb-1 mb-1">
+                                    <small class="text-success fw-bold">🚗 ${veiculo.placa_veiculo}</small><br>
+                                    <small><strong>Revenda:</strong> ${veiculo.razao_social}</small><br>
+                                    <small><strong>Responsável:</strong> ${veiculo.responsavel}</small><br>
+                                    <small><strong>CNPJ:</strong> ${veiculo.cnpj}</small><br>
+                                    <small><strong>Check-in:</strong> ${veiculo.horario_checkin}</small>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        resultadoDiv.innerHTML = html;
+                    } else {
+                        resultadoDiv.innerHTML = '<small class="text-warning">Nenhum veículo encontrado</small>';
+                    }
+                } else {
+                    resultadoDiv.innerHTML = `<small class="text-warning">${data.message}</small>`;
+                }
+            })
+            .catch(error => {
+                console.error('Erro na busca:', error);
+                resultadoDiv.innerHTML = '<small class="text-danger">Erro na busca</small>';
+            });
+    }
+    
+    // Buscar ao pressionar Enter
+    document.getElementById('buscaPlaca').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            buscarVeiculo();
+        }
+    });
+    
+    // Limpar resultados quando o campo for editado
+    document.getElementById('buscaPlaca').addEventListener('input', function() {
+        const resultadoDiv = document.getElementById('resultadoBuscaVeiculo');
+        resultadoDiv.innerHTML = '';
+    });
+    
+    // Máscara para placa (opcional)
+    document.getElementById('buscaPlaca').addEventListener('input', function(e) {
+        let value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        
+        if (value.length > 3) {
+            value = value.slice(0, 3) + '-' + value.slice(3, 7);
+        }
+        
+        this.value = value;
+    });
+</script>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+        <div class="container">
+            <div class="nav-content">
+                <div class="brand-section">
+                    <!-- Logo02.png no topo à esquerda -->
+                    <button class="logo-btn" onclick="window.location.href='/'">
+                        <img src="{{ url_for('static', filename='images/logo02.png') }}" alt="Experience 2025" class="logo">
+                    </button>
+                </div>
+                
+              
+
+                <!-- Menu do Usuário -->
+                <div class="user-menu">
+                    {% if session.usuario_id %}
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ session.nome[0]|upper if session.nome else 'U' }}
+                        </div>
+                        <div>
+                            <div class="fw-semibold">{{ session.nome }}</div>
+                            <div class="small opacity-75">
+                                {{ session.username }}
+                                {% if session.nivel_acesso == 'admin' %}
+                                <span class="admin-badge ms-1">ADMIN</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-divider"></div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            🛠️ Menu
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <!-- Menu Principal com verificação de permissões -->
+                            {% if tem_permissao('dashboard') %}
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard') }}">📊 Dashboard</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">📊 Dashboard <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            
+                            {% if tem_permissao('checkin') %}
+                            <li><a class="dropdown-item" href="{{ url_for('checkin') }}">✅ Check-in</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">✅ Check-in <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            
+                            {% if tem_permissao('vendas') %}
+                            <li><a class="dropdown-item" href="{{ url_for('registrar_venda') }}">💰 Vendas</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">💰 Vendas <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            
+                            {% if tem_permissao('estoque') %}
+                            <li><a class="dropdown-item" href="{{ url_for('estoque') }}">📦 Estoque</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">📦 Estoque <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            
+                            {% if tem_permissao('sorteio') %}
+                            <li><a class="dropdown-item" href="{{ url_for('sorteio') }}">🎁 Sorteio</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">🎁 Sorteio <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            
+                            {% if tem_permissao('entrega_brindes') %}
+                            <li><a class="dropdown-item" href="{{ url_for('confirmar_entrega_page') }}">✅ Confirmar Entrega</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">✅ Confirmar Entrega <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            
+                            {% if tem_permissao('relatorios') %}
+                            <li><a class="dropdown-item" href="{{ url_for('relatorios') }}">📈 Relatórios</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">📈 Relatórios <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            
+                            <!-- Divisor para Admin -->
+                            {% if session.nivel_acesso == 'admin' %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header text-danger">🔧 Administração</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('gestao_usuarios') }}">👥 Gestão de Usuários</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logs_auditoria') }}">📊 Logs de Auditoria</a></li>
+                            
+                            {% if tem_permissao('brindes') %}
+                            <li><a class="dropdown-item" href="{{ url_for('brindes') }}">🎯 Gestão de Brindes</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item menu-disabled">🎯 Gestão de Brindes <small class="text-muted">(sem permissão)</small></a></li>
+                            {% endif %}
+                            {% endif %}
+                            
+                            <!-- Divisor para Configurações -->
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('alterar_senha') }}">🔐 Alterar Senha</a></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">🚪 Sair</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light">
+                        🔐 Entrar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Alertas Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        {% if category == 'error' %}
+                            ❌ {{ message }}
+                        {% else %}
+                            ✅ {{ message }}
+                        {% endif %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-4 footer-content">
+                    <h6>🎯 R.O Experience 2025</h6>
+                    <p class="mb-0 small">Sistema de gestão Experience</p>
+                    <p class="mb-0 small">Desenvolvido por Suporte à Revenda.</p>
+                    <p class="mb-0 small mt-2">
+                        {% if session.usuario_id %}
+                            Logado como: <strong>{{ session.nome }}</strong> | 
+                            <a href="{{ url_for('logout') }}" class="text-warning text-decoration-none">Sair</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="text-warning text-decoration-none">Área Administrativa</a>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <!-- Campo de Busca de Veículos -->
+                    <div class="busca-veiculo-container">
+                        <label class="form-label small text-white-50 mb-1">🔍 Buscar Veículo por Placa</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" id="buscaPlaca" 
+                                   placeholder="Digite a placa..." maxlength="8"
+                                   style="font-size: 0.8rem;">
+                            <button class="btn btn-outline-warning btn-sm" type="button" onclick="buscarVeiculo()">
+                                Buscar
+                            </button>
+                        </div>
+                        <div id="resultadoBuscaVeiculo" class="mt-2"></div>
+                    </div>
+                </div>
+                <div class="col-md-4 footer-logo-container text-md-end">
+                    <!-- Logo.png no rodapé à direita -->
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Experience 2025" class="footer-logo">
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS local -->
+    <script src="{{ url_for('static', filename='js/libs/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

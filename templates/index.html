@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Header Bem-vindo -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary-custom text-white">
+            <div class="card-body text-center py-5">
+                <h1 class="display-5 mb-3">👋 Bem-vindo, {{ session.nome }}!</h1>
+                <p class="lead mb-2">Sistema R.O Experience 2025</p>
+                <small class="opacity-75">Selecione abaixo o módulo desejado</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Menu Principal -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-4">
+                <h4 class="mb-0 text-primary-custom text-center">🏆 Módulos do Sistema</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <!-- Dashboard (se tiver permissão) -->
+                    {% if tem_permissao('dashboard') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('dashboard') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-danger mb-2">📊</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Dashboard</h6>
+                                <small class="menu-desc text-muted">Estatísticas completas</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Check-in -->
+                    {% if tem_permissao('checkin') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('checkin') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-success mb-2">✅</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Check-in</h6>
+                                <small class="menu-desc text-muted">Registrar presença</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Vendas -->
+                    {% if tem_permissao('vendas') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('registrar_venda') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-warning mb-2">💰</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Vendas</h6>
+                                <small class="menu-desc text-muted">Registrar pedidos</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Estoque -->
+                    {% if tem_permissao('estoque') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('estoque') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-info mb-2">📦</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Estoque</h6>
+                                <small class="menu-desc text-muted">Gerenciar inventário</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Sorteio -->
+                    {% if tem_permissao('sorteio') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('sorteio') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-primary mb-2">🎁</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Sorteio</h6>
+                                <small class="menu-desc text-muted">Realizar sorteios</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Relatórios -->
+                    {% if tem_permissao('relatorios') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('relatorios') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-secondary mb-2">📈</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Relatórios</h6>
+                                <small class="menu-desc text-muted">Dados e exportações</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Importação -->
+                    {% if tem_permissao('importacao') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('importar_clientes') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-success mb-2">📋</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Importar</h6>
+                                <small class="menu-desc text-muted">Carregar dados</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Brindes -->
+                    {% if tem_permissao('brindes') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('brindes') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-danger mb-2">🎯</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Brindes</h6>
+                                <small class="menu-desc text-muted">Gerenciar prêmios</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Estoque Público (sempre visível) -->
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('estoque_publico') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-dark mb-2">👀</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Estoque Público</h6>
+                                <small class="menu-desc text-muted">Visualização geral</small>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Confirmar Entrega (nova permissão) -->
+                    {% if tem_permissao('entrega_brindes') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('confirmar_entrega_page') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-success mb-2">🎁</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Entrega Brindes</h6>
+                                <small class="menu-desc text-muted">Confirmar entregas</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('pesquisa_publica') }}" class="card menu-card-standard text-decoration-none h-100" target="_blank">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-info mb-2">📝</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Pesquisa Pública</h6>
+                                <small class="menu-desc text-muted">Avaliação do evento</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% if tem_permissao('relatorios') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('relatorio_pesquisas') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-info mb-2">📋</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Relatório Pesquisas</h6>
+                                <small class="menu-desc text-muted">Análise das respostas</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div><!-- Adicionar este card após o último módulo existente -->
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Se não tiver nenhum módulo -->
+{% if not (tem_permissao('dashboard') or tem_permissao('checkin') or tem_permissao('vendas') or 
+           tem_permissao('estoque') or tem_permissao('sorteio') or tem_permissao('relatorios') or 
+           tem_permissao('brindes') or tem_permissao('importacao')) %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="display-1 text-muted mb-3">🔒</div>
+                <h4 class="text-muted">Nenhum módulo disponível</h4>
+                <p class="text-muted">Entre em contato com o administrador para solicitar acesso aos módulos do sistema.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+/* Cards Padronizados */
+.menu-card-standard {
+    border-radius: 12px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s ease !important;
+    min-height: 130px !important;
+    background: white !important;
+}
+
+.menu-card-standard:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    border-color: var(--accent-green) !important;
+    text-decoration: none !important;
+}
+
+/* Ícones Padronizados */
+.menu-icon {
+    font-size: 2.2rem !important;
+    line-height: 1 !important;
+}
+
+/* Títulos Padronizados */
+.menu-title {
+    font-size: 0.95rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Descrições Padronizadas */
+.menu-desc {
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Garantir altura igual */
+.h-100 {
+    height: 100% !important;
+}
+
+/* Flexbox para centralização vertical */
+.d-flex.flex-column.justify-content-center {
+    min-height: 130px !important;
+}
+
+/* Cores consistentes */
+.text-danger { color: #dc3545 !important; }
+.text-success { color: #28a745 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-info { color: #17a2b8 !important; }
+.text-primary { color: #007bff !important; }
+.text-secondary { color: #6c757d !important; }
+.text-dark { color: #343a40 !important; }
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .menu-card-standard {
+        min-height: 120px !important;
+    }
+    
+    .menu-icon {
+        font-size: 1.8rem !important;
+    }
+    
+    .menu-title {
+        font-size: 0.9rem !important;
+    }
+    
+    .menu-desc {
+        font-size: 0.7rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .menu-card-standard {
+        min-height: 110px !important;
+    }
+    
+    .menu-icon {
+        font-size: 1.6rem !important;
+    }
+}
+</style>
+{% endblock %}

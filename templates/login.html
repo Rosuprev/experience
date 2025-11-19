@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - R.O Experience 2025</title>
+    
+    <!-- Bootstrap local -->
+    <link href="{{ url_for('static', filename='js/libs/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    
+    <!-- Fontes locais (substituindo Google Fonts) -->
+    <style>
+        :root {
+            --primary-dark: #043333;
+            --primary-light: #2c5c2c;
+            --accent-green: #64941c;
+            --accent-yellow: #cef005;
+            --accent-olive: #426d23;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem 2rem 1.5rem 2rem;
+            text-align: center;
+        }
+        
+        .logos-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .logo-item {
+            text-align: center;
+            max-width: 50%;
+            max-height: 50%;
+        }
+        
+        .logo-item-1 {
+            text-align: center;
+            max-width: 200%;
+            max-height: 200%;
+        }
+        
+        .logo-circle img {
+            max-width: 100%;
+            max-height: 100%px;
+           
+        }
+        
+        .logo-label {
+            font-size: 0.8rem;
+            color: var(--accent-yellow);
+            font-weight: 500;
+        }
+        
+        .brand-title {
+            font-family: 'Arial', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .experience-text {
+            font-family: 'Brush Script MT', cursive;
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--accent-yellow) 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .year-text {
+            font-family: 'Arial', sans-serif;
+            font-weight: 300;
+            font-size: 1.4rem;
+            color: var(--accent-yellow);
+        }
+        
+        .login-body {
+            padding: 2rem;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(100, 148, 28, 0.1);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-olive) 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(100, 148, 28, 0.3);
+            color: white;
+        }
+        
+        .public-access {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .public-access a {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .public-access a:hover {
+            text-decoration: underline;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #475569;
+        }
+        
+        .feature-icon {
+            color: var(--accent-green);
+            font-size: 1rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .system-info {
+            color: var(--accent-yellow);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 576px) {
+            .logos-container {
+                gap: 1rem;
+            }
+            
+            .logo-circle {
+                width: 80px;
+                height: 80px;
+                padding: 10px;
+            }
+            
+            .brand-title {
+                font-size: 1.5rem;
+            }
+            
+            .experience-text {
+                font-size: 1.8rem;
+            }
+            
+            .year-text {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="login-container">
+                    <!-- Header com Ambas as Logos -->
+                    <div class="login-header">
+                        <div class="logos-container">
+                            <div class="logo-item-1">
+                                <div class="logo-circle">
+                                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo R.O Experience">
+                             </div>
+                                
+                            </div>
+                            <div class="logo-item">
+                                <div class="logo-circle">
+                                    <img src="{{ url_for('static', filename='images/logo02.png') }}" alt="Logo R.O Experience">
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                                                
+                        <p class="system-info mb-0">Sistema de Gestão do Evento</p>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="login-body">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        {% if error %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ error }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+                        
+                        <form method="POST" action="{{ url_for('login') }}">
+                            <div class="mb-3">
+                                <label for="username" class="form-label fw-semibold">👤 Usuário</label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       placeholder="Digite seu usuário" required autofocus>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold">🔒 Senha</label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Digite sua senha" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-login mb-3">
+                                🚀 Entrar no Sistema
+                            </button>
+                        </form>
+                        
+                        <!-- Acesso Público -->
+                        <div class="public-access">
+                            <small class="text-muted">
+                                📢 <strong>Acesso Público:</strong> 
+                                <a href="{{ url_for('estoque_publico') }}">Ver Estoque</a>
+                            </small>
+                        </div>
+                        
+                        <!-- Features Grid -->
+                        <div class="feature-grid">
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                Check-in
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                Vendas
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                Estoque
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                Sorteios
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                Relatórios
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                Brindes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="footer">
+                    <small>
+                        © 2025 R.O Experience - Sistema desenvolvido para o evento
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS local -->
+    <script src="{{ url_for('static', filename='js/libs/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    
+    <script>
+        // Foco automático no campo de usuário
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').focus();
+        });
+        
+        // Prevenir múltiplos envios do formulário
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Entrando...';
+        });
+    </script>
+</body>
+</html>

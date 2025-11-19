@@ -1,0 +1,9 @@
+ID=RO_EXPERIENCE_2025
+DISPLAYNAME="R.O Experience 2025"
+VERSION=1.0.0
+MAIN=app.py
+DESCRIPTION="Sistema de gestão para o evento R.O Experience 2025"
+MEMORY=512
+CPU=100
+SUBNETWORK=true
+AUTORESTART=true

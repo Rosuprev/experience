@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-warning-custom text-dark py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">🎁</span>
+                    Brindes R$ 20.000
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="formBrinde20k">
+                    <input type="hidden" name="tipo_sorteio" value="20k">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Brinde</label>
+                        <input type="text" class="form-control" name="nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade Disponível</label>
+                        <input type="number" class="form-control" name="quantidade_total" value="1" min="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning-custom w-100">Adicionar Brinde</button>
+                </form>
+                
+                <div class="mt-3">
+                    <h6>Brindes Cadastrados:</h6>
+                    {% for brinde in brindes_20k %}
+                    <div class="card mb-2 border-warning card-hover">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ brinde.nome }}</strong>
+                                    <span class="badge {% if brinde.quantidade_disponivel > 0 %}bg-success-custom{% else %}bg-danger-custom{% endif %} ms-2">
+                                        {{ brinde.quantidade_disponivel }}/{{ brinde.quantidade_total }}
+                                    </span>
+                                    {% if brinde.valor_aproximado %}
+                                    <span class="badge bg-info-custom ms-2">R$ {{ "%.2f"|format(brinde.valor_aproximado) }}</span>
+                                    {% endif %}
+                                    {% if brinde.descricao %}
+                                    <br><small class="text-muted">{{ brinde.descricao }}</small>
+                                    {% endif %}
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="removerBrinde({{ brinde.id }})">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-danger-custom text-white py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">🎁</span>
+                    Brindes R$ 50.000
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="formBrinde50k">
+                    <input type="hidden" name="tipo_sorteio" value="50k">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Brinde</label>
+                        <input type="text" class="form-control" name="nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade Disponível</label>
+                        <input type="number" class="form-control" name="quantidade_total" value="1" min="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning-custom w-100">Adicionar Brinde</button>
+                </form>
+                
+                <div class="mt-3">
+                    <h6>Brindes Cadastrados:</h6>
+                    {% for brinde in brindes_50k %}
+                    <div class="card mb-2 border-danger card-hover">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ brinde.nome }}</strong>
+                                    <span class="badge {% if brinde.quantidade_disponivel > 0 %}bg-success-custom{% else %}bg-danger-custom{% endif %} ms-2">
+                                        {{ brinde.quantidade_disponivel }}/{{ brinde.quantidade_total }}
+                                    </span>
+                                    {% if brinde.valor_aproximado %}
+                                    <span class="badge bg-info-custom ms-2">R$ {{ "%.2f"|format(brinde.valor_aproximado) }}</span>
+                                    {% endif %}
+                                    {% if brinde.descricao %}
+                                    <br><small class="text-muted">{{ brinde.descricao }}</small>
+                                    {% endif %}
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="removerBrinde({{ brinde.id }})">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Formulário brindes 20k
+document.getElementById('formBrinde20k').addEventListener('submit', function(e) {
+    e.preventDefault();
+    adicionarBrinde(this);
+});
+
+// Formulário brindes 50k
+document.getElementById('formBrinde50k').addEventListener('submit', function(e) {
+    e.preventDefault();
+    adicionarBrinde(this);
+});
+
+function adicionarBrinde(form) {
+    const formData = new FormData(form);
+    
+    fetch('/adicionar-brinde', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            form.reset();
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+function removerBrinde(brindeId) {
+    if (confirm('Tem certeza que deseja remover este brinde?')) {
+        fetch(`/remover-brinde/${brindeId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

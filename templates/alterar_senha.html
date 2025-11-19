@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <!-- Card de Alteração de Senha -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary-custom text-white py-3">
+                    <h4 class="card-title mb-0 d-flex align-items-center">
+                        <span class="me-2">🔐</span>
+                        Alterar Senha
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form id="formAlterarSenha">
+                        <div class="mb-3">
+                            <label for="senha_atual" class="form-label fw-semibold">🔒 Senha Atual</label>
+                            <input type="password" class="form-control" id="senha_atual" name="senha_atual" 
+                                   placeholder="Digite sua senha atual" required>
+                            <div class="form-text">
+                                Informe sua senha atual para confirmar a identidade
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="nova_senha" class="form-label fw-semibold">🔄 Nova Senha</label>
+                            <input type="password" class="form-control" id="nova_senha" name="nova_senha" 
+                                   placeholder="Digite a nova senha" required minlength="6">
+                            <div class="form-text">
+                                Mínimo 6 caracteres
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="confirmar_senha" class="form-label fw-semibold">✅ Confirmar Nova Senha</label>
+                            <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" 
+                                   placeholder="Confirme a nova senha" required minlength="6">
+                            <div class="form-text">
+                                Digite a nova senha novamente para confirmar
+                            </div>
+                        </div>
+                        
+                        <!-- Indicador de Força da Senha -->
+                        <div class="mb-3">
+                            <div class="progress mb-2" style="height: 8px; display: none;" id="senhaStrengthBar">
+                                <div class="progress-bar" id="senhaStrengthProgress" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="senhaStrengthText"></small>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <small>
+                                💡 <strong>Dicas para uma senha segura:</strong><br>
+                                • Use pelo menos 6 caracteres<br>
+                                • Combine letras maiúsculas e minúsculas<br>
+                                • Inclua números e símbolos especiais<br>
+                                • Evite senhas óbvias como "123456"
+                            </small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-custom py-2" id="btnAlterarSenha">
+                                🔄 Alterar Senha
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary py-2">
+                                ↩️ Voltar ao Dashboard
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <div id="resultadoAlteracao" class="mt-3"></div>
+                </div>
+            </div>
+            
+            <!-- Informações de Segurança -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light py-3">
+                    <h6 class="card-title mb-0 d-flex align-items-center">
+                        <span class="me-2">🛡️</span>
+                        Segurança da Conta
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="text-primary-custom">
+                                <div style="font-size: 2rem;">👤</div>
+                                <small>Usuário: <strong>{{ session.username }}</strong></small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-success">
+                                <div style="font-size: 2rem;">🎯</div>
+                                <small>Nível: <strong>{{ session.nivel_acesso|upper }}</strong></small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-info">
+                                <div style="font-size: 2rem;">📅</div>
+                                <small>Sessão Ativa</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Manter TODO o JavaScript original aqui
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formAlterarSenha');
+    const btnAlterar = document.getElementById('btnAlterarSenha');
+    const resultadoDiv = document.getElementById('resultadoAlteracao');
+    const senhaStrengthBar = document.getElementById('senhaStrengthBar');
+    const senhaStrengthProgress = document.getElementById('senhaStrengthProgress');
+    const senhaStrengthText = document.getElementById('senhaStrengthText');
+    
+    // Validar força da senha em tempo real
+    document.getElementById('nova_senha').addEventListener('input', function() {
+        const senha = this.value;
+        const forca = calcularForcaSenha(senha);
+        
+        senhaStrengthBar.style.display = 'block';
+        senhaStrengthProgress.style.width = forca.percentual + '%';
+        senhaStrengthProgress.className = 'progress-bar ' + forca.classe;
+        senhaStrengthText.textContent = forca.texto;
+        senhaStrengthText.className = forca.classeTexto;
+    });
+    
+    // Validar confirmação de senha em tempo real
+    document.getElementById('confirmar_senha').addEventListener('input', function() {
+        const novaSenha = document.getElementById('nova_senha').value;
+        const confirmarSenha = this.value;
+        
+        if (confirmarSenha && novaSenha !== confirmarSenha) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (confirmarSenha) {
+            this.classList.add('is-valid');
+            this.classList.remove('is-invalid');
+        } else {
+            this.classList.remove('is-valid', 'is-invalid');
+        }
+    });
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const senhaAtual = document.getElementById('senha_atual').value;
+        const novaSenha = document.getElementById('nova_senha').value;
+        const confirmarSenha = document.getElementById('confirmar_senha').value;
+        
+        // Validações client-side
+        if (novaSenha.length < 6) {
+            mostrarResultado('A senha deve ter pelo menos 6 caracteres.', 'danger');
+            return;
+        }
+        
+        if (novaSenha !== confirmarSenha) {
+            mostrarResultado('As senhas não coincidem.', 'danger');
+            return;
+        }
+        
+        // Desabilitar botão e mostrar loading
+        btnAlterar.disabled = true;
+        btnAlterar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Alterando...';
+        
+        // Enviar requisição
+        fetch('{{ url_for("alterar_senha") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'senha_atual': senhaAtual,
+                'nova_senha': novaSenha,
+                'confirmar_senha': confirmarSenha
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarResultado(data.message, 'success');
+                form.reset();
+                senhaStrengthBar.style.display = 'none';
+            } else {
+                mostrarResultado(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            mostrarResultado('Erro ao alterar senha. Tente novamente.', 'danger');
+        })
+        .finally(() => {
+            // Reabilitar botão
+            btnAlterar.disabled = false;
+            btnAlterar.innerHTML = '🔄 Alterar Senha';
+        });
+    });
+    
+    function mostrarResultado(mensagem, tipo) {
+        resultadoDiv.innerHTML = `
+            <div class="alert alert-${tipo} alert-dismissible fade show">
+                ${mensagem}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+    
+    function calcularForcaSenha(senha) {
+        let forca = 0;
+        
+        if (senha.length >= 6) forca += 25;
+        if (senha.length >= 8) forca += 15;
+        if (/[a-z]/.test(senha)) forca += 15;
+        if (/[A-Z]/.test(senha)) forca += 15;
+        if (/[0-9]/.test(senha)) forca += 15;
+        if (/[^a-zA-Z0-9]/.test(senha)) forca += 15;
+        
+        let classe, texto, classeTexto;
+        
+        if (forca >= 80) {
+            classe = 'bg-success';
+            texto = 'Senha forte';
+            classeTexto = 'text-success';
+        } else if (forca >= 60) {
+            classe = 'bg-warning';
+            texto = 'Senha média';
+            classeTexto = 'text-warning';
+        } else if (forca >= 30) {
+            classe = 'bg-danger';
+            texto = 'Senha fraca';
+            classeTexto = 'text-danger';
+        } else {
+            classe = 'bg-secondary';
+            texto = 'Muito fraca';
+            classeTexto = 'text-muted';
+        }
+        
+        return {
+            percentual: forca,
+            classe: classe,
+            texto: texto,
+            classeTexto: classeTexto
+        };
+    }
+});
+</script>
+
+<style>
+/* Manter TODO o CSS adicional original aqui */
+.progress-bar {
+    transition: width 0.5s ease;
+}
+
+.is-valid {
+    border-color: #198754 !important;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+</style>
+{% endblock %}

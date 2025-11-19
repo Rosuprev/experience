@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Simples -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="text-center">
+                        <h1 class="display-5 mb-2">
+                            <span class="me-3">📦</span>
+                            Estoque em Tempo Real
+                        </h1>
+                        <p class="mb-0 opacity-75">Visão completa de todos os produtos disponíveis</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center py-3">
+                    <div class="h3 mb-1" id="totalItens">0</div>
+                    <small>Total de Itens</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center py-3">
+                    <div class="h3 mb-1" id="totalDisponivel">0</div>
+                    <small>Disponíveis</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-warning text-dark">
+                <div class="card-body text-center py-3">
+                    <div class="h3 mb-1" id="totalBaixoEstoque">0</div>
+                    <small>Estoque Baixo</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 bg-danger text-white">
+                <div class="card-body text-center py-3">
+                    <div class="h3 mb-1" id="totalEsgotado">0</div>
+                    <small>Esgotados</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estoque -->
+    <div class="row" id="estoqueContainer">
+        <!-- Cards serão carregados via JavaScript -->
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center mt-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2 text-muted">Carregando estoque...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variáveis globais
+let estoqueData = [];
+
+// Carregar estoque
+function carregarEstoque() {
+    fetch('/api/estoque-atual')
+        .then(response => response.json())
+        .then(data => {
+            estoqueData = data;
+            atualizarCardsEstoque();
+            atualizarEstatisticas();
+            ocultarLoading();
+        })
+        .catch(error => {
+            console.error('Erro ao carregar estoque:', error);
+            document.getElementById('estoqueContainer').innerHTML = `
+                <div class="col-12 text-center">
+                    <div class="alert alert-danger">
+                        ❌ Erro ao carregar estoque. Tente novamente.
+                    </div>
+                </div>
+            `;
+            ocultarLoading();
+        });
+}
+
+// Atualizar cards de estoque
+function atualizarCardsEstoque() {
+    const container = document.getElementById('estoqueContainer');
+    
+    if (estoqueData.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center">
+                <div class="alert alert-info">
+                    📭 Nenhum item encontrado no estoque
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Ordenar por fabricante e modelo
+    const estoqueOrdenado = estoqueData.sort((a, b) => {
+        if (a.fabricante !== b.fabricante) {
+            return a.fabricante.localeCompare(b.fabricante);
+        }
+        return a.modelo.localeCompare(b.modelo);
+    });
+    
+    container.innerHTML = estoqueOrdenado.map(item => `
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm card-hover">
+                <div class="card-header bg-transparent border-bottom-0 pb-0">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="badge bg-${item.status} fs-6">
+                            ${item.quantidade_disponivel} disponíveis
+                        </span>
+                        <small class="text-muted">#${item.id}</small>
+                    </div>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="h1 text-muted">
+                            ${getIconePorStatus(item.status)}
+                        </div>
+                    </div>
+                    <h5 class="card-title text-primary fw-bold">${item.fabricante}</h5>
+                    <h6 class="card-subtitle mb-2 text-dark">${item.modelo}</h6>
+                    <div class="mt-3">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <small class="text-muted">Estoque Total</small>
+                                <div class="h6 fw-bold text-dark">${item.quantidade_total}</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Disponível</small>
+                                <div class="h6 fw-bold text-${item.status}">${item.quantidade_disponivel}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="text-center">
+                        ${getStatusTexto(item.status, item.quantidade_disponivel)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Ícone baseado no status
+function getIconePorStatus(status) {
+    const icones = {
+        'success': '📦', // Disponível
+        'warning': '⚠️',  // Estoque baixo
+        'danger': '❌'    // Esgotado
+    };
+    return icones[status] || '📦';
+}
+
+// Texto de status
+function getStatusTexto(status, quantidade) {
+    const textos = {
+        'success': '<span class="badge bg-success">✅ Disponível</span>',
+        'warning': '<span class="badge bg-warning text-dark">⚠️ Estoque Baixo</span>',
+        'danger': '<span class="badge bg-danger">❌ Esgotado</span>'
+    };
+    return textos[status] || '<span class="badge bg-secondary">Status Desconhecido</span>';
+}
+
+// Atualizar estatísticas
+function atualizarEstatisticas() {
+    const totalItens = estoqueData.length;
+    const totalDisponivel = estoqueData.filter(item => item.status === 'success').length;
+    const totalBaixoEstoque = estoqueData.filter(item => item.status === 'warning').length;
+    const totalEsgotado = estoqueData.filter(item => item.status === 'danger').length;
+    
+    document.getElementById('totalItens').textContent = totalItens;
+    document.getElementById('totalDisponivel').textContent = totalDisponivel;
+    document.getElementById('totalBaixoEstoque').textContent = totalBaixoEstoque;
+    document.getElementById('totalEsgotado').textContent = totalEsgotado;
+}
+
+// Ocultar loading
+function ocultarLoading() {
+    document.getElementById('loading').style.display = 'none';
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Carregar estoque inicial
+    carregarEstoque();
+    
+    // Atualizar a cada 15 segundos
+    setInterval(carregarEstoque, 15000);
+});
+</script>
+
+<style>
+.card-hover {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    padding: 1rem 1rem 0 1rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.75em;
+}
+
+.h1 {
+    font-size: 3rem;
+}
+
+.h3 {
+    font-size: 1.75rem;
+}
+
+.h5 {
+    font-size: 1.25rem;
+}
+
+.h6 {
+    font-size: 1rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,618 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Card Principal de Vendas -->
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-success-custom text-white py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">💰</span>
+                    Registrar Venda
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form id="vendaForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="cnpj_compra" class="form-label fw-bold text-primary-custom">CNPJ da Compra</label>
+                            <input type="text" class="form-control cnpj-mask" id="cnpj_compra" name="cnpj_compra" 
+                                   placeholder="00.000.000/0000-00" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="numero_pedido" class="form-label fw-bold text-primary-custom">Número do Pedido</label>
+                            <input type="text" class="form-control" id="numero_pedido" name="numero_pedido" 
+                                   placeholder="Ex: 20240001" pattern="[0-9]+" title="Apenas números são permitidos" 
+                                   maxlength="20" required>
+                            <div class="form-text">
+                                💡 Apenas números são permitidos. Ex: 20240001
+                                <div id="statusPedido" class="mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="valor_pedido" class="form-label fw-bold text-primary-custom">Valor do Pedido (R$)</label>
+                        <input type="text" class="form-control money-mask" id="valor_pedido" name="valor_pedido" 
+                               placeholder="0,00" required>
+                    </div>
+
+                    <!-- Seção de Produtos (OPCIONAL) -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label fw-bold text-primary-custom">Produtos da Venda (Opcional)</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="adicionarProduto">
+                                <span class="me-1">➕</span> Adicionar Produto
+                            </button>
+                        </div>
+                        
+                        <div class="alert alert-info border-0 mb-3">
+                            <small>💡 <strong>Opcional:</strong> Adicione produtos apenas se estiver vendendo itens do estoque controlado.</small>
+                        </div>
+                        
+                        <div id="produtosContainer">
+                            <!-- Produtos serão adicionados dinamicamente aqui -->
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success-custom btn-lg w-100 py-3 fw-bold">
+                        💰 Registrar Venda
+                    </button>
+                </form>
+                
+                <div id="result" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para vincular CNPJ -->
+<div class="modal fade" id="modalVincular" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning-custom text-dark py-3">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="me-2">🔗</span>
+                    Vincular CNPJ
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info border-0 mb-4">
+                    <p class="mb-0">O CNPJ da compra não fez check-in. Por favor, informe um CNPJ que fez check-in para vincular:</p>
+                </div>
+                
+                <form id="vinculoForm">
+                    <input type="hidden" id="cnpj_compra_modal" name="cnpj_compra">
+                    <input type="hidden" id="numero_pedido_modal" name="numero_pedido">
+                    <input type="hidden" id="valor_pedido_modal" name="valor_pedido">
+                    <input type="hidden" id="produtos_data_modal" name="produtos_data">
+                    
+                    <div class="mb-3">
+                        <label for="cnpj_checkin" class="form-label fw-bold text-primary-custom">CNPJ com Check-in</label>
+                        <input type="text" class="form-control cnpj-mask" id="cnpj_checkin" name="cnpj_checkin" 
+                               placeholder="00.000.000/0000-00" required>
+                        <div class="form-text">Informe um CNPJ que já realizou check-in no evento</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2 fw-bold">
+                        🔗 Vincular e Registrar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- jQuery local -->
+<script src="{{ url_for('static', filename='js/libs/jquery/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/libs/jquery/jquery.mask.min.js') }}"></script>
+
+<script>
+// Variável para armazenar dados dos produtos
+let produtosData = [];
+
+// Máscaras para os campos
+$(document).ready(function() {
+    $('.cnpj-mask').mask('00.000.000/0000-00');
+    
+    $('.money-mask').mask('000.000.000.000.000,00', { 
+        reverse: true,
+        onKeyPress: function(value, e, field, options) {
+            const onlyNumbers = value.replace(/\D/g, '');
+            const formatted = (onlyNumbers/100).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            $(field).val(formatted);
+        }
+    });
+
+    // Carregar estoque disponível
+    carregarEstoque();
+});
+
+// Carregar estoque disponível
+function carregarEstoque() {
+    fetch('/api/estoque-atual')
+        .then(response => response.json())
+        .then(equipamentos => {
+            window.equipamentosDisponiveis = equipamentos;
+        });
+}
+
+// Adicionar campo de produto
+document.getElementById('adicionarProduto').addEventListener('click', function() {
+    const container = document.getElementById('produtosContainer');
+    const index = container.children.length;
+    
+    const produtoHTML = `
+        <div class="card mb-3 produto-item border-primary" data-index="${index}">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <label class="form-label">Produto</label>
+                        <select class="form-select produto-select" name="produtos[${index}][equipamento_id]">
+                            <option value="">Selecione um produto (opcional)...</option>
+                            ${window.equipamentosDisponiveis ? window.equipamentosDisponiveis.map(eq => 
+                                `<option value="${eq.id}" data-stock="${eq.quantidade_disponivel}">
+                                    ${eq.fabricante} - ${eq.modelo} (Estoque: ${eq.quantidade_disponivel})
+                                </option>`
+                            ).join('') : ''}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Quantidade</label>
+                        <input type="number" class="form-control quantidade-input" name="produtos[${index}][quantidade]" 
+                               min="1" value="1">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Estoque Atual</label>
+                        <input type="text" class="form-control estoque-atual" readonly placeholder="Selecione um produto">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger btn-sm w-100 remover-produto">
+                            ❌
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', produtoHTML);
+    
+    // Adicionar eventos ao novo produto
+    const novoProduto = container.lastElementChild;
+    adicionarEventosProduto(novoProduto);
+});
+
+// Adicionar eventos a um item de produto
+function adicionarEventosProduto(produtoElement) {
+    const select = produtoElement.querySelector('.produto-select');
+    const quantidadeInput = produtoElement.querySelector('.quantidade-input');
+    const estoqueAtual = produtoElement.querySelector('.estoque-atual');
+    const removerBtn = produtoElement.querySelector('.remover-produto');
+    
+    // Atualizar estoque quando selecionar produto
+    select.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const stock = selectedOption.getAttribute('data-stock') || 0;
+        estoqueAtual.value = stock;
+        quantidadeInput.max = stock;
+        
+        // Se selecionou um produto, torna a quantidade obrigatória
+        if (this.value) {
+            quantidadeInput.required = true;
+        } else {
+            quantidadeInput.required = false;
+        }
+    });
+    
+    // Remover produto
+    removerBtn.addEventListener('click', function() {
+        produtoElement.remove();
+        atualizarIndicesProdutos();
+    });
+}
+
+// Atualizar índices dos produtos
+function atualizarIndicesProdutos() {
+    const container = document.getElementById('produtosContainer');
+    const produtos = container.querySelectorAll('.produto-item');
+    
+    produtos.forEach((produto, index) => {
+        produto.setAttribute('data-index', index);
+        
+        // Atualizar names dos inputs
+        const select = produto.querySelector('.produto-select');
+        const quantidade = produto.querySelector('.quantidade-input');
+        
+        select.name = `produtos[${index}][equipamento_id]`;
+        quantidade.name = `produtos[${index}][quantidade]`;
+    });
+}
+
+// Coletar dados dos produtos para envio
+function coletarDadosProdutos() {
+    const produtos = [];
+    const produtoElements = document.querySelectorAll('.produto-item');
+    
+    produtoElements.forEach(produtoElement => {
+        const select = produtoElement.querySelector('.produto-select');
+        const quantidadeInput = produtoElement.querySelector('.quantidade-input');
+        
+        // Só adiciona se ambos os campos estiverem preenchidos
+        if (select.value && quantidadeInput.value) {
+            produtos.push({
+                equipamento_id: parseInt(select.value),
+                quantidade: parseInt(quantidadeInput.value)
+            });
+        }
+    });
+    
+    return produtos;
+}
+
+// Validar produtos antes do envio
+function validarProdutos() {
+    const produtos = coletarDadosProdutos();
+    
+    for (let produto of produtos) {
+        const equipamento = window.equipamentosDisponiveis.find(eq => eq.id === produto.equipamento_id);
+        if (!equipamento) {
+            return { valid: false, message: 'Produto selecionado não encontrado' };
+        }
+        if (equipamento.quantidade_disponivel < produto.quantidade) {
+            return { 
+                valid: false, 
+                message: `Estoque insuficiente para ${equipamento.fabricante} - ${equipamento.modelo}. Disponível: ${equipamento.quantidade_disponivel}` 
+            };
+        }
+    }
+    
+    return { valid: true };
+}
+
+// Envio do formulário principal
+document.getElementById('vendaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Coletar dados dos produtos
+    const produtos = coletarDadosProdutos();
+    
+    // Validar produtos (se houver)
+    if (produtos.length > 0) {
+        const validacao = validarProdutos();
+        if (!validacao.valid) {
+            document.getElementById('result').innerHTML = `
+                <div class="alert alert-warning border-0">
+                    <span class="me-2">⚠️</span>
+                    ${validacao.message}
+                </div>`;
+            return;
+        }
+    }
+    
+    // Converter valor monetário para float
+    const valorInput = document.getElementById('valor_pedido');
+    const valorNumerico = parseFloat(valorInput.value.replace(/\./g, '').replace(',', '.'));
+    
+    if (isNaN(valorNumerico)) {
+        document.getElementById('result').innerHTML = `
+            <div class="alert alert-danger border-0">
+                <span class="me-2">❌</span>
+                Valor inválido
+            </div>`;
+        return;
+    }
+    
+    const formData = new FormData(this);
+    formData.set('valor_pedido', valorNumerico.toString());
+    formData.set('produtos_data', JSON.stringify(produtos));
+    
+    const resultDiv = document.getElementById('result');
+    const submitBtn = this.querySelector('button[type="submit"]');
+    
+    // Mostrar loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+    
+    fetch('/registrar-venda', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success border-0">
+                    <h5 class="d-flex align-items-center">
+                        <span class="me-2">✅</span>
+                        Venda Registrada!
+                    </h5>
+                    <p class="mb-0">${data.message}</p>
+                    ${produtos.length > 0 ? '<small class="text-muted">Produtos debitados do estoque com sucesso.</small>' : ''}
+                </div>`;
+            document.getElementById('vendaForm').reset();
+            document.getElementById('produtosContainer').innerHTML = '';
+        } else if (data.need_link) {
+            // Mostrar modal para vincular CNPJ
+            document.getElementById('cnpj_compra_modal').value = document.getElementById('cnpj_compra').value;
+            document.getElementById('numero_pedido_modal').value = document.getElementById('numero_pedido').value;
+            document.getElementById('valor_pedido_modal').value = valorNumerico.toString();
+            document.getElementById('produtos_data_modal').value = JSON.stringify(produtos);
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalVincular'));
+            modal.show();
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger border-0">
+                    <h5 class="d-flex align-items-center">
+                        <span class="me-2">❌</span>
+                        Erro no Registro
+                    </h5>
+                    <p class="mb-0">${data.message}</p>
+                </div>`;
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger border-0">
+                <h5 class="d-flex align-items-center">
+                    <span class="me-2">❌</span>
+                    Erro na Requisição
+                </h5>
+                <p class="mb-0">Erro ao processar a venda</p>
+            </div>`;
+    })
+    .finally(() => {
+        // Restaurar botão
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '💰 Registrar Venda';
+    });
+});
+
+// Envio do formulário de vinculação
+document.getElementById('vinculoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    
+    // Mostrar loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Vinculando...';
+    
+    fetch('/vincular-cnpj', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('result').innerHTML = `
+                <div class="alert alert-success border-0">
+                    <h5 class="d-flex align-items-center">
+                        <span class="me-2">✅</span>
+                        Venda Vinculada!
+                    </h5>
+                    <p class="mb-0">${data.message}</p>
+                </div>`;
+            document.getElementById('vendaForm').reset();
+            document.getElementById('produtosContainer').innerHTML = '';
+            bootstrap.Modal.getInstance(document.getElementById('modalVincular')).hide();
+        } else {
+            document.getElementById('result').innerHTML = `
+                <div class="alert alert-danger border-0">
+                    <h5 class="d-flex align-items-center">
+                        <span class="me-2">❌</span>
+                        Erro na Vinculação
+                    </h5>
+                    <p class="mb-0">${data.message}</p>
+                </div>`;
+        }
+    })
+    .finally(() => {
+        // Restaurar botão
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '🔗 Vincular e Registrar';
+    });
+});
+
+// Validação em tempo real para o campo de valor
+document.getElementById('valor_pedido').addEventListener('blur', function(e) {
+    let value = this.value.replace(/\D/g, '');
+    if (value) {
+        value = (parseInt(value) / 100).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        this.value = value;
+    }
+});
+
+// Validar número do pedido em tempo real
+document.getElementById('numero_pedido').addEventListener('input', function(e) {
+    const numeroPedido = this.value;
+    const statusDiv = document.getElementById('statusPedido');
+    
+    // Permitir apenas números
+    this.value = this.value.replace(/[^0-9]/g, '');
+    
+    if (numeroPedido.length > 0) {
+        // Verificar se o pedido já existe
+        verificarPedidoExistente(numeroPedido);
+    } else {
+        statusDiv.innerHTML = '';
+    }
+});
+
+// Verificar se pedido já existe
+function verificarPedidoExistente(numeroPedido) {
+    const statusDiv = document.getElementById('statusPedido');
+    
+    // Mostrar loading
+    statusDiv.innerHTML = '<small class="text-warning">🔍 Verificando...</small>';
+    
+    fetch(`/api/verificar-pedido/${numeroPedido}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.existe) {
+                statusDiv.innerHTML = `
+                    <small class="text-danger">
+                        ❌ Este número de pedido já foi registrado!
+                    </small>
+                `;
+                document.getElementById('numero_pedido').classList.add('is-invalid');
+            } else {
+                statusDiv.innerHTML = `
+                    <small class="text-success">
+                        ✅ Número de pedido disponível
+                    </small>
+                `;
+                document.getElementById('numero_pedido').classList.remove('is-invalid');
+                document.getElementById('numero_pedido').classList.add('is-valid');
+            }
+        })
+        .catch(error => {
+            statusDiv.innerHTML = `
+                <small class="text-warning">
+                    ⚠️ Erro na verificação
+                </small>
+            `;
+        });
+}
+
+// Limpar validação quando o campo perder o foco
+document.getElementById('numero_pedido').addEventListener('blur', function() {
+    if (this.value === '') {
+        this.classList.remove('is-invalid', 'is-valid');
+        document.getElementById('statusPedido').innerHTML = '';
+    }
+});
+
+// Validar antes do envio do formulário
+document.getElementById('vendaForm').addEventListener('submit', function(e) {
+    const numeroPedido = document.getElementById('numero_pedido').value;
+    const statusDiv = document.getElementById('statusPedido');
+    
+    // Verificar se contém apenas números
+    if (!/^\d+$/.test(numeroPedido)) {
+        e.preventDefault();
+        statusDiv.innerHTML = `
+            <small class="text-danger">
+                ❌ Apenas números são permitidos no número do pedido
+            </small>
+        `;
+        document.getElementById('numero_pedido').classList.add('is-invalid');
+        document.getElementById('numero_pedido').focus();
+        return;
+    }
+    
+    // Verificar se está vazio
+    if (!numeroPedido.trim()) {
+        e.preventDefault();
+        statusDiv.innerHTML = `
+            <small class="text-danger">
+                ❌ Número do pedido é obrigatório
+            </small>
+        `;
+        document.getElementById('numero_pedido').classList.add('is-invalid');
+        document.getElementById('numero_pedido').focus();
+        return;
+    }
+    
+    // Verificar duplicação (double-check)
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';
+    
+    fetch(`/api/verificar-pedido/${numeroPedido}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.existe) {
+                e.preventDefault();
+                statusDiv.innerHTML = `
+                    <small class="text-danger">
+                        ❌ Este número de pedido já foi registrado!
+                    </small>
+                `;
+                document.getElementById('numero_pedido').classList.add('is-invalid');
+                document.getElementById('numero_pedido').focus();
+                
+                // Restaurar botão
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '💰 Registrar Venda';
+            } else {
+                // Se não existe, permitir o envio do formulário
+                // O botão será restaurado no finally do fetch principal
+            }
+        })
+        .catch(error => {
+            e.preventDefault();
+            statusDiv.innerHTML = `
+                <small class="text-danger">
+                    ❌ Erro na verificação do pedido
+                </small>
+            `;
+            // Restaurar botão
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '💰 Registrar Venda';
+        });
+});
+
+// Focar no primeiro campo ao carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('cnpj_compra').focus();
+});
+</script>
+
+<style>
+.money-mask, .cnpj-mask {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.money-mask {
+    color: #198754;
+}
+
+.bg-warning-custom {
+    background: linear-gradient(135deg, var(--accent-yellow) 0%, #e6ff00 100%) !important;
+    color: #333 !important;
+}
+
+.produto-item {
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+.estoque-atual {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Adicione no estilo do vendas.html */
+.is-valid {
+    border-color: #198754 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+</style>
+{% endblock %}

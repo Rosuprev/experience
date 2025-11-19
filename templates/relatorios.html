@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary-custom text-white py-3">
+                <h4 class="card-title mb-0 d-flex align-items-center">
+                    <span class="me-2">📊</span>
+                    Relatórios Completos
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Botões de Exportação -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-2">
+                        <a href="/exportar-sorteios-completo" class="btn btn-primary-custom w-100">
+                            🎯 Exportar Sorteios
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/exportar-checkins" class="btn btn-success-custom w-100">
+                            ✅ Exportar Check-ins
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/exportar-vendas" class="btn btn-warning-custom w-100">
+                            💰 Exportar Vendas
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/exportar-clientes" class="btn btn-info-custom w-100">
+                            📋 Exportar Clientes
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Abas -->
+                <ul class="nav nav-tabs" id="relatoriosTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="sorteios-tab" data-bs-toggle="tab" data-bs-target="#sorteios" type="button" role="tab">
+                            🎯 Sorteios ({{ sorteios|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="checkins-tab" data-bs-toggle="tab" data-bs-target="#checkins" type="button" role="tab">
+                            ✅ Check-ins ({{ checkins|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="vendas-tab" data-bs-toggle="tab" data-bs-target="#vendas" type="button" role="tab">
+                            💰 Vendas ({{ vendas|length }})
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="relatoriosTabsContent">
+                    <!-- ABA SORTEIOS -->
+                    <div class="tab-pane fade show active" id="sorteios" role="tabpanel">
+                        <div class="mt-3">
+                            <!-- Estatísticas Sorteios -->
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-primary-custom">{{ sorteios|length }}</h5>
+                                            <p class="card-text">Total Sorteios</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-warning">{{ sorteios_20k|length }}</h5>
+                                            <p class="card-text">Sorteios R$ 20k</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-danger">{{ sorteios_50k|length }}</h5>
+                                            <p class="card-text">Sorteios R$ 50k</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-success">R$ {{ total_faturamento_sorteios|currency }}</h5>
+                                            <p class="card-text">Faturamento do Sorteio</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabela Sorteios -->
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Data/Hora</th>
+                                            <th>Categoria</th>
+                                            <th>Revenda Vencedora</th>
+                                            <th>CNPJ</th>
+                                            <th class="text-end">Faturamento</th>
+                                            <th>Brinde</th>
+                                            <th>Responsável</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for sorteio in sorteios %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ sorteio.data_sorteio.strftime('%d/%m/%Y') }}</strong><br>
+                                                <small class="text-muted">{{ sorteio.data_sorteio.strftime('%H:%M') }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if sorteio.tipo_brinde == '50k' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                    R$ {{ sorteio.tipo_brinde }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong>{{ sorteio.razao_social_vencedor }}</strong>
+                                            </td>
+                                            <td>
+                                                <code>{{ sorteio.cnpj_vencedor|cnpj }}</code>
+                                            </td>
+                                            <td class="text-end">
+                                                R$ {{ sorteio.valor_acumulado_revenda|currency }}
+                                            </td>
+                                            <td>
+                                                {% if sorteio.brinde %}
+                                                <strong>{{ sorteio.brinde.nome }}</strong>
+                                                {% if sorteio.brinde.valor_aproximado %}
+                                                <br><small class="text-muted">R$ {{ sorteio.brinde.valor_aproximado|currency }}</small>
+                                                {% endif %}
+                                                {% else %}
+                                                <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ sorteio.responsavel_recebimento }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {% if not sorteios %}
+                            <div class="text-center text-muted py-5">
+                                <h5>Nenhum sorteio realizado</h5>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ABA CHECK-INS -->
+                    <div class="tab-pane fade" id="checkins" role="tabpanel">
+                        <div class="mt-3">
+                            <!-- Estatísticas Check-ins -->
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-primary-custom">{{ checkins|length }}</h5>
+                                            <p class="card-text">Total Check-in's</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-success">{{ revendas_unicas_checkin }}</h5>
+                                            <p class="card-text">Revendas</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-info">{{ responsaveis_unicos_checkin }}</h5>
+                                            <p class="card-text">Total de pessoas</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-warning">{{ total_clientes - checkins|length }}</h5>
+                                            <p class="card-text">Check-in's Pendentes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabela Check-ins -->
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Horário</th>
+                                            <th>Revenda</th>
+                                            <th>CNPJ</th>
+                                            <th>Responsável</th>
+                                            <th>Consultor</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for checkin in checkins %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ checkin.horario_checkin.strftime('%d/%m/%Y') }}</strong><br>
+                                                <small class="text-muted">{{ checkin.horario_checkin.strftime('%H:%M') }}</small>
+                                            </td>
+                                            <td>
+                                                <strong>{{ checkin.razao_social }}</strong>
+                                            </td>
+                                            <td>
+                                                <code>{{ checkin.cnpj|cnpj }}</code>
+                                            </td>
+                                            <td>
+                                                {{ checkin.responsavel_checkin or checkin.responsavel }}
+                                            </td>
+                                            <td>
+                                                {% if checkin.consultor and checkin.consultor != 'Não Informado' %}
+                                                <span class="badge bg-info">{{ checkin.consultor }}</span>
+                                                {% else %}
+                                                <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">✅ Presente</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {% if not checkins %}
+                            <div class="text-center text-muted py-5">
+                                <h5>Nenhum check-in realizado</h5>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ABA VENDAS -->
+                    <div class="tab-pane fade" id="vendas" role="tabpanel">
+                        <div class="mt-3">
+                            <!-- Estatísticas Vendas -->
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-primary-custom">{{ vendas|length }}</h5>
+                                            <p class="card-text">Total Vendas</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-success">R$ {{ total_vendas_valor|currency }}</h5>
+                                            <p class="card-text">Faturamento Total</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-info">{{ revendas_compradoras }}</h5>
+                                            <p class="card-text">Revendas Compradoras</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title text-warning">R$ {{ ticket_medio|currency }}</h5>
+                                            <p class="card-text">Ticket Médio</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabela Vendas -->
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Data/Hora</th>
+                                            <th>Nº Pedido</th>
+                                            <th>Revenda</th>
+                                            <th>CNPJ Compra</th>
+                                            <th>Responsável</th>
+                                            <th class="text-end">Valor</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for venda in vendas %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ venda.data_hora_venda.strftime('%d/%m/%Y') }}</strong><br>
+                                                <small class="text-muted">{{ venda.data_hora_venda.strftime('%H:%M') }}</small>
+                                            </td>
+                                            <td>
+                                                <code>{{ venda.numero_pedido }}</code>
+                                            </td>
+                                            <td>
+                                                <strong>{{ venda.cliente.razao_social }}</strong>
+                                            </td>
+                                            <td>
+                                                <code>{{ venda.cnpj_compra|cnpj }}</code>
+                                                {% if venda.cnpj_checkin_vinculado %}
+                                                <br><small class="text-info">Vinculado: {{ venda.cnpj_checkin_vinculado|cnpj }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ venda.cliente.responsavel }}
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="text-success">R$ {{ venda.valor_pedido|currency }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">✅ Confirmada</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-primary">
+                                            <td colspan="5" class="text-end"><strong>Total Geral:</strong></td>
+                                            <td class="text-end"><strong>R$ {{ total_vendas_valor|currency }}</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            {% if not vendas %}
+                            <div class="text-center text-muted py-5">
+                                <h5>Nenhuma venda registrada</h5>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Ativar tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+// Ordenação das tabelas
+document.addEventListener('DOMContentLoaded', function() {
+    const tables = document.querySelectorAll('.table');
+    tables.forEach(table => {
+        const headers = table.querySelectorAll('th');
+        headers.forEach((header, index) => {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', () => {
+                sortTable(table, index);
+            });
+        });
+    });
+});
+
+function sortTable(table, columnIndex) {
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const isAscending = !table.getAttribute('data-sort-asc');
+    
+    rows.sort((a, b) => {
+        let aValue = a.cells[columnIndex].textContent.trim();
+        let bValue = b.cells[columnIndex].textContent.trim();
+        
+        // Para colunas de data/hora
+        if (columnIndex === 0) {
+            const aDateStr = a.cells[columnIndex].querySelector('strong')?.textContent;
+            const aTimeStr = a.cells[columnIndex].querySelector('small')?.textContent;
+            const bDateStr = b.cells[columnIndex].querySelector('strong')?.textContent;
+            const bTimeStr = b.cells[columnIndex].querySelector('small')?.textContent;
+            
+            if (aDateStr && aTimeStr && bDateStr && bTimeStr) {
+                aValue = new Date(aDateStr.split('/').reverse().join('-') + ' ' + aTimeStr);
+                bValue = new Date(bDateStr.split('/').reverse().join('-') + ' ' + bTimeStr);
+            }
+        }
+        
+        // Para colunas de valor (remove formatação brasileira)
+        if (aValue.includes('R$') || columnIndex === 4 || columnIndex === 5) {
+            aValue = parseFloat(aValue.replace('R$', '').replace(/\./g, '').replace(',', '.'));
+            bValue = parseFloat(bValue.replace('R$', '').replace(/\./g, '').replace(',', '.'));
+        }
+        
+        if (aValue < bValue) return isAscending ? -1 : 1;
+        if (aValue > bValue) return isAscending ? 1 : -1;
+        return 0;
+    });
+    
+    // Remover e re-adicionar linhas
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
+    rows.forEach(row => tbody.appendChild(row));
+    
+    table.setAttribute('data-sort-asc', isAscending);
+}
+</script>
+
+<style>
+.nav-tabs .nav-link {
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: 600;
+}
+
+.table th {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.table th:hover::after {
+    content: '↕';
+    position: absolute;
+    right: 8px;
+    opacity: 0.5;
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn {
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

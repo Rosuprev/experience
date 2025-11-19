@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa de Satisfação - R.O Experience 2025</title>
+    
+    <!-- Bootstrap local -->
+    <link href="{{ url_for('static', filename='js/libs/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    
+    <!-- Fontes locais -->
+    <style>
+        :root {
+            --primary-dark: #043333;
+            --primary-light: #2c5c2c;
+            --accent-green: #64941c;
+            --accent-yellow: #cef005;
+            --accent-olive: #426d23;
+        }
+        
+        .bg-primary-custom {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%) !important;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-right: auto;
+        }
+        
+        .experience-text {
+            font-family: 'Brush Script MT', cursive;
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--accent-yellow) 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .ro-text {
+            font-family: 'Arial', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .year-text {
+            font-family: 'Arial', sans-serif;
+            font-weight: 300;
+            font-size: 1.4rem;
+            color: var(--accent-yellow);
+            margin-left: 5px;
+        }
+        
+        .logo {
+            height: 50px;
+            width: auto;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .logo-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logo-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .title-content {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .footer-logo {
+            height: 40px;
+            width: auto;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-logo:hover {
+            opacity: 1;
+        }
+
+        /* Estilos específicos da pesquisa */
+        .pesquisa-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 2rem auto;
+            max-width: 800px;
+        }
+        
+        .pesquisa-header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .pesquisa-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .pesquisa-body {
+            padding: 3rem 2rem;
+        }
+        
+        .questao-card {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .questao-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .questao-numero {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-olive));
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .rating-stars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .star-btn {
+            background: none;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .star-btn:hover {
+            background: var(--accent-yellow);
+            border-color: var(--accent-green);
+            transform: scale(1.1);
+        }
+        
+        .star-btn.selected {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-olive));
+            color: white;
+            border-color: var(--accent-green);
+        }
+        
+        .identificacao-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--accent-green);
+        }
+        
+        .btn-identificacao {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            text-align: left;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-identificacao:hover {
+            border-color: var(--accent-green);
+            background: #f8fff8;
+        }
+        
+        .btn-identificacao.selected {
+            border-color: var(--accent-green);
+            background: linear-gradient(135deg, #f8fff8, #e8f5e8);
+        }
+        
+        .cnpj-validado {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+        
+        .cnpj-invalido {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .btn-submit-pesquisa {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-olive));
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 2rem;
+            cursor: pointer;
+        }
+        
+        .btn-submit-pesquisa:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(100, 148, 28, 0.3);
+        }
+        
+        .btn-submit-pesquisa:disabled {
+            background: #6c757d;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        .textarea-dissertativa {
+            min-height: 120px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 1rem;
+            resize: vertical;
+        }
+        
+        .textarea-dissertativa:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 0.2rem rgba(100, 148, 28, 0.25);
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-olive));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        /* Otimizações para mobile */
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .brand-section {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .title-section {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .navbar-brand {
+                margin-right: 0;
+                text-align: center;
+            }
+            
+            .experience-text {
+                font-size: 1.8rem;
+            }
+            
+            .ro-text {
+                font-size: 1.5rem;
+            }
+            
+            .year-text {
+                font-size: 1.2rem;
+            }
+
+            .footer-content {
+                text-align: center;
+            }
+
+            .footer-logo-container {
+                text-align: center;
+                margin-top: 10px;
+            }
+            
+            /* Otimizações específicas para pesquisa em mobile */
+            .pesquisa-header {
+                padding: 2rem 1rem;
+            }
+            
+            .pesquisa-body {
+                padding: 2rem 1rem;
+            }
+            
+            .questao-card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .rating-stars {
+                gap: 5px;
+                margin: 1rem 0;
+            }
+            
+            .star-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1rem;
+            }
+            
+            .identificacao-section {
+                padding: 1.5rem;
+            }
+            
+            .btn-identificacao {
+                padding: 0.8rem;
+            }
+            
+            .btn-submit-pesquisa {
+                padding: 0.8rem 2rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title-content {
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+            }
+            
+            .experience-text {
+                font-size: 1.6rem;
+            }
+            
+            .ro-text {
+                font-size: 1.3rem;
+            }
+            
+            .year-text {
+                font-size: 1.1rem;
+                margin-left: 0;
+            }
+            
+            /* Otimizações adicionais para telas muito pequenas */
+            .pesquisa-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .pesquisa-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .pesquisa-body {
+                padding: 1.5rem 1rem;
+            }
+            
+            .questao-card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .questao-numero {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .questao-card h4 {
+                font-size: 1.1rem;
+            }
+            
+            .rating-stars {
+                gap: 3px;
+            }
+            
+            .star-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+            
+            .identificacao-section {
+                padding: 1rem;
+            }
+            
+            .btn-identificacao {
+                padding: 0.7rem;
+                margin-bottom: 0.7rem;
+            }
+            
+            .btn-identificacao h6 {
+                font-size: 0.9rem;
+            }
+            
+            .btn-identificacao small {
+                font-size: 0.8rem;
+            }
+            
+            .btn-submit-pesquisa {
+                padding: 0.8rem;
+                font-size: 1rem;
+                margin-top: 1rem;
+            }
+            
+            .textarea-dissertativa {
+                min-height: 100px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .rating-stars {
+                gap: 2px;
+            }
+            
+            .star-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.8rem;
+            }
+            
+            .questao-card h4 {
+                font-size: 1rem;
+            }
+            
+            .questao-card p {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header igual ao base.html -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+        <div class="container">
+            <div class="nav-content">
+                <div class="brand-section">
+                    <!-- Logo02.png no topo à esquerda -->
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Experience 2025" class="logo">
+                    </button>
+                </div>
+                
+                <div class="col-md-9 footer-logo-container text-md-end">
+                    <!-- Logo.png no rodapé à direita -->
+                    <img src="{{ url_for('static', filename='images/logo02.png') }}" alt="Experience 2025" class="footer-logo">
+                </div>
+                <!-- Espaço vazio para manter o layout balanceado -->
+                <div style="width: 80px;"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Container principal -->
+    <div class="container mt-4">
+        <div class="pesquisa-container">
+            <!-- Header da Pesquisa -->
+            <div class="pesquisa-header">
+                
+                <h1 class="display-5 fw-bold mb-3">📊Pesquisa de Satisfação</h1>
+                <p class="lead mb-0">Experience 2025</p>
+                <small class="opacity-75">Sua opinião é muito importante para nós!</small>
+            </div>
+
+            <!-- Corpo da Pesquisa -->
+            <div class="pesquisa-body">
+                {% if not enviado %}
+                <form id="formPesquisa" method="POST">
+                    <!-- Seção de Identificação Opcional -->
+                    <div class="identificacao-section">
+                        <h4 class="mb-3">🔍 Identificação (Opcional)</h4>
+                        <p class="text-muted mb-4">Você pode se identificar para associar sua pesquisa ao seu CNPJ ou responder anonimamente.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="button" class="btn-identificacao" onclick="selecionarIdentificacao('cnpj')" id="btnCnpj">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="fas fa-building fa-2x text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Identificar com CNPJ</h6>
+                                            <small class="text-muted">Associar à sua empresa</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn-identificacao" onclick="selecionarIdentificacao('anonimo')" id="btnAnonimo">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="fas fa-user-secret fa-2x text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Responder Anonimamente</h6>
+                                            <small class="text-muted">Sem identificação</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Campo CNPJ (aparece apenas quando selecionado) -->
+                        <div id="campoCnpj" class="mt-3" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label for="cnpj" class="form-label">CNPJ da Empresa</label>
+                                    <input type="text" class="form-control" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn w-100" style="background: linear-gradient(135deg, var(--accent-green), var(--accent-olive)); color: white;" onclick="validarCnpj()" id="btnValidarCnpj">
+                                        <span id="textoValidar">Validar CNPJ</span>
+                                        <div id="loadingValidar" class="spinner-border spinner-border-sm d-none" role="status">
+                                            <span class="visually-hidden">Validando...</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="resultadoValidacao" class="mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Questões de Avaliação -->
+                    <div class="questao-card">
+                        <div class="questao-numero">1</div>
+                        <h4>Como você avalia a organização geral do evento?</h4>
+                        <p class="text-muted">Avalie de 1 (Péssimo) a 10 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 11) %}
+                            <button type="button" class="star-btn" data-questao="organizacao" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="organizacao" id="organizacao" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">2</div>
+                        <h4>Qual sua satisfação com a qualidade das palestras e conteúdo?</h4>
+                        <p class="text-muted">Avalie de 1 (Muito Insatisfeito) a 10 (Muito Satisfeito)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 11) %}
+                            <button type="button" class="star-btn" data-questao="palestras" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="palestras" id="palestras" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">3</div>
+                        <h4>Como avalia o atendimento e suporte durante o evento?</h4>
+                        <p class="text-muted">Avalie de 1 (Muito Ruim) a 10 (Excelente)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 11) %}
+                            <button type="button" class="star-btn" data-questao="atendimento" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="atendimento" id="atendimento" required>
+                    </div>
+
+                    <div class="questao-card">
+                        <div class="questao-numero">4</div>
+                        <h4>Qual a probabilidade de você participar de futuros eventos?</h4>
+                        <p class="text-muted">Avalie de 1 (Muito Improvável) a 10 (Muito Provável)</p>
+                        
+                        <div class="rating-stars">
+                            {% for i in range(1, 11) %}
+                            <button type="button" class="star-btn" data-questao="futuro" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="futuro" id="futuro" required>
+                    </div>
+
+                    <!-- Questão Dissertativa -->
+                    <div class="questao-card">
+                        <div class="questao-numero">5</div>
+                        <h4>Comentários e Sugestões</h4>
+                        <p class="text-muted">Compartilhe suas impressões, sugestões de melhoria ou qualquer outro comentário sobre o evento.</p>
+                        
+                        <textarea class="form-control textarea-dissertativa" name="comentarios" id="comentarios" 
+                                  placeholder="Escreva aqui seus comentários, sugestões ou impressões sobre o evento..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit-pesquisa" id="btnEnviar" disabled>
+                        <span id="textoEnviar">📨 Enviar Pesquisa</span>
+                        <div id="loadingEnviar" class="spinner-border spinner-border-sm d-none" role="status">
+                            <span class="visually-hidden">Enviando...</span>
+                        </div>
+                    </button>
+                </form>
+                {% else %}
+                <!-- Mensagem de Sucesso -->
+                <div class="success-message">
+                    <div class="display-1 mb-3">🎉</div>
+                    <h2 class="mb-3">Obrigado pela sua participação!</h2>
+                    <p class="lead mb-4">Sua pesquisa foi enviada com sucesso. Sua opinião é muito valiosa para nós!</p>
+                    <a href="{{ url_for('pesquisa_publica') }}" class="btn btn-light btn-lg">
+                        📝 Responder Novamente
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer igual ao base.html -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8 footer-content">
+                    <h6>🎯 R.O Experience 2025</h6>
+                    <p class="mb-0 small">Sistema de pesquisa de satisfação</p>
+                    <p class="mb-0 small mt-2">
+                        <em>Sua opinião é muito importante para melhorarmos nossos eventos</em>
+                    </p>
+                </div>
+                
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS local -->
+    <script src="{{ url_for('static', filename='js/libs/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    
+    <script>
+        let tipoIdentificacao = null;
+        let cnpjValidado = false;
+    
+        function selecionarIdentificacao(tipo) {
+            tipoIdentificacao = tipo;
+            
+            // Resetar seleções
+            document.getElementById('btnCnpj').classList.remove('selected');
+            document.getElementById('btnAnonimo').classList.remove('selected');
+            document.getElementById('campoCnpj').style.display = 'none';
+            document.getElementById('resultadoValidacao').innerHTML = '';
+            cnpjValidado = false;
+            
+            // Selecionar o tipo escolhido
+            if (tipo === 'cnpj') {
+                document.getElementById('btnCnpj').classList.add('selected');
+                document.getElementById('campoCnpj').style.display = 'block';
+            } else {
+                document.getElementById('btnAnonimo').classList.add('selected');
+            }
+            
+            verificarFormularioCompleto();
+        }
+    
+        function selecionarAvaliacao(botao) {
+            const questao = botao.getAttribute('data-questao');
+            const valor = botao.getAttribute('data-valor');
+            
+            // Remover seleção de todos os botões desta questão
+            const botoes = document.querySelectorAll(`[data-questao="${questao}"]`);
+            botoes.forEach(btn => btn.classList.remove('selected'));
+            
+            // Selecionar o botão clicado
+            botao.classList.add('selected');
+            
+            // Atualizar o campo hidden
+            document.getElementById(questao).value = valor;
+            
+            verificarFormularioCompleto();
+        }
+    
+        async function validarCnpj() {
+            const cnpj = document.getElementById('cnpj').value;
+            const btnValidar = document.getElementById('btnValidarCnpj');
+            const textoValidar = document.getElementById('textoValidar');
+            const loadingValidar = document.getElementById('loadingValidar');
+            const resultado = document.getElementById('resultadoValidacao');
+            
+            if (!cnpj) {
+                resultado.innerHTML = '<small class="cnpj-invalido">⚠️ Digite um CNPJ para validar</small>';
+                return;
+            }
+            
+            // Mostrar loading
+            textoValidar.classList.add('d-none');
+            loadingValidar.classList.remove('d-none');
+            btnValidar.disabled = true;
+            
+            try {
+                const response = await fetch(`/api/validar-cnpj-pesquisa/${encodeURIComponent(cnpj)}`);
+                const data = await response.json();
+                
+                if (data.valido) {
+                    resultado.innerHTML = `<small class="cnpj-validado">✅ ${data.mensagem}</small>`;
+                    cnpjValidado = true;
+                } else {
+                    resultado.innerHTML = `<small class="cnpj-invalido">❌ ${data.mensagem}</small>`;
+                    cnpjValidado = false;
+                }
+            } catch (error) {
+                resultado.innerHTML = '<small class="cnpj-invalido">❌ Erro na validação</small>';
+                cnpjValidado = false;
+            } finally {
+                textoValidar.classList.remove('d-none');
+                loadingValidar.classList.add('d-none');
+                btnValidar.disabled = false;
+                verificarFormularioCompleto();
+            }
+        }
+    
+        function verificarFormularioCompleto() {
+            const organizacao = document.getElementById('organizacao').value;
+            const palestras = document.getElementById('palestras').value;
+            const atendimento = document.getElementById('atendimento').value;
+            const futuro = document.getElementById('futuro').value;
+            const btnEnviar = document.getElementById('btnEnviar');
+            
+            // Verificar se todas as questões obrigatórias foram respondidas
+            const questoesCompletas = organizacao && palestras && atendimento && futuro;
+            
+            // Verificar identificação
+            let identificacaoValida = false;
+            if (tipoIdentificacao === 'anonimo') {
+                identificacaoValida = true;
+            } else if (tipoIdentificacao === 'cnpj') {
+                identificacaoValida = cnpjValidado;
+            }
+            
+            btnEnviar.disabled = !(questoesCompletas && identificacaoValida);
+        }
+    
+        // Máscara para CNPJ
+        document.getElementById('cnpj').addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            
+            if (value.length > 2) {
+                value = value.slice(0, 2) + '.' + value.slice(2);
+            }
+            if (value.length > 6) {
+                value = value.slice(0, 6) + '.' + value.slice(6);
+            }
+            if (value.length > 10) {
+                value = value.slice(0, 10) + '/' + value.slice(10);
+            }
+            if (value.length > 15) {
+                value = value.slice(0, 15) + '-' + value.slice(15, 17);
+            }
+            
+            this.value = value;
+            
+            // Resetar validação quando o CNPJ for alterado
+            cnpjValidado = false;
+            document.getElementById('resultadoValidacao').innerHTML = '';
+            verificarFormularioCompleto();
+        });
+    
+        // Submit do formulário
+        document.getElementById('formPesquisa').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btnEnviar = document.getElementById('btnEnviar');
+            const textoEnviar = document.getElementById('textoEnviar');
+            const loadingEnviar = document.getElementById('loadingEnviar');
+            
+            // Mostrar loading
+            textoEnviar.classList.add('d-none');
+            loadingEnviar.classList.remove('d-none');
+            btnEnviar.disabled = true;
+            
+            // Enviar formulário
+            this.submit();
+        });
+    </script>
+    
+</body>
+</html>

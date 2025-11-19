@@ -1,0 +1,29 @@
+# Arquivos de desenvolvimento
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.env
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Database (se quiser manter os dados localmente)
+instance/database.db
+
+# Arquivos temporários
+temp/
+tmp/
+
+# Sistema
+.DS_Store
+Thumbs.db

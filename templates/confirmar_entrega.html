@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-2">
+    <!-- Header Mobile -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body py-3">
+                    <div class="text-center">
+                        <h2 class="h4 mb-1">
+                            <span class="me-2">🎁</span>
+                            Entrega de Brindes
+                        </h2>
+                        <p class="mb-0 opacity-75 small">Controle de entrega - Mobile</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas em Grid 2x2 -->
+    <div class="row g-2 mb-3">
+        <div class="col-6">
+            <div class="card border-0 bg-primary text-white text-center p-2">
+                <div class="h5 mb-0" id="totalSorteados">0</div>
+                <small class="opacity-75">Sorteados</small>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card border-0 bg-success text-white text-center p-2">
+                <div class="h5 mb-0" id="totalEntregues">0</div>
+                <small class="opacity-75">Entregues</small>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card border-0 bg-warning text-dark text-center p-2">
+                <div class="h5 mb-0" id="totalPendentes">0</div>
+                <small class="opacity-75">Pendentes</small>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card border-0 bg-info text-white text-center p-2">
+                <div class="h5 mb-0" id="percentualEntrega">0%</div>
+                <small class="opacity-75">Taxa</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Mobile -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body py-2">
+            <!-- Botão para expandir filtros -->
+            <button class="btn btn-outline-primary btn-sm w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#filtrosCollapse">
+                🔍 Filtros
+            </button>
+            
+            <!-- Filtros colapsáveis -->
+            <div class="collapse" id="filtrosCollapse">
+                <div class="row g-2">
+                    <div class="col-12">
+                        <input type="text" class="form-control form-control-sm" id="filtroPesquisa" 
+                               placeholder="Pesquisar revenda...">
+                    </div>
+                    <div class="col-6">
+                        <select class="form-select form-select-sm" id="filtroStatus">
+                            <option value="">Todos status</option>
+                            <option value="pendente">Pendentes</option>
+                            <option value="entregue">Entregues</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select class="form-select form-select-sm" id="filtroTipo">
+                            <option value="">Todos tipos</option>
+                            <option value="20k">R$ 20k</option>
+                            <option value="50k">R$ 50k</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-outline-secondary btn-sm w-100" id="btnLimparFiltros">
+                            🗑️ Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Brindes - Cards Mobile -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0 text-primary-custom">📋 Brindes Sorteados</h5>
+                <small class="text-muted" id="contadorItens">0 itens</small>
+            </div>
+            
+            <div id="listaBrindesMobile">
+                <!-- Cards serão carregados via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Mobile -->
+    <div id="loading" class="text-center mt-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2 text-muted small">Carregando brindes...</p>
+    </div>
+
+    <!-- Botão Flutuante para Topo -->
+    <button id="btnTopo" class="btn btn-primary rounded-circle position-fixed shadow" 
+            style="bottom: 20px; right: 20px; width: 50px; height: 50px; display: none; z-index: 1000;">
+        ↑
+    </button>
+</div>
+
+<!-- Modal de Confirmação de Entrega - Mobile -->
+<div class="modal fade" id="modalEntrega" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-success text-white py-3">
+                <h6 class="modal-title mb-0">
+                    <span class="me-2">✅</span>
+                    Confirmar Entrega
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div id="detalhesBrinde" class="mb-3">
+                    <!-- Detalhes serão preenchidos via JavaScript -->
+                </div>
+                
+                <form id="formEntrega">
+                    <input type="hidden" id="sorteio_id" name="sorteio_id">
+                    
+                    <div class="mb-3">
+                        <label for="responsavel_entrega" class="form-label fw-bold small">
+                            🧑‍💼 Seu Nome
+                        </label>
+                        <input type="text" class="form-control form-control-sm" id="responsavel_entrega" 
+                               name="responsavel_entrega" placeholder="Quem está entregando" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observacao_entrega" class="form-label fw-bold small">
+                            📝 Observações (Opcional)
+                        </label>
+                        <textarea class="form-control form-control-sm" id="observacao_entrega" 
+                                  name="observacao_entrega" rows="2" placeholder="Alguma observação..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info border-0 py-2 small mb-3">
+                        💡 <strong>Atenção:</strong> Após confirmar, não poderá ser revertido.
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                        ✅ Confirmar Entrega
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes - Mobile -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-primary text-white py-3">
+                <h6 class="modal-title mb-0">
+                    <span class="me-2">🔍</span>
+                    Detalhes
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3" id="detalhesCompletos">
+                <!-- Detalhes completos serão preenchidos via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variáveis globais
+let brindesData = [];
+
+// Carregar brindes sorteados
+function carregarBrindes() {
+    fetch('/api/brindes-sorteados-completo')
+        .then(response => response.json())
+        .then(data => {
+            brindesData = data;
+            atualizarListaMobile();
+            atualizarEstatisticas();
+            ocultarLoading();
+        })
+        .catch(error => {
+            console.error('Erro ao carregar brindes:', error);
+            document.getElementById('listaBrindesMobile').innerHTML = `
+                <div class="alert alert-danger text-center py-4">
+                    ❌ Erro ao carregar. Tente novamente.
+                </div>
+            `;
+            ocultarLoading();
+        });
+}
+
+// Atualizar lista mobile (cards)
+function atualizarListaMobile() {
+    const container = document.getElementById('listaBrindesMobile');
+    const filtroPesquisa = document.getElementById('filtroPesquisa').value.toLowerCase();
+    const filtroStatus = document.getElementById('filtroStatus').value;
+    const filtroTipo = document.getElementById('filtroTipo').value;
+    
+    let dadosFiltrados = brindesData.filter(brinde => {
+        const matchPesquisa = brinde.razao_social_vencedor.toLowerCase().includes(filtroPesquisa) || 
+                             brinde.responsavel_recebimento.toLowerCase().includes(filtroPesquisa) ||
+                             (brinde.brinde_nome && brinde.brinde_nome.toLowerCase().includes(filtroPesquisa));
+        const matchStatus = !filtroStatus || 
+                           (filtroStatus === 'pendente' && !brinde.entregue) ||
+                           (filtroStatus === 'entregue' && brinde.entregue);
+        const matchTipo = !filtroTipo || brinde.tipo_brinde === filtroTipo;
+        
+        return matchPesquisa && matchStatus && matchTipo;
+    });
+    
+    // Ordenar por data (mais recentes primeiro)
+    dadosFiltrados.sort((a, b) => new Date(b.data_sorteio) - new Date(a.data_sorteio));
+    
+    // Atualizar contador
+    document.getElementById('contadorItens').textContent = `${dadosFiltrados.length} itens`;
+    
+    if (dadosFiltrados.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info text-center py-4">
+                📭 Nenhum brinde encontrado
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = dadosFiltrados.map(brinde => `
+        <div class="card mb-2 border-0 shadow-sm ${brinde.entregue ? 'border-success' : 'border-warning'}">
+            <div class="card-body p-3">
+                <!-- Header do Card -->
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="flex-grow-1">
+                        <h6 class="card-title mb-1 text-truncate">${brinde.razao_social_vencedor}</h6>
+                        <small class="text-muted">${brinde.responsavel_recebimento}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge ${brinde.tipo_brinde === '50k' ? 'bg-warning' : 'bg-info'} small">
+                            R$ ${brinde.tipo_brinde}
+                        </span>
+                        <div class="mt-1">
+                            ${brinde.entregue ? 
+                                '<span class="badge bg-success small">✅</span>' : 
+                                '<span class="badge bg-warning text-dark small">⏳</span>'
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detalhes do Brinde -->
+                <div class="mb-2">
+                    <strong>🎁 ${brinde.brinde_nome || 'Brinde'}</strong>
+                    ${brinde.brinde_descricao ? `<br><small class="text-muted">${brinde.brinde_descricao}</small>` : ''}
+                </div>
+                
+                <!-- Informações Adicionais -->
+                <div class="row small text-muted mb-2">
+                    <div class="col-6">
+                        <small>📅 ${formatarDataMobile(brinde.data_sorteio)}</small>
+                    </div>
+                    <div class="col-6 text-end">
+                        <small>💰 R$ ${(brinde.valor_acumulado_revenda || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</small>
+                    </div>
+                </div>
+                
+                <!-- Botões de Ação -->
+                <div class="d-flex gap-1">
+                    <button class="btn btn-outline-primary btn-sm flex-fill" 
+                            onclick="verDetalhes(${brinde.id})">
+                        🔍 Detalhes
+                    </button>
+                    ${!brinde.entregue ? 
+                        `<button class="btn btn-success btn-sm flex-fill" 
+                                onclick="confirmarEntrega(${brinde.id})">
+                            ✅ Entregar
+                        </button>` : 
+                        `<button class="btn btn-outline-secondary btn-sm flex-fill" disabled>
+                            ✅ Entregue
+                        </button>`
+                    }
+                </div>
+                
+                ${brinde.entregue ? `
+                    <div class="mt-2 p-2 bg-light rounded small">
+                        <strong>Entregue em:</strong> ${formatarDataMobile(brinde.data_entrega)}<br>
+                        <strong>Por:</strong> ${brinde.responsavel_entrega || 'N/A'}
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Atualizar estatísticas
+function atualizarEstatisticas() {
+    const totalSorteados = brindesData.length;
+    const totalEntregues = brindesData.filter(b => b.entregue).length;
+    const totalPendentes = totalSorteados - totalEntregues;
+    const percentualEntrega = totalSorteados > 0 ? Math.round((totalEntregues / totalSorteados) * 100) : 0;
+    
+    document.getElementById('totalSorteados').textContent = totalSorteados;
+    document.getElementById('totalEntregues').textContent = totalEntregues;
+    document.getElementById('totalPendentes').textContent = totalPendentes;
+    document.getElementById('percentualEntrega').textContent = percentualEntrega + '%';
+}
+
+// Formatar data para mobile
+function formatarDataMobile(dataString) {
+    if (!dataString) return 'N/A';
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR');
+}
+
+// Ver detalhes do sorteio
+function verDetalhes(sorteioId) {
+    const brinde = brindesData.find(b => b.id === sorteioId);
+    if (!brinde) return;
+    
+    const detalhesHTML = `
+        <div class="row g-2">
+            <div class="col-12">
+                <h6 class="text-primary-custom border-bottom pb-1">🏢 Revenda</h6>
+                <p class="mb-1 small"><strong>Razão Social:</strong> ${brinde.razao_social_vencedor}</p>
+                <p class="mb-1 small"><strong>CNPJ:</strong> ${formatarCNPJ(brinde.cnpj_vencedor)}</p>
+                <p class="mb-2 small"><strong>Responsável:</strong> ${brinde.responsavel_recebimento}</p>
+            </div>
+            <div class="col-12">
+                <h6 class="text-primary-custom border-bottom pb-1">🎁 Brinde</h6>
+                <p class="mb-1 small"><strong>Nome:</strong> ${brinde.brinde_nome || 'N/A'}</p>
+                <p class="mb-1 small"><strong>Tipo:</strong> R$ ${brinde.tipo_brinde}</p>
+                ${brinde.brinde_descricao ? `<p class="mb-1 small"><strong>Descrição:</strong> ${brinde.brinde_descricao}</p>` : ''}
+                ${brinde.brinde_valor ? `<p class="mb-2 small"><strong>Valor:</strong> R$ ${brinde.brinde_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>` : ''}
+            </div>
+            <div class="col-12">
+                <h6 class="text-primary-custom border-bottom pb-1">📊 Sorteio</h6>
+                <p class="mb-1 small"><strong>Data:</strong> ${formatarDataMobile(brinde.data_sorteio)}</p>
+                <p class="mb-2 small"><strong>Faturamento:</strong> R$ ${brinde.valor_acumulado_revenda.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            </div>
+            <div class="col-12">
+                <h6 class="text-primary-custom border-bottom pb-1">🚚 Entrega</h6>
+                <p class="mb-1 small"><strong>Status:</strong> ${brinde.entregue ? '<span class="badge bg-success">✅ Entregue</span>' : '<span class="badge bg-warning">⏳ Pendente</span>'}</p>
+                ${brinde.entregue ? `
+                    <p class="mb-1 small"><strong>Data:</strong> ${formatarDataMobile(brinde.data_entrega)}</p>
+                    <p class="mb-1 small"><strong>Entregue por:</strong> ${brinde.responsavel_entrega || 'N/A'}</p>
+                    ${brinde.observacao_entrega ? `<p class="mb-0 small"><strong>Observações:</strong> ${brinde.observacao_entrega}</p>` : ''}
+                ` : '<p class="mb-0 small text-muted">Aguardando confirmação</p>'}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('detalhesCompletos').innerHTML = detalhesHTML;
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+    modal.show();
+}
+
+// Confirmar entrega
+function confirmarEntrega(sorteioId) {
+    const brinde = brindesData.find(b => b.id === sorteioId);
+    if (!brinde) return;
+    
+    // Preencher detalhes no modal
+    document.getElementById('detalhesBrinde').innerHTML = `
+        <div class="alert alert-info border-0 py-2 small">
+            <strong>Confirmação de Entrega</strong><br>
+            <strong>Revenda:</strong> ${brinde.razao_social_vencedor}<br>
+            <strong>Responsável:</strong> ${brinde.responsavel_recebimento}<br>
+            <strong>Brinde:</strong> ${brinde.brinde_nome || 'N/A'}
+        </div>
+    `;
+    
+    document.getElementById('sorteio_id').value = sorteioId;
+    document.getElementById('responsavel_entrega').value = '';
+    document.getElementById('observacao_entrega').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalEntrega'));
+    modal.show();
+}
+
+// Enviar confirmação de entrega
+document.getElementById('formEntrega').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    
+    // Mostrar loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Confirmando...';
+    
+    fetch('/confirmar-entrega', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Fechar modal e recarregar dados
+            bootstrap.Modal.getInstance(document.getElementById('modalEntrega')).hide();
+            carregarBrindes();
+            showAlert('✅ Entrega confirmada!', 'success');
+        } else {
+            showAlert('❌ Erro: ' + data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('❌ Erro na conexão', 'danger');
+    })
+    .finally(() => {
+        // Restaurar botão
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '✅ Confirmar Entrega';
+    });
+});
+
+// Mostrar alerta mobile
+function showAlert(message, type) {
+    const alertHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show position-fixed top-0 start-0 w-100 m-0 rounded-0" 
+             role="alert" style="z-index: 1060; border: none;">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', alertHTML);
+    
+    // Remover automaticamente após 3 segundos
+    setTimeout(() => {
+        const alert = document.querySelector('.alert');
+        if (alert) alert.remove();
+    }, 3000);
+}
+
+// Formatar CNPJ
+function formatarCNPJ(cnpj) {
+    if (!cnpj) return '';
+    return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+}
+
+// Ocultar loading
+function ocultarLoading() {
+    document.getElementById('loading').style.display = 'none';
+}
+
+// Botão voltar ao topo
+document.getElementById('btnTopo').addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Mostrar/ocultar botão do topo
+window.addEventListener('scroll', function() {
+    const btnTopo = document.getElementById('btnTopo');
+    if (window.scrollY > 300) {
+        btnTopo.style.display = 'block';
+    } else {
+        btnTopo.style.display = 'none';
+    }
+});
+
+// Event Listeners Mobile
+document.addEventListener('DOMContentLoaded', function() {
+    // Carregar brindes inicial
+    carregarBrindes();
+    
+    // Filtros em tempo real
+    document.getElementById('filtroPesquisa').addEventListener('input', atualizarListaMobile);
+    document.getElementById('filtroStatus').addEventListener('change', atualizarListaMobile);
+    document.getElementById('filtroTipo').addEventListener('change', atualizarListaMobile);
+    
+    // Limpar filtros
+    document.getElementById('btnLimparFiltros').addEventListener('click', function() {
+        document.getElementById('filtroPesquisa').value = '';
+        document.getElementById('filtroStatus').value = '';
+        document.getElementById('filtroTipo').value = '';
+        atualizarListaMobile();
+    });
+    
+    // Atualizar a cada 30 segundos
+    setInterval(carregarBrindes, 30000);
+    
+    // Swipe para refresh (simplificado)
+    let touchStartY = 0;
+    document.addEventListener('touchstart', e => {
+        touchStartY = e.touches[0].clientY;
+    });
+    
+    document.addEventListener('touchend', e => {
+        const touchEndY = e.changedTouches[0].clientY;
+        const diff = touchStartY - touchEndY;
+        
+        if (diff > 100 && window.scrollY === 0) {
+            // Pull to refresh
+            carregarBrindes();
+            showAlert('🔄 Atualizando...', 'info');
+        }
+    });
+});
+</script>
+
+<style>
+/* Estilos Mobile-First */
+.container-fluid {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+}
+
+.card-body {
+    padding: 12px;
+}
+
+.btn {
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+
+.badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+}
+
+.form-control, .form-select {
+    font-size: 0.875rem;
+    border-radius: 8px;
+}
+
+/* Melhorias de toque para mobile */
+.btn, .form-control, .form-select {
+    min-height: 44px; /* Tamanho mínimo para toque */
+}
+
+/* Animações suaves */
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:active {
+    transform: scale(0.98);
+}
+
+/* Scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Otimizações de performance */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Melhorias visuais para mobile */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* Loading otimizado */
+#loading {
+    padding: 2rem 0;
+}
+
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+</style>
+{% endblock %}

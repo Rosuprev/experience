@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">📊 Logs de Auditoria</h2>
+            <p class="text-muted mb-0">Registro de todas as atividades do sistema</p>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline-primary" onclick="exportarLogs()">
+                📤 Exportar Logs
+            </button>
+            <button class="btn btn-outline-secondary" onclick="limparFiltros()">
+                🔄 Limpar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="filtroUsuario" class="form-label">👤 Usuário</label>
+                    <select class="form-select" id="filtroUsuario">
+                        <option value="">Todos os usuários</option>
+                        {% for usuario in usuarios %}
+                        <option value="{{ usuario.username }}">{{ usuario.nome }} ({{ usuario.username }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filtroModulo" class="form-label">📦 Módulo</label>
+                    <select class="form-select" id="filtroModulo">
+                        <option value="">Todos os módulos</option>
+                        <option value="autenticacao">Autenticação</option>
+                        <option value="checkin">Check-in</option>
+                        <option value="vendas">Vendas</option>
+                        <option value="estoque">Estoque</option>
+                        <option value="sorteio">Sorteio</option>
+                        <option value="relatorios">Relatórios</option>
+                        <option value="usuarios">Usuários</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filtroAcao" class="form-label">🎯 Ação</label>
+                    <input type="text" class="form-control" id="filtroAcao" placeholder="Filtrar por ação...">
+                </div>
+                <div class="col-md-3">
+                    <label for="filtroData" class="form-label">📅 Data</label>
+                    <input type="date" class="form-control" id="filtroData">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center py-3">
+                    <h5 class="mb-1">{{ logs|length }}</h5>
+                    <small>Total de Logs</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center py-3">
+                    <h5 class="mb-1">{{ logs|selectattr('modulo', 'equalto', 'autenticacao')|list|length }}</h5>
+                    <small>Autenticações</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center py-3">
+                    <h5 class="mb-1">{{ logs|selectattr('modulo', 'equalto', 'vendas')|list|length }}</h5>
+                    <small>Vendas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center py-3">
+                    <h5 class="mb-1">{{ logs|selectattr('modulo', 'equalto', 'checkin')|list|length }}</h5>
+                    <small>Check-ins</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center py-3">
+                    <h5 class="mb-1">{{ logs|selectattr('modulo', 'equalto', 'usuarios')|list|length }}</h5>
+                    <small>Gestão de Usuários</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center py-3">
+                    <h5 class="mb-1">{{ usuarios|length }}</h5>
+                    <small>Usuários Únicos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Logs -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">Registros de Atividade</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 600px;">
+                <table class="table table-hover mb-0" id="tabelaLogs">
+                    <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Módulo</th>
+                            <th>Ação</th>
+                            <th>IP</th>
+                            <th>Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr class="log-item" 
+                            data-usuario="{{ log.usuario.username if log.usuario else 'Sistema' }}"
+                            data-modulo="{{ log.modulo }}"
+                            data-acao="{{ log.acao }}"
+                            data-data="{{ log.data_hora.strftime('%Y-%m-%d') }}">
+                            <td>
+                                <small class="text-muted">
+                                    {{ log.data_hora.strftime('%d/%m/%Y') }}<br>
+                                    {{ log.data_hora.strftime('%H:%M:%S') }}
+                                </small>
+                            </td>
+                            <td>
+                                <strong>{{ log.usuario.username if log.usuario else 'Sistema' }}</strong>
+                                {% if log.usuario %}
+                                <br><small class="text-muted">{{ log.usuario.nome }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if log.modulo == 'autenticacao' %}bg-primary
+                                    {% elif log.modulo == 'checkin' %}bg-success
+                                    {% elif log.modulo == 'vendas' %}bg-info
+                                    {% elif log.modulo == 'estoque' %}bg-warning
+                                    {% elif log.modulo == 'sorteio' %}bg-purple
+                                    {% elif log.modulo == 'usuarios' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ log.modulo|upper }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="fw-semibold">{{ log.acao }}</span>
+                            </td>
+                            <td>
+                                <code class="small">{{ log.ip }}</code>
+                            </td>
+                            <td>
+                                {% if log.dados %}
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="mostrarDetalhes({{ log.id }})">
+                                    🔍 Ver
+                                </button>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação/Info -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <small class="text-muted">
+            Mostrando os últimos {{ logs|length }} registros
+        </small>
+        <small class="text-muted">
+            Atualizado em: {{ now().strftime('%d/%m/%Y %H:%M') }}
+        </small>
+    </div>
+</div>
+
+<!-- Modal Detalhes do Log -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">🔍 Detalhes do Log</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="detalhesConteudo" class="p-3 bg-light rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Filtros em tempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const filtros = ['filtroUsuario', 'filtroModulo', 'filtroAcao', 'filtroData'];
+    
+    filtros.forEach(filtroId => {
+        document.getElementById(filtroId).addEventListener('input', filtrarLogs);
+    });
+});
+
+function filtrarLogs() {
+    const filtroUsuario = document.getElementById('filtroUsuario').value.toLowerCase();
+    const filtroModulo = document.getElementById('filtroModulo').value.toLowerCase();
+    const filtroAcao = document.getElementById('filtroAcao').value.toLowerCase();
+    const filtroData = document.getElementById('filtroData').value;
+    
+    const linhas = document.querySelectorAll('#tabelaLogs tbody tr');
+    
+    linhas.forEach(linha => {
+        const usuario = linha.getAttribute('data-usuario').toLowerCase();
+        const modulo = linha.getAttribute('data-modulo').toLowerCase();
+        const acao = linha.getAttribute('data-acao').toLowerCase();
+        const data = linha.getAttribute('data-data');
+        
+        const usuarioMatch = !filtroUsuario || usuario.includes(filtroUsuario);
+        const moduloMatch = !filtroModulo || modulo === filtroModulo;
+        const acaoMatch = !filtroAcao || acao.includes(filtroAcao);
+        const dataMatch = !filtroData || data === filtroData;
+        
+        linha.style.display = (usuarioMatch && moduloMatch && acaoMatch && dataMatch) ? '' : 'none';
+    });
+}
+
+function limparFiltros() {
+    document.getElementById('filtroUsuario').value = '';
+    document.getElementById('filtroModulo').value = '';
+    document.getElementById('filtroAcao').value = '';
+    document.getElementById('filtroData').value = '';
+    filtrarLogs();
+}
+
+function mostrarDetalhes(logId) {
+    fetch(`/api/log-detalhes/${logId}`)
+        .then(response => response.json())
+        .then(data => {
+            const conteudo = document.getElementById('detalhesConteudo');
+            if (data.dados) {
+                conteudo.textContent = JSON.stringify(JSON.parse(data.dados), null, 2);
+            } else {
+                conteudo.textContent = 'Nenhum dado adicional registrado.';
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao carregar detalhes do log.');
+        });
+}
+
+function exportarLogs() {
+    // Mostrar loading
+    const btnExportar = event.target;
+    const originalText = btnExportar.innerHTML;
+    btnExportar.innerHTML = '⏳ Exportando...';
+    btnExportar.disabled = true;
+    
+    // Fazer requisição para exportar logs
+    fetch('/exportar-logs')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro na exportação');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Criar link para download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'logs_auditoria_ro_experience.xlsx';
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            // Limpar
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            // Restaurar botão
+            btnExportar.innerHTML = originalText;
+            btnExportar.disabled = false;
+            
+            // Mostrar mensagem de sucesso
+            mostrarToast('✅ Logs exportados com sucesso!', 'success');
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            
+            // Restaurar botão
+            btnExportar.innerHTML = originalText;
+            btnExportar.disabled = false;
+            
+            // Mostrar mensagem de erro
+            mostrarToast('❌ Erro ao exportar logs.', 'error');
+        });
+}
+
+function mostrarToast(mensagem, tipo = 'info') {
+    // Criar toast dinamicamente
+    const toastContainer = document.getElementById('toastContainer') || criarToastContainer();
+    
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast align-items-center text-bg-${tipo === 'success' ? 'success' : 'danger'} border-0`;
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+    
+    toastEl.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${mensagem}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toastEl);
+    
+    const toast = new bootstrap.Toast(toastEl, {
+        autohide: true,
+        delay: 5000
+    });
+    toast.show();
+    
+    // Remover toast do DOM após esconder
+    toastEl.addEventListener('hidden.bs.toast', () => {
+        toastEl.remove();
+    });
+}
+
+function criarToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+    return container;
+}
+</script>
+
+<style>
+
+/* Adicione ao final do bloco de estilo existente */
+.toast-container {
+    z-index: 9999;
+}
+
+.toast {
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+}
+
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.log-item:hover {
+    background-color: #f8f9fa;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}
