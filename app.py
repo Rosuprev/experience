@@ -23,9 +23,9 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão PostgreSQL com SSL - versão simplificada
+    # String de conexão PostgreSQL com SSL - COM OS DADOS CORRETOS
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://squarecloud:1vpihhkIlpBOLwCAKmRD4SRQ@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require'
+        'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require'
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
