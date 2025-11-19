@@ -17,19 +17,21 @@ import os
 import stat
 import psycopg2
 
-def criar_schema_publico():
-    """Garante que o schema public existe e tem permissões"""
+def configurar_permissoes_postgres():
+    """Configura permissões no banco postgres"""
     try:
         with db.engine.connect() as conn:
-            # Tenta criar o schema se não existir
-            conn.execute(db.text("CREATE SCHEMA IF NOT EXISTS public"))
-            # Concede permissões ao usuário atual
-            conn.execute(db.text("GRANT USAGE ON SCHEMA public TO CURRENT_USER"))
-            conn.execute(db.text("GRANT CREATE ON SCHEMA public TO CURRENT_USER"))
+            # Conecta ao banco postgres e configura permissões
+            conn.execute(db.text("""
+                GRANT ALL ON SCHEMA public TO squarecloud;
+                GRANT ALL ON ALL TABLES IN SCHEMA public TO squarecloud;
+                GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO squarecloud;
+                GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO squarecloud;
+            """))
             conn.commit()
-            print("✅ Schema public configurado com sucesso!")
+            print("✅ Permissões configuradas com sucesso para o usuário squarecloud!")
     except Exception as e:
-        print(f"⚠️ Aviso ao configurar schema: {e}")
+        print(f"⚠️ Aviso nas permissões: {e}")
 
 # Chame esta função ANTES de db.create_all()
 
@@ -63,10 +65,9 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão PostgreSQL com pg8000 - SSL na própria URL
+    # String de conexão - banco postgres
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql+psycopg2://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
-    
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -2389,14 +2390,22 @@ def exportar_pesquisas():
 if __name__ == '__main__':
     with app.app_context():
         try:
+            # 1. Ajusta permissões dos certificados
+            ajustar_permissoes_certificados()
+            
+            # 2. Configura permissões no PostgreSQL
+            configurar_permissoes_postgres()
+            
+            # 3. Cria as tabelas
             db.create_all()
             criar_usuario_admin()
             migrar_banco_dados()
             atualizar_faturamento_sorteio()
+            
             print("✅ Banco de dados PostgreSQL configurado com sucesso!")
         except Exception as e:
             print(f"❌ Erro ao conectar com PostgreSQL: {e}")
-            print("🔧 Verifique a string de conexão")
+            print("🔧 Verifique a string de conexão e permissões")
     
     # Configurações para desenvolvimento local
     host = '0.0.0.0'
