@@ -44,7 +44,7 @@ class Config:
     
     # String de conexão PostgreSQL com SSL usando arquivos de certificado
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience'
+        'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres'
     
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
