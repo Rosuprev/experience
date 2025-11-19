@@ -13,6 +13,25 @@ from openpyxl.styles import Font, PatternFill
 from werkzeug.security import generate_password_hash, check_password_hash
 import ssl
 import tempfile
+import os
+import stat
+
+# Ajustar permissões dos certificados SSL para PostgreSQL
+def ajustar_permissoes_certificados():
+    """Ajusta as permissões dos arquivos de certificado para PostgreSQL"""
+    certificados = ['private-key.key', 'certificate.pem', 'ca-certificate.crt']
+    
+    for cert_file in certificados:
+        if os.path.exists(cert_file):
+            try:
+                # PostgreSQL requer permissões restritas para arquivos de chave
+                os.chmod(cert_file, stat.S_IRUSR | stat.S_IWUSR)  # 600
+                print(f"✅ Permissões ajustadas para: {cert_file}")
+            except Exception as e:
+                print(f"⚠️ Não foi possível ajustar permissões de {cert_file}: {e}")
+
+# Ajustar permissões antes de inicializar o app
+ajustar_permissoes_certificados()
 
 # CORREÇÃO DO FUSO HORÁRIO
 def agora():
@@ -23,10 +42,18 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão PostgreSQL com SSL - COM OS DADOS CORRETOS
+    # String de conexão PostgreSQL com SSL usando arquivos de certificado
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require'
+        'postgresql://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience'
     
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'connect_args': {
+            'sslmode': 'verify-ca',
+            'sslrootcert': 'ca-certificate.crt',
+            'sslcert': 'certificate.pem', 
+            'sslkey': 'private-key.key'
+        }
+    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
