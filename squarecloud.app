@@ -1,9 +1,8 @@
-ID=RO_EXPERIENCE_2025
-DISPLAYNAME="R.O Experience 2025"
-VERSION=1.0.0
-MAIN=app.py
-DESCRIPTION="Sistema de gestão para o evento R.O Experience 2025"
-MEMORY=512
-CPU=100
-SUBNETWORK=true
-AUTORESTART=true
+{
+  "display_name": "RO Experience App",
+  "description": "App de gestão de eventos",
+  "main": "app.py",
+  "memory": 512,
+  "version": "recommended",
+  "start": "chmod 600 /application/client.pem && python app.py"
+}

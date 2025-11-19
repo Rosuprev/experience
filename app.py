@@ -2,6 +2,7 @@ import io
 import csv
 import os
 import json
+import stat  # <--- ADICIONADO: Necessário para ajustar permissões
 from pathlib import Path
 from functools import wraps
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, flash
@@ -28,6 +29,16 @@ class Config:
         'root_cert': '/application/cert.crt',  # Certificado root
         'client_pem': '/application/client.pem'  # Cliente + chave
     }
+
+    # --- CORREÇÃO DE PERMISSÃO (Adicionado) ---
+    # O PostgreSQL exige permissão 0600 na chave privada
+    if os.path.exists(ssl_files['client_pem']):
+        try:
+            print("🔧 Ajustando permissões do arquivo client.pem para 0600...")
+            os.chmod(ssl_files['client_pem'], stat.S_IRUSR | stat.S_IWUSR)
+        except Exception as e:
+            print(f"⚠️ Aviso: Não foi possível alterar permissões do arquivo SSL: {e}")
+    # ------------------------------------------
     
     all_files_exist = all(os.path.exists(path) for path in ssl_files.values())
     
