@@ -2356,97 +2356,99 @@ def testar_permissoes():
     except Exception as e:
         print(f"❌ Erro de conexão: {e}")
 
-if __name__ == '__main__':
-    # 1. CORRIGIR PERMISSÕES DOS CERTIFICADOS PRIMEIRO
-    import os
-    import stat
+ 
+
+def criar_banco_se_nao_existir(app):
+    """
+    Tenta conectar ao DB padrão 'postgres' e cria o DB alvo ('dbexperience') se não existir.
+    """
+    full_uri = app.config['SQLALCHEMY_DATABASE_URI']
     
-    def corrigir_permissoes_certificados():
-        """Corrige permissões dos certificados PostgreSQL"""
-        certificados = {
-            'private-key.key': stat.S_IRUSR | stat.S_IWUSR,  # 600
-            'certificate.pem': stat.S_IRUSR | stat.S_IWUSR,  # 600
-            'ca-certificate.crt': stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH  # 644
-        }
+    # Extrai o nome do DB alvo ('dbexperience')
+    DB_NAME = full_uri.split('/')[-1].split('?')[0]
+    
+    # Extrai as credenciais e o endereço do servidor para a conexão temporária
+    import re
+    match = re.search(r'//(.*?):(.*?)@([^:]*):(\d+)/', full_uri)
+    
+    if not match:
+        print("❌ Erro ao extrair credenciais da URI.")
+        return
+
+    user, password, host, port = match.groups()
+
+    # Extrai os parâmetros SSL (necessários para a conexão temporária)
+    ssl_params = {}
+    if '?' in full_uri:
+        query_string = full_uri.split('?', 1)[1]
+        for pair in query_string.split('&'):
+            if '=' in pair:
+                key, value = pair.split('=', 1)
+                if 'sslrootcert' in key or 'sslcert' in key or 'sslkey' in key or 'sslmode' in key:
+                    ssl_params[key] = value
+
+    conn = None
+    try:
+        # Tenta conectar ao DB padrão 'postgres'
+        print(f"🔧 Tentando conectar ao banco default ('postgres') para criar '{DB_NAME}'...")
+        conn = psycopg2.connect(
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            database='postgres', # Conecta-se ao banco de dados administrativo
+            **ssl_params
+        )
+        conn.autocommit = True
+        cursor = conn.cursor()
         
-        for cert_file, perms in certificados.items():
-            if os.path.exists(cert_file):
-                try:
-                    os.chmod(cert_file, perms)
-                    print(f"✅ Permissões ajustadas para: {cert_file}")
-                except Exception as e:
-                    print(f"⚠️ Não foi possível ajustar {cert_file}: {e}")
-            else:
-                print(f"❌ Certificado não encontrado: {cert_file}")
-    
-    # Executa correção de permissões
-    corrigir_permissoes_certificados()
-    
-    # 2. VERIFICAR SE CERTIFICADOS EXISTEM
-    def verificar_certificados():
-        certificados = ['ca-certificate.crt', 'certificate.pem', 'private-key.key']
-        todos_existem = all(os.path.exists(cert) for cert in certificados)
+        # Verifica se o banco de dados alvo existe
+        cursor.execute(f"SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME,))
+        exists = cursor.fetchone()
         
-        if todos_existem:
-            print("✅ Todos os certificados encontrados!")
-            return True
+        if not exists:
+            # Cria o banco de dados
+            print(f"🔧 Criando banco de dados '{DB_NAME}'...")
+            cursor.execute(f"CREATE DATABASE {DB_NAME}")
+            print(f"✅ Banco de dados '{DB_NAME}' criado com sucesso!")
         else:
-            print("❌ Alguns certificados não foram encontrados")
-            return False
-    
-    certificados_ok = verificar_certificados()
-    
-    # 3. CONFIGURAÇÃO DO BANCO DE DADOS
+            print(f"✅ Banco de dados '{DB_NAME}' já existe no servidor.")
+            
+        cursor.close()
+
+    except psycopg2.OperationalError as e:
+        print(f"❌ Erro crítico ao criar/verificar o banco de dados: {e}")
+        raise Exception("Conexão ao DB default falhou. Verifique as credenciais, certificados e permissões.") from e
+        
+    except Exception as e:
+        print(f"❌ Erro inesperado ao configurar o banco de dados: {e}")
+        raise
+
+    finally:
+        if conn:
+            conn.close()       
+
+if __name__ == '__main__':
     with app.app_context():
-        postgresql_funcionando = False
-        
-        if certificados_ok:
-            try:
-                print("🔄 Tentando conectar ao PostgreSQL...")
-                
-                # Testa a conexão com PostgreSQL
-                with db.engine.connect() as conn:
-                    result = conn.execute(db.text("SELECT version(), current_user, current_database()"))
-                    versao, usuario, banco = result.fetchone()
-                    print(f"✅ PostgreSQL conectado!")
-                    print(f"   📋 Versão: {versao.split(',')[0]}")
-                    print(f"   👤 Usuário: {usuario}")
-                    print(f"   🗄️  Banco: {banco}")
-                
-                postgresql_funcionando = True
-                
-            except Exception as e:
-                print(f"❌ Erro ao conectar com PostgreSQL: {e}")
-                print("🔄 PostgreSQL não disponível, usando SQLite...")
-        
-        # SE POSTGRESQL FALHOU, USA SQLITE
-        if not postgresql_funcionando:
-            print("🔧 Configurando SQLite...")
-            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
-        
-        # 4. INICIALIZAÇÃO DO BANCO DE DADOS
         try:
-            print("🔄 Criando tabelas...")
+            # 1. PASSO ADICIONAL: Cria o banco de dados alvo se não existir (instrução do suporte)
+            criar_banco_se_nao_existir(app) 
+            
+            # 2. Cria as tabelas (agora no banco criado com permissão)
             db.create_all()
-            print("✅ Tabelas criadas/verificadas com sucesso!")
             
-            # Criar usuário admin
+            # 3. Execuções de inicialização normais
             criar_usuario_admin()
-            
-            # Migração do banco (se necessário)
             migrar_banco_dados()
-            
-            # Atualizar faturamento para sorteios
             atualizar_faturamento_sorteio()
-            
-            print("🎉 Sistema inicializado com sucesso!")
+            print("✅ Banco de dados PostgreSQL configurado com sucesso!")
             
         except Exception as e:
-            print(f"❌ Erro crítico na inicialização: {e}")
-            print("💥 Sistema pode não funcionar corretamente!")
+            # Captura qualquer erro (DB ou código) e informa
+            print(f"❌ Erro ao conectar com PostgreSQL: {e}")
+            print("🔧 Verifique a string de conexão, certificados e permissões.")
     
-    # 5. CONFIGURAÇÃO DO SERVIDOR
+    # Configurações de HOST/PORTA para execução do servidor
     host = '0.0.0.0'
     
     if os.environ.get('SQUARECLOUD') or os.environ.get('PORT'):
@@ -2458,26 +2460,12 @@ if __name__ == '__main__':
         debug = True
         environment = "Desenvolvimento Local"
     
-    # 6. INFORMAÇÕES FINAIS
-    print("\n" + "="*50)
-    print("🎯 R.O Experience 2025 - Servidor Iniciado!")
-    print("="*50)
+    print(f"🎯 R.O Experience 2025 - Servidor Iniciado!")
     print(f"📍 Host: {host}")
     print(f"🔧 Porta: {port}")
     print(f"🌐 Ambiente: {environment}")
     print(f"🐛 Debug: {debug}")
-    
-    # Mostra qual banco está sendo usado
-    with app.app_context():
-        banco_em_uso = db.engine.url.drivername
-        if banco_em_uso == 'sqlite':
-            print(f"🗄️  Banco: SQLite (database.db)")
-        else:
-            print(f"🗄️  Banco: PostgreSQL")
-    
+    print(f"🗄️ Banco: PostgreSQL")
     print("🚀 Aplicação rodando!")
-    print("="*50)
-    print("")
     
-    # 7. INICIAR SERVIDOR
     app.run(host=host, port=port, debug=debug)
