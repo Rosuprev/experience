@@ -46,7 +46,8 @@ class Config:
         print("✅ TODOS os arquivos SSL encontrados!")
         print("🚀 Configurando PostgreSQL...")
         
-        SQLALCHEMY_DATABASE_URI = 'postgresql://squarecloud:<IPL4v0u4mXNdzyTkrEhSnTBh>@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091'
+        # Alterei o usuário (início) e o banco (final) para 'Dbexperience'
+        SQLALCHEMY_DATABASE_URI = 'postgresql://Dbexperience:IPL4v0u4mXNdzyTkrEhSnTBh@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/Dbexperience'
         
         SQLALCHEMY_ENGINE_OPTIONS = {
             'connect_args': {
