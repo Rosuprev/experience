@@ -48,14 +48,14 @@ def agora():
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'sua-chave-secreta-super-segura-aqui-ro-experience-2025'
     
-    # String de conexão PostgreSQL com pg8000
+    # String de conexão PostgreSQL com pg8000 - SSL na própria URL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql+pg8000://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/postgres'
+        'postgresql+pg8000://squarecloud:5W3Ww67llyHrBmcutvyL5xXO@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?ssl=true'
     
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
-            'sslmode': 'require'
-            # Removemos a referência aos certificados para simplificar
+            # pg8000 não usa sslmode, usa ssl=True diretamente
+            # Removemos completamente os argumentos SSL
         }
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
