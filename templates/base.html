@@ -254,6 +254,51 @@ if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.us
             cursor: not-allowed;
         }
 
+        /* Estilos para instruções de instalação PWA */
+        .pwa-install-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--primary-dark);
+            border: 2px solid var(--accent-yellow);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 300px;
+            display: none;
+        }
+
+        .pwa-install-container.show {
+            display: block;
+        }
+
+        .pwa-close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .pwa-install-steps {
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        .pwa-install-steps ol {
+            padding-left: 15px;
+            margin-bottom: 0;
+        }
+
+        .pwa-install-steps li {
+            margin-bottom: 5px;
+        }
+
         /* Estilos para o rodapé */
         .footer-logo {
             height: 40px;
@@ -312,6 +357,13 @@ if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.us
             .footer-logo-container {
                 text-align: center;
                 margin-top: 10px;
+            }
+
+            .pwa-install-container {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
             }
         }
 
@@ -468,20 +520,21 @@ if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.us
     // Controle do botão de instalação PWA
     let deferredPrompt;
     const installBtn = document.getElementById('pwa-install-btn');
+    const pwaInstructions = document.getElementById('pwa-instructions');
 
     // Detecta quando o PWA pode ser instalado
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
         
-        // Mostra o botão apenas em dispositivos móveis
-        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // Mostra o botão para Android e outros dispositivos
+        if (/Android|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             installBtn.style.display = 'block';
-            console.log('📱 PWA disponível para instalação');
+            console.log('📱 PWA disponível para instalação (Android)');
         }
     });
 
-    // Função de instalação
+    // Função de instalação para Android
     function installPWA() {
         if (deferredPrompt) {
             deferredPrompt.prompt();
@@ -489,9 +542,38 @@ if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.us
                 if (choiceResult.outcome === 'accepted') {
                     console.log('✅ App instalado com sucesso!');
                     installBtn.style.display = 'none';
+                    hidePWAInstructions();
                 }
                 deferredPrompt = null;
             });
+        }
+    }
+
+    // Mostrar instruções para iPhone
+    function showPWAInstructions() {
+        if (pwaInstructions) {
+            pwaInstructions.classList.add('show');
+        }
+    }
+
+    function hidePWAInstructions() {
+        if (pwaInstructions) {
+            pwaInstructions.classList.remove('show');
+        }
+    }
+
+    // Detectar iPhone e mostrar instruções
+    function detectIOSAndShowInstructions() {
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome|CriOS/i.test(navigator.userAgent);
+        const isStandalone = window.navigator.standalone;
+        
+        if (isIOS && isSafari && !isStandalone) {
+            console.log('📱 iPhone/Safari detectado - mostrando instruções PWA');
+            // Mostrar botão para iPhone após um delay
+            setTimeout(() => {
+                installBtn.style.display = 'block';
+            }, 2000);
         }
     }
 
@@ -499,11 +581,50 @@ if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.us
     window.addEventListener('appinstalled', () => {
         console.log('✅ PWA já instalado');
         installBtn.style.display = 'none';
+        hidePWAInstructions();
         deferredPrompt = null;
+    });
+
+    // Verificar se já está instalado como PWA
+    function isRunningAsPWA() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true;
+    }
+
+    // Inicializar detecção PWA
+    document.addEventListener('DOMContentLoaded', function() {
+        detectIOSAndShowInstructions();
+        
+        // Esconder botão se já estiver rodando como PWA
+        if (isRunningAsPWA()) {
+            installBtn.style.display = 'none';
+        }
+
+        // Mostrar instruções ao clicar no botão no iPhone
+        installBtn.addEventListener('click', function(e) {
+            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                e.preventDefault();
+                showPWAInstructions();
+            }
+        });
     });
 </script>
 
 <body>
+    <!-- Instruções de instalação PWA para iPhone -->
+    <div id="pwa-instructions" class="pwa-install-container">
+        <button class="pwa-close-btn" onclick="hidePWAInstructions()">×</button>
+        <h6 class="mb-2">📱 Instalar App</h6>
+        <p class="small mb-2">Para instalar no seu iPhone:</p>
+        <div class="pwa-install-steps">
+            <ol>
+                <li>Toque no botão <strong>Compartilhar</strong> 📤</li>
+                <li>Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong></li>
+                <li>Toque em <strong>"Adicionar"</strong> no canto superior direito</li>
+            </ol>
+        </div>
+    </div>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
         <div class="container">
             <div class="nav-content">
