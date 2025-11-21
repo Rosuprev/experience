@@ -1,18 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Header Simples -->
+<div class="container-fluid px-3">
+    <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 bg-primary text-white">
+            <div class="card border-0 bg-dark-custom text-white shadow-lg">
                 <div class="card-body py-4">
                     <div class="text-center">
-                        <h1 class="display-5 mb-2">
-                            <span class="me-3">📦</span>
-                            Estoque em Tempo Real
-                        </h1>
-                        <p class="mb-0 opacity-75">Visão completa de todos os produtos disponíveis</p>
+                        <div class="display-1 mb-3">📦</div>
+                        <h1 class="display-6 fw-bold mb-2">Estoque em Tempo Real</h1>
+                        <p class="mb-0 opacity-75 fs-5">Visão completa de todos os produtos disponíveis no evento</p>
                     </div>
                 </div>
             </div>
@@ -20,52 +18,92 @@
     </div>
 
     <!-- Estatísticas Rápidas -->
+    <div class="row mb-4 g-3">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 bg-primary-custom text-white shadow stat-card">
+                <div class="card-body text-center py-4">
+                    <div class="stat-icon mb-2">📊</div>
+                    <div class="h2 fw-bold mb-1" id="totalItens">0</div>
+                    <small class="opacity-90">Total de Itens</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 bg-success-custom text-white shadow stat-card">
+                <div class="card-body text-center py-4">
+                    <div class="stat-icon mb-2">✅</div>
+                    <div class="h2 fw-bold mb-1" id="totalDisponivel">0</div>
+                    <small class="opacity-90">Disponíveis</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 bg-warning-custom text-dark shadow stat-card">
+                <div class="card-body text-center py-4">
+                    <div class="stat-icon mb-2">⚠️</div>
+                    <div class="h2 fw-bold mb-1" id="totalBaixoEstoque">0</div>
+                    <small class="opacity-90">Estoque Baixo</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 bg-danger-custom text-white shadow stat-card">
+                <div class="card-body text-center py-4">
+                    <div class="stat-icon mb-2">❌</div>
+                    <div class="h2 fw-bold mb-1" id="totalEsgotado">0</div>
+                    <small class="opacity-90">Esgotados</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros e Busca -->
     <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 bg-success text-white">
-                <div class="card-body text-center py-3">
-                    <div class="h3 mb-1" id="totalItens">0</div>
-                    <small>Total de Itens</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 bg-info text-white">
-                <div class="card-body text-center py-3">
-                    <div class="h3 mb-1" id="totalDisponivel">0</div>
-                    <small>Disponíveis</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 bg-warning text-dark">
-                <div class="card-body text-center py-3">
-                    <div class="h3 mb-1" id="totalBaixoEstoque">0</div>
-                    <small>Estoque Baixo</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 bg-danger text-white">
-                <div class="card-body text-center py-3">
-                    <div class="h3 mb-1" id="totalEsgotado">0</div>
-                    <small>Esgotados</small>
+        <div class="col-12">
+            <div class="card border-0 bg-light-custom shadow-sm">
+                <div class="card-body py-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control border-0 shadow-sm" 
+                                   id="searchInput" placeholder="🔍 Buscar por fabricante ou modelo...">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select border-0 shadow-sm" id="statusFilter">
+                                <option value="all">Todos os status</option>
+                                <option value="success">Disponível</option>
+                                <option value="warning">Estoque Baixo</option>
+                                <option value="danger">Esgotado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-warning-custom w-100 border-0 shadow-sm" onclick="resetFilters()">
+                                🔄 Limpar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Cards de Estoque -->
-    <div class="row" id="estoqueContainer">
+    <div class="row g-3" id="estoqueContainer">
         <!-- Cards serão carregados via JavaScript -->
     </div>
 
     <!-- Loading -->
-    <div id="loading" class="text-center mt-4">
-        <div class="spinner-border text-primary" role="status">
+    <div id="loading" class="text-center mt-5 py-5">
+        <div class="spinner-border text-warning" style="width: 3rem; height: 3rem;" role="status">
             <span class="visually-hidden">Carregando...</span>
         </div>
-        <p class="mt-2 text-muted">Carregando estoque...</p>
+        <p class="mt-3 text-muted fs-5">Carregando estoque...</p>
+    </div>
+
+    <!-- Sem resultados -->
+    <div id="noResults" class="text-center mt-5 py-5" style="display: none;">
+        <div class="h1 text-muted mb-3">🔍</div>
+        <h4 class="text-muted">Nenhum item encontrado</h4>
+        <p class="text-muted">Tente ajustar os filtros de busca</p>
     </div>
 </div>
 {% endblock %}
@@ -74,6 +112,7 @@
 <script>
 // Variáveis globais
 let estoqueData = [];
+let filteredData = [];
 
 // Carregar estoque
 function carregarEstoque() {
@@ -81,16 +120,17 @@ function carregarEstoque() {
         .then(response => response.json())
         .then(data => {
             estoqueData = data;
-            atualizarCardsEstoque();
+            aplicarFiltros();
             atualizarEstatisticas();
             ocultarLoading();
         })
         .catch(error => {
             console.error('Erro ao carregar estoque:', error);
             document.getElementById('estoqueContainer').innerHTML = `
-                <div class="col-12 text-center">
-                    <div class="alert alert-danger">
-                        ❌ Erro ao carregar estoque. Tente novamente.
+                <div class="col-12">
+                    <div class="alert alert-danger-custom text-white text-center py-4">
+                        <div class="h4 mb-2">❌ Erro ao carregar estoque</div>
+                        <p class="mb-0">Tente recarregar a página</p>
                     </div>
                 </div>
             `;
@@ -98,23 +138,37 @@ function carregarEstoque() {
         });
 }
 
+// Aplicar filtros
+function aplicarFiltros() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    filteredData = estoqueData.filter(item => {
+        const matchesSearch = item.fabricante.toLowerCase().includes(searchTerm) || 
+                             item.modelo.toLowerCase().includes(searchTerm);
+        const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+    
+    atualizarCardsEstoque();
+}
+
 // Atualizar cards de estoque
 function atualizarCardsEstoque() {
     const container = document.getElementById('estoqueContainer');
+    const noResults = document.getElementById('noResults');
     
-    if (estoqueData.length === 0) {
-        container.innerHTML = `
-            <div class="col-12 text-center">
-                <div class="alert alert-info">
-                    📭 Nenhum item encontrado no estoque
-                </div>
-            </div>
-        `;
+    if (filteredData.length === 0) {
+        container.innerHTML = '';
+        noResults.style.display = 'block';
         return;
     }
     
+    noResults.style.display = 'none';
+    
     // Ordenar por fabricante e modelo
-    const estoqueOrdenado = estoqueData.sort((a, b) => {
+    const estoqueOrdenado = filteredData.sort((a, b) => {
         if (a.fabricante !== b.fabricante) {
             return a.fabricante.localeCompare(b.fabricante);
         }
@@ -122,38 +176,40 @@ function atualizarCardsEstoque() {
     });
     
     container.innerHTML = estoqueOrdenado.map(item => `
-        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 border-0 shadow-sm card-hover">
-                <div class="card-header bg-transparent border-bottom-0 pb-0">
+        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm card-hover product-card">
+                <div class="card-header bg-transparent border-bottom-0 pb-0 pt-3">
                     <div class="d-flex justify-content-between align-items-start">
-                        <span class="badge bg-${item.status} fs-6">
-                            ${item.quantidade_disponivel} disponíveis
+                        <span class="badge status-badge bg-${item.status}">
+                            ${item.quantidade_disponivel} uni
                         </span>
-                        <small class="text-muted">#${item.id}</small>
+                        <small class="text-muted product-id">#${item.id}</small>
                     </div>
                 </div>
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <div class="h1 text-muted">
+                <div class="card-body text-center d-flex flex-column">
+                    <div class="mb-3 flex-grow-1 d-flex align-items-center justify-content-center">
+                        <div class="product-icon">
                             ${getIconePorStatus(item.status)}
                         </div>
                     </div>
-                    <h5 class="card-title text-primary fw-bold">${item.fabricante}</h5>
-                    <h6 class="card-subtitle mb-2 text-dark">${item.modelo}</h6>
-                    <div class="mt-3">
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <small class="text-muted">Estoque Total</small>
-                                <div class="h6 fw-bold text-dark">${item.quantidade_total}</div>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Disponível</small>
-                                <div class="h6 fw-bold text-${item.status}">${item.quantidade_disponivel}</div>
+                    <div class="product-info">
+                        <h5 class="card-title fw-bold text-dark mb-1">${item.fabricante}</h5>
+                        <h6 class="card-subtitle mb-3 text-muted">${item.modelo}</h6>
+                        <div class="product-stats">
+                            <div class="row g-2 text-center">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Total</small>
+                                    <div class="h6 fw-bold text-dark">${item.quantidade_total}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Disponível</small>
+                                    <div class="h6 fw-bold text-${item.status}">${item.quantidade_disponivel}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-transparent border-top-0">
+                <div class="card-footer bg-transparent border-top-0 pt-0">
                     <div class="text-center">
                         ${getStatusTexto(item.status, item.quantidade_disponivel)}
                     </div>
@@ -176,9 +232,9 @@ function getIconePorStatus(status) {
 // Texto de status
 function getStatusTexto(status, quantidade) {
     const textos = {
-        'success': '<span class="badge bg-success">✅ Disponível</span>',
-        'warning': '<span class="badge bg-warning text-dark">⚠️ Estoque Baixo</span>',
-        'danger': '<span class="badge bg-danger">❌ Esgotado</span>'
+        'success': '<span class="badge bg-success-custom text-white">✅ Disponível</span>',
+        'warning': '<span class="badge bg-warning-custom text-dark">⚠️ Estoque Baixo</span>',
+        'danger': '<span class="badge bg-danger-custom text-white">❌ Esgotado</span>'
     };
     return textos[status] || '<span class="badge bg-secondary">Status Desconhecido</span>';
 }
@@ -196,6 +252,13 @@ function atualizarEstatisticas() {
     document.getElementById('totalEsgotado').textContent = totalEsgotado;
 }
 
+// Resetar filtros
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = 'all';
+    aplicarFiltros();
+}
+
 // Ocultar loading
 function ocultarLoading() {
     document.getElementById('loading').style.display = 'none';
@@ -206,57 +269,179 @@ document.addEventListener('DOMContentLoaded', function() {
     // Carregar estoque inicial
     carregarEstoque();
     
+    // Eventos de filtro
+    document.getElementById('searchInput').addEventListener('input', aplicarFiltros);
+    document.getElementById('statusFilter').addEventListener('change', aplicarFiltros);
+    
     // Atualizar a cada 15 segundos
     setInterval(carregarEstoque, 15000);
 });
 </script>
 
 <style>
-.card-hover {
+:root {
+    --amarelo-brilhante: #d4f404;
+    --azul-escuro: #24343c;
+    --verde-escuro: #1c3434;
+    --amarelo-dourado: #d8c820;
+    --verde-floresta: #1c6820;
+}
+
+.bg-dark-custom {
+    background: linear-gradient(135deg, var(--azul-escuro) 0%, var(--verde-escuro) 100%) !important;
+}
+
+.bg-primary-custom {
+    background: linear-gradient(135deg, var(--verde-escuro) 0%, var(--azul-escuro) 100%) !important;
+}
+
+.bg-success-custom {
+    background: linear-gradient(135deg, var(--verde-floresta) 0%, #2a7a2f 100%) !important;
+}
+
+.bg-warning-custom {
+    background: linear-gradient(135deg, var(--amarelo-brilhante) 0%, var(--amarelo-dourado) 100%) !important;
+}
+
+.bg-danger-custom {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+.bg-light-custom {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+/* Cards */
+.stat-card {
+    border-radius: 15px;
     transition: all 0.3s ease;
-    border-radius: 12px;
 }
 
-.card-hover:hover {
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.product-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.product-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 25px rgba(36, 52, 60, 0.15) !important;
 }
 
-.card {
-    border-radius: 12px;
-}
-
-.card-header {
-    padding: 1rem 1rem 0 1rem;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-.card-footer {
-    padding: 0 1rem 1rem 1rem;
-}
-
-.badge {
-    font-size: 0.75rem;
-    padding: 0.5em 0.75em;
-}
-
-.h1 {
+.product-icon {
     font-size: 3rem;
+    opacity: 0.8;
 }
 
-.h3 {
-    font-size: 1.75rem;
+.product-info {
+    min-height: 120px;
 }
 
-.h5 {
-    font-size: 1.25rem;
+.status-badge {
+    font-size: 0.7rem;
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
 }
 
-.h6 {
-    font-size: 1rem;
+.product-id {
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Tipografia */
+.display-6 {
+    font-size: 2rem;
+}
+
+.h2 {
+    font-size: 2rem;
+}
+
+/* Formulários */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--amarelo-brilhante);
+    box-shadow: 0 0 0 0.2rem rgba(212, 244, 4, 0.25);
+}
+
+.btn-warning-custom {
+    background: linear-gradient(135deg, var(--amarelo-brilhante) 0%, var(--amarelo-dourado) 100%);
+    color: var(--verde-escuro);
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+}
+
+.btn-warning-custom:hover {
+    color: var(--verde-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 244, 4, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .display-6 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+    }
+    
+    .h2 {
+        font-size: 1.5rem;
+    }
+    
+    .product-icon {
+        font-size: 2.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .display-6 {
+        font-size: 1.25rem;
+    }
+    
+    .product-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.product-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.spinner-border {
+    border-width: 3px;
 }
 </style>
 {% endblock %}
