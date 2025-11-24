@@ -180,37 +180,36 @@
                     </div>
 
                     <!-- Seção de Permissões (apenas para operadores) -->
-                    <div id="secaoPermissoes">
-                        <hr>
-                        <h6 class="mb-3">🔐 Permissões por Módulo</h6>
-                        <div class="row">
-                            {% for modulo, info in modulos_sistema.items() %}
-                            {% if modulo not in ['usuarios', 'logs'] or session.nivel_acesso == 'admin' %}
-                            <div class="col-md-6 mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input modulo-checkbox" 
-                                           type="checkbox" 
-                                           id="modulo_{{ modulo }}" 
-                                           name="permissoes" 
-                                           value="{{ modulo }}"
-                                           {% if modulo in ['dashboard', 'checkin', 'vendas', 'estoque', 'sorteio', 'relatorios', 'entrega_brindes'] %}checked{% endif %}>
-                                    <label class="form-check-label" for="modulo_{{ modulo }}">
-                                        <strong>{{ info.nome }}</strong>
-                                        <br>
-                                        <small class="text-muted">{{ info.descricao }}</small>
-                                    </label>
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="alert alert-info mt-3">
-                            <small>
-                                💡 <strong>Dica:</strong> Administradores têm acesso a todos os módulos automaticamente.
-                                As permissões abaixo se aplicam apenas a usuários operadores.
-                            </small>
-                        </div>
-                    </div>
+<div id="secaoPermissoes">
+    <hr>
+    <h6 class="mb-3">🔐 Permissões por Módulo</h6>
+    <div class="row">
+        {% for modulo, info in modulos_sistema.items() %}
+        {% if modulo not in ['usuarios', 'logs'] %}
+        <div class="col-md-6 mb-2">
+            <div class="form-check">
+                <input class="form-check-input modulo-checkbox" 
+                       type="checkbox" 
+                       id="modulo_{{ modulo }}" 
+                       name="permissoes" 
+                       value="{{ modulo }}"
+                       {% if modulo in [
+                           'dashboard', 'checkin', 'vendas', 'estoque', 
+                           'sorteio', 'relatorios', 'entrega_brindes',
+                           'pesquisa_marketing', 'relatorio_pesquisas', 
+                           'relatorio_pesquisas_mkt', 'pesquisa_publica'
+                       ] %}checked{% endif %}>
+                <label class="form-check-label" for="modulo_{{ modulo }}">
+                    <strong>{{ info.nome }}</strong>
+                    <br>
+                    <small class="text-muted">{{ info.descricao }}</small>
+                </label>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

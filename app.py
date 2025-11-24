@@ -273,13 +273,11 @@ MODULOS_SISTEMA = {
     'usuarios': {'nome': '👥 Usuários', 'descricao': 'Gestão de usuários'},
     'logs': {'nome': '📊 Logs', 'descricao': 'Logs de auditoria'},
     
-    # NOVOS MÓDULOS ADICIONADOS
-    'pesquisa_mkt': {'nome': '📈 Pesquisa Marketing', 'descricao': 'Pesquisa estratégica de marketing'},
-    'relatorio_pesquisas_mkt': {'nome': '📊 Relatório Pesquisa Mkt', 'descricao': 'Relatórios da pesquisa de marketing'},
-    
-    # MÓDULOS EXISTENTES DE PESQUISA
-    'pesquisa_publica': {'nome': '📝 Pesquisa Pública', 'descricao': 'Pesquisa de satisfação pública'},
-    'relatorio_pesquisas': {'nome': '📋 Relatório Pesquisas', 'descricao': 'Relatórios de pesquisas públicas'},
+    # MÓDULOS DE PESQUISA (COMPLETO)
+    'pesquisa_publica': {'nome': '📝 Pesquisa Pública', 'descricao': 'Pesquisa de satisfação do evento'},
+    'pesquisa_marketing': {'nome': '📈 Pesquisa Marketing', 'descricao': 'Pesquisa de estratégia comercial'},
+    'relatorio_pesquisas': {'nome': '📊 Relatório Pesquisas', 'descricao': 'Relatórios das pesquisas de satisfação'},
+    'relatorio_pesquisas_mkt': {'nome': '📈 Relatório Pesq. Marketing', 'descricao': 'Relatórios das pesquisas de marketing'}
 }
 
 
@@ -2413,10 +2411,9 @@ def api_validar_cnpj_pesquisa(cnpj):
     
 @app.route('/pesquisa-marketing')
 @login_required
-@permissao_required('pesquisa_mkt')
+@permissao_required('pesquisa_marketing')  # ← Deve ser esta permissão
 def pesquisa_marketing():
-    """Pesquisa de marketing - apenas para empresas com check-in"""
-    return render_template('pesquisa-marketing.html')
+    return render_template('pesquisa_marketing.html')
 
 @app.route('/api/verificar-cnpj-marketing')
 @login_required
@@ -2713,7 +2710,7 @@ def exportar_pesquisas_marketing():
     
 @app.route('/relatorio-pesquisas')
 @login_required
-@permissao_required('relatorios')
+@permissao_required('relatorio_pesquisas')  # ← Deve ser esta permissão
 def relatorio_pesquisas():
     pesquisas = PesquisaResposta.query.order_by(PesquisaResposta.data_resposta.desc()).all()
     

@@ -23,7 +23,12 @@
             </div>
             <div class="card-body p-4">
                 <div class="row g-3">
-                    <!-- Dashboard (se tiver permissão) -->
+                    
+                    <!-- ==================== -->
+                    <!-- MÓDULOS PRINCIPAIS -->
+                    <!-- ==================== -->
+                    
+                    <!-- Dashboard -->
                     {% if tem_permissao('dashboard') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('dashboard') }}" class="card menu-card-standard text-decoration-none h-100">
@@ -88,7 +93,11 @@
                     </div>
                     {% endif %}
 
-                    <!-- Relatórios -->
+                    <!-- ==================== -->
+                    <!-- MÓDULOS DE RELATÓRIOS -->
+                    <!-- ==================== -->
+                    
+                    <!-- Relatórios Gerais -->
                     {% if tem_permissao('relatorios') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('relatorios') }}" class="card menu-card-standard text-decoration-none h-100">
@@ -101,6 +110,66 @@
                     </div>
                     {% endif %}
 
+                    <!-- Relatório Pesquisas Satisfação -->
+                    {% if tem_permissao('relatorio_pesquisas') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('relatorio_pesquisas') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-info mb-2">📋</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Relatório Pesquisas</h6>
+                                <small class="menu-desc text-muted">Análise das respostas</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Relatório Pesquisas Marketing -->
+                    {% if tem_permissao('relatorio_pesquisas_mkt') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('relatorio_pesquisas_marketing') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-success mb-2">📊</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Relatório Marketing</h6>
+                                <small class="menu-desc text-muted">Análise comercial</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- ==================== -->
+                    <!-- MÓDULOS DE PESQUISA -->
+                    <!-- ==================== -->
+                    
+                    <!-- Pesquisa Marketing -->
+                    {% if tem_permissao('pesquisa_marketing') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('pesquisa_marketing') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-warning mb-2">📈</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Pesquisa Marketing</h6>
+                                <small class="menu-desc text-muted">Estratégia comercial</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Pesquisa Pública -->
+                    {% if tem_permissao('pesquisa_publica') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('pesquisa_publica') }}" class="card menu-card-standard text-decoration-none h-100" target="_blank">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-primary mb-2">📝</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Pesquisa Pública</h6>
+                                <small class="menu-desc text-muted">Avaliação do evento</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- ==================== -->
+                    <!-- MÓDULOS DE GESTÃO -->
+                    <!-- ==================== -->
+                    
                     <!-- Importação -->
                     {% if tem_permissao('importacao') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
@@ -109,6 +178,19 @@
                                 <div class="menu-icon text-success mb-2">📋</div>
                                 <h6 class="menu-title text-dark fw-bold mb-1">Importar</h6>
                                 <small class="menu-desc text-muted">Carregar dados</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Exportação -->
+                    {% if tem_permissao('exportacao') %}
+                    <div class="col-xl-2 col-md-3 col-4 mb-3">
+                        <a href="{{ url_for('exportar_clientes') }}" class="card menu-card-standard text-decoration-none h-100">
+                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                                <div class="menu-icon text-info mb-2">📤</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Exportar</h6>
+                                <small class="menu-desc text-muted">Exportar dados</small>
                             </div>
                         </a>
                     </div>
@@ -127,18 +209,11 @@
                     </div>
                     {% endif %}
 
-                    <!-- Estoque Público (sempre visível) -->
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('estoque_publico') }}" class="card menu-card-standard text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-dark mb-2">👀</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Estoque Público</h6>
-                                <small class="menu-desc text-muted">Visualização geral</small>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Confirmar Entrega -->
+                    <!-- ==================== -->
+                    <!-- MÓDULOS ESPECIAIS -->
+                    <!-- ==================== -->
+                    
+                    <!-- Entrega Brindes -->
                     {% if tem_permissao('entrega_brindes') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('confirmar_entrega_page') }}" class="card menu-card-standard text-decoration-none h-100">
@@ -151,40 +226,40 @@
                     </div>
                     {% endif %}
 
-                    <!-- Relatório Pesquisas -->
-                    {% if tem_permissao('relatorios') %}
+                    <!-- Estoque Público (sempre visível) -->
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('relatorio_pesquisas') }}" class="card menu-card-standard text-decoration-none h-100">
+                        <a href="{{ url_for('estoque_publico') }}" class="card menu-card-standard text-decoration-none h-100">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-info mb-2">📋</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Relatório Pesquisas</h6>
-                                <small class="menu-desc text-muted">Análise das respostas</small>
+                                <div class="menu-icon text-dark mb-2">👀</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Estoque Público</h6>
+                                <small class="menu-desc text-muted">Visualização geral</small>
                             </div>
                         </a>
                     </div>
-                    {% endif %}
 
-                    <!-- Pesquisa Pública -->
-                    {% if tem_permissao('relatorios') %}
+                    <!-- ==================== -->
+                    <!-- MÓDULOS ADMIN (se for admin) -->
+                    <!-- ==================== -->
+                    
+                    {% if session.nivel_acesso == 'admin' %}
+                    <!-- Gestão de Usuários -->
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('pesquisa_publica') }}" class="card menu-card-standard text-decoration-none h-100" target="_blank">
+                        <a href="{{ url_for('gestao_usuarios') }}" class="card menu-card-standard text-decoration-none h-100">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-info mb-2">📝</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Pesquisa Pública</h6>
-                                <small class="menu-desc text-muted">Avaliação do evento</small>
+                                <div class="menu-icon text-danger mb-2">👥</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Gestão Usuários</h6>
+                                <small class="menu-desc text-muted">Gerenciar acessos</small>
                             </div>
                         </a>
                     </div>
-                    {% endif %}
 
-                    <!-- Pesquisa Marketing -->
-                    {% if tem_permissao('relatorios') %}
+                    <!-- Logs de Auditoria -->
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('pesquisa_marketing') }}" class="card menu-card-standard text-decoration-none h-100">
+                        <a href="{{ url_for('logs_auditoria') }}" class="card menu-card-standard text-decoration-none h-100">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-warning mb-2">📈</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Pesquisa Marketing</h6>
-                                <small class="menu-desc text-muted">Estratégia comercial</small>
+                                <div class="menu-icon text-secondary mb-2">📊</div>
+                                <h6 class="menu-title text-dark fw-bold mb-1">Logs Auditoria</h6>
+                                <small class="menu-desc text-muted">Registros do sistema</small>
                             </div>
                         </a>
                     </div>
@@ -199,7 +274,10 @@
 <!-- Se não tiver nenhum módulo -->
 {% if not (tem_permissao('dashboard') or tem_permissao('checkin') or tem_permissao('vendas') or 
            tem_permissao('estoque') or tem_permissao('sorteio') or tem_permissao('relatorios') or 
-           tem_permissao('brindes') or tem_permissao('importacao') or tem_permissao('entrega_brindes')) %}
+           tem_permissao('brindes') or tem_permissao('importacao') or tem_permissao('exportacao') or
+           tem_permissao('entrega_brindes') or tem_permissao('pesquisa_marketing') or 
+           tem_permissao('relatorio_pesquisas') or tem_permissao('relatorio_pesquisas_mkt') or
+           tem_permissao('pesquisa_publica')) %}
 <div class="row mt-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
