@@ -1,0 +1,1373 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <!-- Header -->
+            <div class="pesquisa-header mb-4">
+                <div class="pesquisa-logo">📈</div>
+                <h1 class="display-5 fw-bold mb-3">Pesquisa de Marketing</h1>
+                <p class="lead mb-2">Nos ajude a construir campanhas mais estratégicas e alinhadas ao que realmente faz diferença no seu negócio</p>
+                <small class="opacity-75">R.O Experience 2025 - Estratégia Comercial</small>
+            </div>
+
+            <!-- Identification Section - OBRIGATÓRIA -->
+            <div class="card mb-4" id="identification-section">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">👤 Identificação Obrigatória</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Pesquisa Exclusiva:</strong> Esta pesquisa é destinada apenas para empresas que participaram do evento e realizaram check-in.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="cnpj" class="form-label">CNPJ da Empresa *</label>
+                                <input type="text" class="form-control" id="cnpj" 
+                                       placeholder="00.000.000/0000-00" 
+                                       onblur="validarCNPJMarketing(this.value)"
+                                       required>
+                                <div class="form-text">Digite o CNPJ conforme consta no seu crachá</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Status da Validação</label>
+                                <div class="form-control bg-light">
+                                    <span id="tipo-resposta" class="text-muted">Aguardando CNPJ...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="cnpj-validation" class="mt-3"></div>
+
+                    <!-- Informações da Empresa (aparece quando validado) -->
+                    <div id="empresa-info" class="alert alert-success mt-3" style="display: none;">
+                        <h6>✅ Empresa Validada</h6>
+                        <p class="mb-1" id="info-razao-social"></p>
+                        <p class="mb-0" id="info-responsavel"></p>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <strong>Confidencialidade:</strong> Todas as informações serão tratadas com absoluto sigilo e uso exclusivo para melhorias estratégicas.
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary-custom btn-lg" id="btn-iniciar" onclick="iniciarPesquisaMarketing()" disabled>
+                            Iniciar Pesquisa <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research Form (inicialmente oculto) -->
+            <div id="research-form" style="display: none;">
+                <!-- Progress Bar -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Progresso da Pesquisa</small>
+                            <small class="text-muted"><span id="current-question">0</span>/10</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" id="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="pesquisaForm">
+                    <input type="hidden" id="cnpj-hidden" name="cnpj">
+                    
+                    <!-- QUESTÃO 1 -->
+                    <div class="questao-card mb-4 question-section active" id="section-1">
+                        <div class="questao-numero">1</div>
+                        <h4>Posicionamento Competitivo</h4>
+                        <p class="lead">Como você avalia o posicionamento da Reis Office em relação aos concorrentes?</p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="posicionamento" 
+                                       id="pos_muito_superior" value="muito_superior" required>
+                                <label class="form-check-label w-100 p-3" for="pos_muito_superior">
+                                    <span class="fw-bold">Muito superior</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="posicionamento" 
+                                       id="pos_superior" value="superior" required>
+                                <label class="form-check-label w-100 p-3" for="pos_superior">
+                                    <span class="fw-bold">Superior</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="posicionamento" 
+                                       id="pos_igual" value="igual" required>
+                                <label class="form-check-label w-100 p-3" for="pos_igual">
+                                    <span class="fw-bold">Igual</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="posicionamento" 
+                                       id="pos_inferior" value="inferior" required>
+                                <label class="form-check-label w-100 p-3" for="pos_inferior">
+                                    <span class="fw-bold">Inferior</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="posicionamento" 
+                                       id="pos_muito_inferior" value="muito_inferior" required>
+                                <label class="form-check-label w-100 p-3" for="pos_muito_inferior">
+                                    <span class="fw-bold">Muito inferior</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 2 -->
+                    <div class="questao-card mb-4 question-section" id="section-2">
+                        <div class="questao-numero">2</div>
+                        <h4>Formatos de Engajamento</h4>
+                        <p class="lead">Sobre benefícios e incentivos de campanhas, qual formato mais te motiva a engajar?</p>
+                        <p class="text-muted"><small>Escolha até 2 opções</small></p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input engajamento-checkbox" type="checkbox" 
+                                       name="beneficio_engajamento" id="eng_cashback" value="cashback">
+                                <label class="form-check-label w-100 p-3" for="eng_cashback">
+                                    <span class="fw-bold">Cashback financeiro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input engajamento-checkbox" type="checkbox" 
+                                       name="beneficio_engajamento" id="eng_premiacao_metas" value="premiacao_metas">
+                                <label class="form-check-label w-100 p-3" for="eng_premiacao_metas">
+                                    <span class="fw-bold">Premiação por metas (produtos, vouchers etc.)</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input engajamento-checkbox" type="checkbox" 
+                                       name="beneficio_engajamento" id="eng_marketing_cooperado" value="marketing_cooperado">
+                                <label class="form-check-label w-100 p-3" for="eng_marketing_cooperado">
+                                    <span class="fw-bold">Ações de marketing cooperado</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input engajamento-checkbox" type="checkbox" 
+                                       name="beneficio_engajamento" id="eng_descontos_volume" value="descontos_volume">
+                                <label class="form-check-label w-100 p-3" for="eng_descontos_volume">
+                                    <span class="fw-bold">Descontos progressivos por volume</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input engajamento-checkbox" type="checkbox" 
+                                       name="beneficio_engajamento" id="eng_treinamentos" value="treinamentos">
+                                <label class="form-check-label w-100 p-3" for="eng_treinamentos">
+                                    <span class="fw-bold">Treinamentos e capacitação técnica/comercial</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input engajamento-checkbox" type="checkbox" 
+                                       name="beneficio_engajamento" id="eng_outro" value="outro">
+                                <label class="form-check-label w-100 p-3" for="eng_outro">
+                                    <span class="fw-bold">Outro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="other-input mt-3" id="outro_questao2_input" style="display: none;">
+                                <label for="outro_questao2" class="form-label">Especifique:</label>
+                                <input type="text" class="form-control" name="outro_questao2" 
+                                       placeholder="Descreva o formato que mais motiva...">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted" id="selection-counter">Selecionados: <span id="contador-engajamento">0</span>/2</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()">
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 3 -->
+                    <div class="questao-card mb-4 question-section" id="section-3">
+                        <div class="questao-numero">3</div>
+                        <h4>Benefício Preferido</h4>
+                        <p class="lead">Se você pudesse escolher apenas um benefício para receber em campanhas, qual seria?</p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="beneficio_preferido" 
+                                       id="ben_cashback_dinheiro" value="cashback_dinheiro" required>
+                                <label class="form-check-label w-100 p-3" for="ben_cashback_dinheiro">
+                                    <span class="fw-bold">Cashback em dinheiro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="beneficio_preferido" 
+                                       id="ben_desconto_adicional" value="desconto_adicional" required>
+                                <label class="form-check-label w-100 p-3" for="ben_desconto_adicional">
+                                    <span class="fw-bold">Desconto adicional em produtos</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="beneficio_preferido" 
+                                       id="ben_pontos_troca" value="pontos_troca" required>
+                                <label class="form-check-label w-100 p-3" for="ben_pontos_troca">
+                                    <span class="fw-bold">Pontos / acúmulo para trocar por prêmios</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="beneficio_preferido" 
+                                       id="ben_premiacao_performance" value="premiacao_performance" required>
+                                <label class="form-check-label w-100 p-3" for="ben_premiacao_performance">
+                                    <span class="fw-bold">Premiação por performance</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="beneficio_preferido" 
+                                       id="ben_acao_marketing" value="acao_marketing" required>
+                                <label class="form-check-label w-100 p-3" for="ben_acao_marketing">
+                                    <span class="fw-bold">Ação conjunta de marketing</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="beneficio_preferido" 
+                                       id="ben_brindes_campanha" value="brindes_campanha" required>
+                                <label class="form-check-label w-100 p-3" for="ben_brindes_campanha">
+                                    <span class="fw-bold">Brindes para campanha interna de vendas</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="beneficio_preferido" 
+                                       id="ben_outro" value="outro" required>
+                                <label class="form-check-label w-100 p-3" for="ben_outro">
+                                    <span class="fw-bold">Outro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="other-input mt-3" id="outro_questao3_input" style="display: none;">
+                                <label for="outro_questao3" class="form-label">Especifique:</label>
+                                <input type="text" class="form-control" name="outro_questao3" 
+                                       placeholder="Qual benefício você prefere?">
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 4 -->
+                    <div class="questao-card mb-4 question-section" id="section-4">
+                        <div class="questao-numero">4</div>
+                        <h4>Fatores de Influência</h4>
+                        <p class="lead">Em que nível os fatores abaixo influenciam sua decisão de revender nossos produtos?</p>
+                        <p class="text-muted"><small>Avalie de 1 a 5, onde 1 = pouca influência / 5 = muita influência</small></p>
+                        
+                        <div class="rating-grid">
+                            <div class="rating-item mb-3">
+                                <label class="form-label fw-bold">Margem de lucro</label>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" class="star-btn" data-questao="margem_lucro" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="margem_lucro" id="margem_lucro" required>
+                            </div>
+                            
+                            <div class="rating-item mb-3">
+                                <label class="form-label fw-bold">Qualidade dos produtos</label>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" class="star-btn" data-questao="qualidade_produtos" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="qualidade_produtos" id="qualidade_produtos" required>
+                            </div>
+                            
+                            <div class="rating-item mb-3">
+                                <label class="form-label fw-bold">Suporte comercial</label>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" class="star-btn" data-questao="suporte_comercial" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="suporte_comercial" id="suporte_comercial" required>
+                            </div>
+                            
+                            <div class="rating-item mb-3">
+                                <label class="form-label fw-bold">Condições comerciais</label>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" class="star-btn" data-questao="condicoes_comerciais" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="condicoes_comerciais" id="condicoes_comerciais" required>
+                            </div>
+                            
+                            <div class="rating-item mb-3">
+                                <label class="form-label fw-bold">Reconhecimento da marca</label>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" class="star-btn" data-questao="reconhecimento_marca" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="reconhecimento_marca" id="reconhecimento_marca" required>
+                            </div>
+                            
+                            <div class="rating-item mb-3">
+                                <label class="form-label fw-bold">Velocidade de resposta do time</label>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" class="star-btn" data-questao="velocidade_resposta" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="velocidade_resposta" id="velocidade_resposta" required>
+                            </div>
+                            
+                            <div class="rating-item mb-3">
+                                <label class="form-label fw-bold">Facilidade de fechar pedidos</label>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" class="star-btn" data-questao="facilidade_pedidos" data-valor="{{ i }}" onclick="selecionarAvaliacao(this)">
+                                        {{ i }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="facilidade_pedidos" id="facilidade_pedidos" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 5 -->
+                    <div class="questao-card mb-4 question-section" id="section-5">
+                        <div class="questao-numero">5</div>
+                        <h4>Dificuldades de Participação</h4>
+                        <p class="lead">Entre nossas campanhas anteriores, o que mais dificultou sua participação?</p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_metas_altas" value="metas_altas" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_metas_altas">
+                                    <span class="fw-bold">Metas altas demais</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_mecanica_complicada" value="mecanica_complicada" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_mecanica_complicada">
+                                    <span class="fw-bold">Mecânica complicada</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_falta_retorno" value="falta_retorno" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_falta_retorno">
+                                    <span class="fw-bold">Falta de retorno financeiro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_falta_divulgacao" value="falta_divulgacao" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_falta_divulgacao">
+                                    <span class="fw-bold">Falta de divulgação</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_falta_engajamento" value="falta_engajamento" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_falta_engajamento">
+                                    <span class="fw-bold">Falta de engajamento vendedor</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_periodo_inadequado" value="periodo_inadequado" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_periodo_inadequado">
+                                    <span class="fw-bold">Período da campanha inadequado</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_sem_vantagem" value="sem_vantagem" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_sem_vantagem">
+                                    <span class="fw-bold">Não vejo vantagem comercial</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="dificuldade_participacao" 
+                                       id="dificuldade_outro" value="outro" required>
+                                <label class="form-check-label w-100 p-3" for="dificuldade_outro">
+                                    <span class="fw-bold">Outro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="other-input mt-3" id="outro_questao5_input" style="display: none;">
+                                <label for="outro_questao5" class="form-label">Especifique:</label>
+                                <input type="text" class="form-control" name="outro_questao5" 
+                                       placeholder="O que mais dificultou sua participação?">
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 6 -->
+                    <div class="questao-card mb-4 question-section" id="section-6">
+                        <div class="questao-numero">6</div>
+                        <h4>Tipo de Campanha com Impacto</h4>
+                        <p class="lead">Que tipo de campanha você acredita que teria maior impacto nas suas vendas?</p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="tipo_campanha_impacto" 
+                                       id="campanha_desconto_revenda" value="desconto_revenda" required>
+                                <label class="form-check-label w-100 p-3" for="campanha_desconto_revenda">
+                                    <span class="fw-bold">Campanha focada em desconto para revenda</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="tipo_campanha_impacto" 
+                                       id="campanha_cashback_item" value="cashback_item" required>
+                                <label class="form-check-label w-100 p-3" for="campanha_cashback_item">
+                                    <span class="fw-bold">Cashback por item vendido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="tipo_campanha_impacto" 
+                                       id="campanha_competicao_premiacao" value="competicao_premiacao" required>
+                                <label class="form-check-label w-100 p-3" for="campanha_competicao_premiacao">
+                                    <span class="fw-bold">Competição entre revendas com premiações</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="tipo_campanha_impacto" 
+                                       id="campanha_acoes_marketing" value="acoes_marketing" required>
+                                <label class="form-check-label w-100 p-3" for="campanha_acoes_marketing">
+                                    <span class="fw-bold">Ações conjuntas de marketing</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="tipo_campanha_impacto" 
+                                       id="campanha_outro" value="outro" required>
+                                <label class="form-check-label w-100 p-3" for="campanha_outro">
+                                    <span class="fw-bold">Outro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="other-input mt-3" id="outro_questao6_input" style="display: none;">
+                                <label for="outro_questao6" class="form-label">Especifique:</label>
+                                <input type="text" class="form-control" name="outro_questao6" 
+                                       placeholder="Que tipo de campanha teria maior impacto?">
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 7 -->
+                    <div class="questao-card mb-4 question-section" id="section-7">
+                        <div class="questao-numero">7</div>
+                        <h4>Benefício para Vender Mais</h4>
+                        <p class="lead">Se lançarmos uma nova campanha agora, qual seria o melhor benefício para te ajudar a vender mais?</p>
+                        
+                        <div class="mb-3">
+                            <label for="beneficio_venda" class="form-label">Resposta aberta:</label>
+                            <textarea class="form-control textarea-dissertativa" name="beneficio_venda" id="beneficio_venda" 
+                                      rows="4" placeholder="Descreva qual benefício te ajudaria a vender mais..." required></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 8 -->
+                    <div class="questao-card mb-4 question-section" id="section-8">
+                        <div class="questao-numero">8</div>
+                        <h4>Aumento de Volume</h4>
+                        <p class="lead">O que faria você aumentar o volume de compras conosco nos próximos 90 dias?</p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="aumento_volume" 
+                                       id="aumento_melhor_condicao" value="melhor_condicao" required>
+                                <label class="form-check-label w-100 p-3" for="aumento_melhor_condicao">
+                                    <span class="fw-bold">Melhor condição comercial</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="aumento_volume" 
+                                       id="aumento_beneficio_financeiro" value="beneficio_financeiro" required>
+                                <label class="form-check-label w-100 p-3" for="aumento_beneficio_financeiro">
+                                    <span class="fw-bold">Benefício financeiro direto</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="aumento_volume" 
+                                       id="aumento_campanhas_simples" value="campanhas_simples" required>
+                                <label class="form-check-label w-100 p-3" for="aumento_campanhas_simples">
+                                    <span class="fw-bold">Campanhas simples e atrativas</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="aumento_volume" 
+                                       id="aumento_maior_suporte" value="maior_suporte" required>
+                                <label class="form-check-label w-100 p-3" for="aumento_maior_suporte">
+                                    <span class="fw-bold">Maior suporte do time comercial</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="aumento_volume" 
+                                       id="aumento_treinamento_material" value="treinamento_material" required>
+                                <label class="form-check-label w-100 p-3" for="aumento_treinamento_material">
+                                    <span class="fw-bold">Treinamento e material para vendedores</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="aumento_volume" 
+                                       id="aumento_novos_produtos" value="novos_produtos" required>
+                                <label class="form-check-label w-100 p-3" for="aumento_novos_produtos">
+                                    <span class="fw-bold">Novos produtos</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="aumento_volume" 
+                                       id="aumento_outro" value="outro" required>
+                                <label class="form-check-label w-100 p-3" for="aumento_outro">
+                                    <span class="fw-bold">Outro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="other-input mt-3" id="outro_questao8_input" style="display: none;">
+                                <label for="outro_questao8" class="form-label">Especifique:</label>
+                                <input type="text" class="form-control" name="outro_questao8" 
+                                       placeholder="O que faria você aumentar as compras?">
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 9 -->
+                    <div class="questao-card mb-4 question-section" id="section-9">
+                        <div class="questao-numero">9</div>
+                        <h4>Competitividade Comercial</h4>
+                        <p class="lead">Qual é sua percepção sobre nossa competitividade comercial atual no mercado?</p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="competitividade" 
+                                       id="comp_muito_competitiva" value="muito_competitiva" required>
+                                <label class="form-check-label w-100 p-3" for="comp_muito_competitiva">
+                                    <span class="fw-bold">Muito competitiva</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="competitividade" 
+                                       id="comp_competitiva" value="competitiva" required>
+                                <label class="form-check-label w-100 p-3" for="comp_competitiva">
+                                    <span class="fw-bold">Competitiva</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="competitividade" 
+                                       id="comp_neutra" value="neutra" required>
+                                <label class="form-check-label w-100 p-3" for="comp_neutra">
+                                    <span class="fw-bold">Neutra</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="competitividade" 
+                                       id="comp_pouco_competitiva" value="pouco_competitiva" required>
+                                <label class="form-check-label w-100 p-3" for="comp_pouco_competitiva">
+                                    <span class="fw-bold">Pouco competitiva</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="competitividade" 
+                                       id="comp_nada_competitiva" value="nada_competitiva" required>
+                                <label class="form-check-label w-100 p-3" for="comp_nada_competitiva">
+                                    <span class="fw-bold">Nada competitiva</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextQuestion()" disabled>
+                                Próxima <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QUESTÃO 10 -->
+                    <div class="questao-card mb-4 question-section" id="section-10">
+                        <div class="questao-numero">10</div>
+                        <h4>Valorização do Parceiro</h4>
+                        <p class="lead">O que você mais valoriza em um parceiro de distribuição?</p>
+                        
+                        <div class="options-container">
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="valor_parceiro" 
+                                       id="parc_preco" value="preco" required>
+                                <label class="form-check-label w-100 p-3" for="parc_preco">
+                                    <span class="fw-bold">Preço</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="valor_parceiro" 
+                                       id="parc_estoque" value="estoque" required>
+                                <label class="form-check-label w-100 p-3" for="parc_estoque">
+                                    <span class="fw-bold">Estoque e disponibilidade</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="valor_parceiro" 
+                                       id="parc_atendimento" value="atendimento" required>
+                                <label class="form-check-label w-100 p-3" for="parc_atendimento">
+                                    <span class="fw-bold">Atendimento rápido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="valor_parceiro" 
+                                       id="parc_suporte" value="suporte" required>
+                                <label class="form-check-label w-100 p-3" for="parc_suporte">
+                                    <span class="fw-bold">Suporte pós-venda</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="valor_parceiro" 
+                                       id="parc_campanhas" value="campanhas" required>
+                                <label class="form-check-label w-100 p-3" for="parc_campanhas">
+                                    <span class="fw-bold">Campanhas e incentivos</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="valor_parceiro" 
+                                       id="parc_relacionamento" value="relacionamento" required>
+                                <label class="form-check-label w-100 p-3" for="parc_relacionamento">
+                                    <span class="fw-bold">Relacionamento próximo</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check-card mb-2">
+                                <input class="form-check-input" type="radio" name="valor_parceiro" 
+                                       id="parc_outro" value="outro" required>
+                                <label class="form-check-label w-100 p-3" for="parc_outro">
+                                    <span class="fw-bold">Outro</span>
+                                </label>
+                            </div>
+                            
+                            <div class="other-input mt-3" id="outro_questao10_input" style="display: none;">
+                                <label for="outro_questao10" class="form-label">Especifique:</label>
+                                <input type="text" class="form-control" name="outro_questao10" 
+                                       placeholder="O que você mais valoriza em um parceiro?">
+                            </div>
+                        </div>
+
+                        <!-- Comentários Gerais -->
+                        <div class="mt-4">
+                            <label for="comentarios_gerais" class="form-label">Comentários ou sugestões adicionais:</label>
+                            <textarea class="form-control textarea-dissertativa" name="comentarios_gerais" id="comentarios_gerais" 
+                                      rows="3" placeholder="Tem alguma sugestão ou observação que gostaria de compartilhar?"></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevQuestion()">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-success btn-lg" onclick="submitPesquisaMarketing()">
+                                <i class="fas fa-paper-plane me-2"></i> Enviar Pesquisa
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="success-message" style="display: none;">
+                <div class="display-1 mb-3">✅</div>
+                <h2 class="mb-3">Pesquisa Enviada com Sucesso!</h2>
+                <p class="lead mb-4">Obrigado por compartilhar sua opinião. Suas respostas nos ajudarão a construir campanhas mais estratégicas e alinhadas com suas necessidades.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-home me-2"></i> Voltar ao Início
+                    </a>
+                    <a href="{{ url_for('pesquisa_marketing') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-redo me-2"></i> Nova Pesquisa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variáveis globais
+let currentSection = 1;
+const totalSections = 10;
+let cnpjValidado = null;
+let razaoSocialValidada = null;
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("🚀 DOM carregado - Inicializando pesquisa de marketing...");
+    updateProgress();
+    setupEventListeners();
+    
+    // Máscara para CNPJ
+    document.getElementById('cnpj').addEventListener('input', function(e) {
+        let value = this.value.replace(/\D/g, '');
+        
+        if (value.length > 2) {
+            value = value.slice(0, 2) + '.' + value.slice(2);
+        }
+        if (value.length > 6) {
+            value = value.slice(0, 6) + '.' + value.slice(6);
+        }
+        if (value.length > 10) {
+            value = value.slice(0, 10) + '/' + value.slice(10);
+        }
+        if (value.length > 15) {
+            value = value.slice(0, 15) + '-' + value.slice(15, 17);
+        }
+        
+        this.value = value;
+    });
+});
+
+function setupEventListeners() {
+    // Validação em tempo real para questões obrigatórias
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            validateCurrentSection();
+            
+            // Mostrar/ocultar campo "Outro" para questões específicas
+            const name = this.getAttribute('name');
+            const value = this.value;
+            
+            if (value === 'outro') {
+                const questionNumber = name.includes('beneficio_engajamento') ? '2' : 
+                                     name.includes('beneficio_preferido') ? '3' :
+                                     name.includes('dificuldade_participacao') ? '5' :
+                                     name.includes('tipo_campanha_impacto') ? '6' :
+                                     name.includes('aumento_volume') ? '8' :
+                                     name.includes('valor_parceiro') ? '10' : '';
+                
+                if (questionNumber) {
+                    document.getElementById(`outro_questao${questionNumber}_input`).style.display = 'block';
+                }
+            } else {
+                // Ocultar todos os campos "Outro" quando outra opção for selecionada
+                document.querySelectorAll('.other-input').forEach(input => {
+                    input.style.display = 'none';
+                });
+            }
+        });
+    });
+
+    // Validação para questão 2 (máximo 2 checkboxes)
+    document.querySelectorAll('.engajamento-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            validateEngajamento();
+        });
+    });
+
+    // Validação para questão 7 (textarea obrigatório)
+    document.getElementById('beneficio_venda').addEventListener('input', function() {
+        validateCurrentSection();
+    });
+}
+
+function updateProgress() {
+    const progress = ((currentSection - 1) / totalSections) * 100;
+    document.getElementById('progress-fill').style.width = `${progress}%`;
+    document.getElementById('current-question').textContent = currentSection - 1;
+}
+
+function showSection(sectionIndex) {
+    document.querySelectorAll('.question-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(`section-${sectionIndex}`).classList.add('active');
+    currentSection = sectionIndex;
+    updateProgress();
+    validateCurrentSection();
+    
+    // Scroll para o topo da questão
+    document.getElementById(`section-${sectionIndex}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function nextQuestion() {
+    if (currentSection < totalSections) {
+        showSection(currentSection + 1);
+    }
+}
+
+function prevQuestion() {
+    if (currentSection > 1) {
+        showSection(currentSection - 1);
+    }
+}
+
+function validateCurrentSection() {
+    const currentSectionEl = document.getElementById(`section-${currentSection}`);
+    const nextButton = currentSectionEl.querySelector('.btn-primary-custom');
+    
+    let isValid = true;
+    
+    switch(currentSection) {
+        case 1:
+            isValid = document.querySelector('input[name="posicionamento"]:checked') !== null;
+            break;
+        case 2:
+            isValid = true; // Questão 2 é opcional (checkbox)
+            break;
+        case 3:
+            isValid = document.querySelector('input[name="beneficio_preferido"]:checked') !== null;
+            break;
+        case 4:
+            // Verificar se todas as 7 avaliações foram preenchidas
+            const camposQ4 = ['margem_lucro', 'qualidade_produtos', 'suporte_comercial', 'condicoes_comerciais', 
+                             'reconhecimento_marca', 'velocidade_resposta', 'facilidade_pedidos'];
+            isValid = camposQ4.every(campo => document.getElementById(campo).value !== '');
+            break;
+        case 5:
+            isValid = document.querySelector('input[name="dificuldade_participacao"]:checked') !== null;
+            break;
+        case 6:
+            isValid = document.querySelector('input[name="tipo_campanha_impacto"]:checked') !== null;
+            break;
+        case 7:
+            isValid = document.getElementById('beneficio_venda').value.trim() !== '';
+            break;
+        case 8:
+            isValid = document.querySelector('input[name="aumento_volume"]:checked') !== null;
+            break;
+        case 9:
+            isValid = document.querySelector('input[name="competitividade"]:checked') !== null;
+            break;
+        case 10:
+            isValid = document.querySelector('input[name="valor_parceiro"]:checked') !== null;
+            break;
+    }
+    
+    if (nextButton) {
+        nextButton.disabled = !isValid;
+    }
+}
+
+function validateEngajamento() {
+    const checkboxes = document.querySelectorAll('.engajamento-checkbox:checked');
+    const counter = document.getElementById('contador-engajamento');
+    
+    counter.textContent = checkboxes.length;
+    
+    // Limitar a 2 seleções
+    if (checkboxes.length > 2) {
+        event.target.checked = false;
+        counter.textContent = 2;
+        showAlert('Por favor, selecione no máximo 2 opções.', 'warning');
+    }
+    
+    // Mostrar/ocultar campo "Outro"
+    const outroChecked = document.querySelector('input[name="beneficio_engajamento"][value="outro"]:checked');
+    document.getElementById('outro_questao2_input').style.display = outroChecked ? 'block' : 'none';
+}
+
+function selecionarAvaliacao(botao) {
+    const questao = botao.getAttribute('data-questao');
+    const valor = botao.getAttribute('data-valor');
+    
+    console.log("⭐ Selecionando avaliação:", questao, valor);
+    
+    // Remover seleção de todos os botões desta questão
+    const botoes = document.querySelectorAll(`[data-questao="${questao}"]`);
+    botoes.forEach(btn => btn.classList.remove('selected'));
+    
+    // Selecionar o botão clicado
+    botao.classList.add('selected');
+    
+    // Atualizar o campo hidden
+    document.getElementById(questao).value = valor;
+    
+    validateCurrentSection();
+}
+
+async function validarCNPJMarketing(cnpj) {
+    const cnpjLimpo = cnpj.replace(/\D/g, '');
+    const validationDiv = document.getElementById('cnpj-validation');
+    const tipoResposta = document.getElementById('tipo-resposta');
+    const btnIniciar = document.getElementById('btn-iniciar');
+    const empresaInfo = document.getElementById('empresa-info');
+    
+    // Reset
+    cnpjValidado = null;
+    razaoSocialValidada = null;
+    btnIniciar.disabled = true;
+    empresaInfo.style.display = 'none';
+    
+    if (cnpjLimpo.length !== 14) {
+        validationDiv.innerHTML = '<div class="alert alert-warning mb-0">CNPJ deve ter 14 dígitos</div>';
+        validationDiv.style.display = 'block';
+        tipoResposta.textContent = 'CNPJ inválido';
+        tipoResposta.className = 'text-danger';
+        return;
+    }
+    
+    try {
+        // Alternativa: usar query parameter
+        const response = await fetch(`/api/verificar-cnpj-marketing?cnpj=${cnpj}`);
+        const data = await response.json();
+        
+        if (data.valido) {
+            validationDiv.innerHTML = `<div class="alert alert-success mb-0">✅ ${data.mensagem}</div>`;
+            tipoResposta.textContent = 'Validado com sucesso';
+            tipoResposta.className = 'text-success';
+            
+            // Salvar dados da empresa
+            cnpjValidado = data.cnpj_correto;
+            razaoSocialValidada = data.razao_social;
+            
+            // Mostrar informações da empresa
+            document.getElementById('info-razao-social').textContent = `Empresa: ${data.razao_social}`;
+            document.getElementById('info-responsavel').textContent = `Responsável: ${data.responsavel}`;
+            empresaInfo.style.display = 'block';
+            
+            // Habilitar botão de iniciar
+            btnIniciar.disabled = false;
+            
+        } else {
+            validationDiv.innerHTML = `<div class="alert alert-danger mb-0">❌ ${data.mensagem}</div>`;
+            tipoResposta.textContent = 'Não qualificado';
+            tipoResposta.className = 'text-danger';
+            btnIniciar.disabled = true;
+        }
+        validationDiv.style.display = 'block';
+    } catch (error) {
+        validationDiv.innerHTML = '<div class="alert alert-danger mb-0">Erro na validação do CNPJ</div>';
+        validationDiv.style.display = 'block';
+        tipoResposta.textContent = 'Erro na validação';
+        tipoResposta.className = 'text-danger';
+        btnIniciar.disabled = true;
+    }
+}
+
+function iniciarPesquisaMarketing() {
+    if (!cnpjValidado) {
+        showAlert('Por favor, valide seu CNPJ antes de iniciar a pesquisa.', 'error');
+        return;
+    }
+    
+    // Salvar CNPJ validado para usar no formulário
+    document.getElementById('cnpj-hidden').value = cnpjValidado;
+    
+    // Ocultar seção de identificação e mostrar formulário de pesquisa
+    document.getElementById('identification-section').style.display = 'none';
+    document.getElementById('research-form').style.display = 'block';
+    
+    console.log("🚀 Pesquisa iniciada para CNPJ:", cnpjValidado);
+}
+
+async function submitPesquisaMarketing() {
+    if (!cnpjValidado) {
+        showAlert('CNPJ não validado. Por favor, volte à primeira seção e valide seu CNPJ.', 'error');
+        return;
+    }
+
+    const form = document.getElementById('pesquisaForm');
+    const formData = new FormData(form);
+    const data = {};
+    
+    // Coletar dados do formulário
+    for (let [key, value] of formData.entries()) {
+        if (key === 'beneficio_engajamento') {
+            if (!data[key]) data[key] = [];
+            data[key].push(value);
+        } else {
+            data[key] = value;
+        }
+    }
+    
+    // Adicionar CNPJ validado
+    data.cnpj = cnpjValidado;
+    
+    console.log("📦 Dados a serem enviados:", data);
+    
+    try {
+        const response = await fetch('/submit_pesquisa_marketing', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('research-form').style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+            console.log("✅ Pesquisa enviada com sucesso!");
+        } else {
+            showAlert(result.message, 'error');
+            console.log("❌ Erro ao enviar pesquisa:", result.message);
+        }
+    } catch (error) {
+        showAlert('Erro ao enviar pesquisa. Tente novamente.', 'error');
+        console.log("❌ Erro de rede:", error);
+    }
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'error' ? 'alert-danger' : 'alert-warning';
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+
+<style>
+.pesquisa-header {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    border-radius: 20px;
+}
+
+.pesquisa-logo {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.questao-card {
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.questao-card:hover {
+    border-color: var(--accent-green);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.questao-numero {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-olive));
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.form-check-card {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.form-check-card:hover {
+    border-color: var(--accent-green);
+    transform: translateY(-2px);
+}
+
+.form-check-input:checked + .form-check-label {
+    background-color: rgba(39, 174, 96, 0.1);
+    border-color: var(--accent-green);
+}
+
+.form-check-input {
+    display: none;
+}
+
+.rating-grid {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.rating-item {
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.rating-stars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.star-btn {
+    background: none;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.star-btn:hover {
+    background: var(--accent-yellow);
+    border-color: var(--accent-green);
+    transform: scale(1.1);
+}
+
+.star-btn.selected {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-olive));
+    color: white;
+    border-color: var(--accent-green);
+}
+
+.other-input {
+    animation: slideDown 0.3s ease;
+}
+
+.textarea-dissertativa {
+    min-height: 120px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    padding: 1rem;
+    resize: vertical;
+}
+
+.textarea-dissertativa:focus {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 0.2rem rgba(100, 148, 28, 0.25);
+}
+
+.success-message {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-olive));
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pesquisa-header {
+        padding: 2rem 1rem;
+    }
+    
+    .pesquisa-body {
+        padding: 2rem 1rem;
+    }
+    
+    .questao-card {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-check-card .form-check-label {
+        padding: 1rem !important;
+    }
+    
+    .questao-numero {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+    
+    .rating-stars {
+        gap: 5px;
+    }
+    
+    .star-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .pesquisa-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .pesquisa-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .questao-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .questao-numero {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+    
+    .questao-card h4 {
+        font-size: 1.1rem;
+    }
+    
+    .rating-stars {
+        gap: 3px;
+    }
+    
+    .star-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}

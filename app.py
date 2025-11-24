@@ -215,6 +215,50 @@ class PesquisaResposta(db.Model):
     ip = db.Column(db.String(45))
     anonima = db.Column(db.Boolean, default=False)
 
+class PesquisaMarketing(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cnpj_identificado = db.Column(db.String(18))
+    razao_social = db.Column(db.String(200))
+    
+    # Questão 1
+    posicionamento = db.Column(db.String(20), nullable=False)
+    
+    # Questão 2 (múltipla escolha - até 2)
+    beneficio_engajamento = db.Column(db.Text)  # JSON array
+    
+    # Questão 3
+    beneficio_preferido = db.Column(db.String(100), nullable=False)
+    
+    # Questão 4 (avaliações 1-5) - TORNAR OPCIONAIS
+    margem_lucro = db.Column(db.Integer, default=0)
+    qualidade_produtos = db.Column(db.Integer, default=0)
+    suporte_comercial = db.Column(db.Integer, default=0)
+    condicoes_comerciais = db.Column(db.Integer, default=0)
+    reconhecimento_marca = db.Column(db.Integer, default=0)
+    velocidade_resposta = db.Column(db.Integer, default=0)
+    facilidade_pedidos = db.Column(db.Integer, default=0)
+    
+    # Questões 5-10 - TORNAR OPCIONAIS
+    dificuldade_participacao = db.Column(db.String(100))
+    tipo_campanha_impacto = db.Column(db.String(100))
+    beneficio_venda = db.Column(db.Text)
+    aumento_volume = db.Column(db.String(100))
+    competitividade = db.Column(db.String(20))
+    valor_parceiro = db.Column(db.String(100))
+    
+    # Outros campos
+    outro_questao2 = db.Column(db.String(200))
+    outro_questao3 = db.Column(db.String(200))
+    outro_questao5 = db.Column(db.String(200))
+    outro_questao6 = db.Column(db.String(200))
+    outro_questao8 = db.Column(db.String(200))
+    outro_questao10 = db.Column(db.String(200))
+    
+    comentarios_gerais = db.Column(db.Text)
+    data_resposta = db.Column(db.DateTime, default=agora)
+    ip = db.Column(db.String(45))
+    usuario_responsavel = db.Column(db.String(200))
+
 MODULOS_SISTEMA = {
     'dashboard': {'nome': '📊 Dashboard', 'descricao': 'Página inicial do sistema'},
     'checkin': {'nome': '✅ Check-in', 'descricao': 'Check-in de participantes'},
@@ -227,8 +271,17 @@ MODULOS_SISTEMA = {
     'exportacao': {'nome': '📥 Exportação', 'descricao': 'Exportar dados'},
     'brindes': {'nome': '🎯 Brindes', 'descricao': 'Gestão de brindes'},
     'usuarios': {'nome': '👥 Usuários', 'descricao': 'Gestão de usuários'},
-    'logs': {'nome': '📊 Logs', 'descricao': 'Logs de auditoria'}
+    'logs': {'nome': '📊 Logs', 'descricao': 'Logs de auditoria'},
+    
+    # NOVOS MÓDULOS ADICIONADOS
+    'pesquisa_mkt': {'nome': '📈 Pesquisa Marketing', 'descricao': 'Pesquisa estratégica de marketing'},
+    'relatorio_pesquisas_mkt': {'nome': '📊 Relatório Pesquisa Mkt', 'descricao': 'Relatórios da pesquisa de marketing'},
+    
+    # MÓDULOS EXISTENTES DE PESQUISA
+    'pesquisa_publica': {'nome': '📝 Pesquisa Pública', 'descricao': 'Pesquisa de satisfação pública'},
+    'relatorio_pesquisas': {'nome': '📋 Relatório Pesquisas', 'descricao': 'Relatórios de pesquisas públicas'},
 }
+
 
 # Funções de permissão
 def permissao_required(modulo):
@@ -2357,6 +2410,304 @@ def api_validar_cnpj_pesquisa(cnpj):
     except Exception as e:
         print(f"❌ Erro na validação: {str(e)}")
         return jsonify({'valido': False, 'mensagem': f'Erro na validação: {str(e)}'})
+    
+@app.route('/pesquisa-marketing')
+@login_required
+@permissao_required('pesquisa_mkt')
+def pesquisa_marketing():
+    """Pesquisa de marketing - apenas para empresas com check-in"""
+    return render_template('pesquisa-marketing.html')
+
+@app.route('/api/verificar-cnpj-marketing')
+@login_required
+def api_verificar_cnpj_marketing():
+    """Verifica se CNPJ está qualificado para pesquisa marketing"""
+    cnpj = request.args.get('cnpj')
+    # resto do código igual...
+    try:
+        from urllib.parse import unquote
+        cnpj = unquote(cnpj)
+        
+        cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
+        
+        if len(cnpj_limpo) != 14:
+            return jsonify({'valido': False, 'mensagem': 'CNPJ deve ter 14 dígitos'})
+        
+        # Busca cliente com check-in realizado
+        cliente = Cliente.query.filter_by(cnpj=cnpj_limpo, checkin_realizado=True).first()
+        
+        if not cliente:
+            # Tenta com CNPJ formatado
+            cnpj_formatado = normalizar_cnpj(cnpj_limpo)
+            cliente = Cliente.query.filter_by(cnpj=cnpj_formatado, checkin_realizado=True).first()
+        
+        if not cliente:
+            # Busca em todos os clientes (fallback)
+            todos_clientes = Cliente.query.filter_by(checkin_realizado=True).all()
+            for cli in todos_clientes:
+                cli_cnpj_limpo = ''.join(filter(str.isdigit, cli.cnpj))
+                if cli_cnpj_limpo == cnpj_limpo:
+                    cliente = cli
+                    break
+        
+        if cliente:
+            return jsonify({
+                'valido': True, 
+                'mensagem': f'CNPJ validado - {cliente.razao_social}',
+                'razao_social': cliente.razao_social,
+                'responsavel': cliente.responsavel,
+                'cnpj_correto': cliente.cnpj
+            })
+        else:
+            return jsonify({
+                'valido': False, 
+                'mensagem': 'CNPJ não encontrado ou não fez check-in no evento'
+            })
+            
+    except Exception as e:
+        return jsonify({'valido': False, 'mensagem': f'Erro na validação: {str(e)}'})
+
+
+@app.route('/submit_pesquisa_marketing', methods=['POST'])
+@login_required
+@permissao_required('pesquisa_mkt')
+def submit_pesquisa_marketing():
+    try:
+        data = request.get_json()
+        
+        # CNPJ é OBRIGATÓRIO para pesquisa marketing
+        cnpj = data.get('cnpj', '').strip()
+        if not cnpj:
+            return jsonify({'success': False, 'message': 'CNPJ é obrigatório para esta pesquisa'})
+        
+        cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
+        
+        # Verificar novamente se o cliente existe e fez check-in
+        cliente = Cliente.query.filter_by(cnpj=cnpj_limpo, checkin_realizado=True).first()
+        if not cliente:
+            # Tenta com CNPJ formatado
+            cnpj_formatado = normalizar_cnpj(cnpj_limpo)
+            cliente = Cliente.query.filter_by(cnpj=cnpj_formatado, checkin_realizado=True).first()
+        
+        if not cliente:
+            return jsonify({'success': False, 'message': 'CNPJ não validado ou não fez check-in no evento'})
+        
+        # Processar benefícios de engajamento (questão 2 - múltipla escolha)
+        beneficio_engajamento = data.get('beneficio_engajamento', [])
+        if isinstance(beneficio_engajamento, list) and len(beneficio_engajamento) > 2:
+            return jsonify({'success': False, 'message': 'Selecione no máximo 2 opções na questão 2'})
+
+        # Validar campos obrigatórios
+        if not data.get('posicionamento'):
+            return jsonify({'success': False, 'message': 'A questão 1 (posicionamento) é obrigatória'})
+        
+        if not data.get('beneficio_preferido'):
+            return jsonify({'success': False, 'message': 'A questão 3 (benefício preferido) é obrigatória'})
+        
+        if not data.get('valor_parceiro'):
+            return jsonify({'success': False, 'message': 'A questão 10 (valor do parceiro) é obrigatória'})
+
+        # Criar a pesquisa com valores padrão para campos opcionais
+        pesquisa = PesquisaMarketing(
+            cnpj_identificado=cliente.cnpj,
+            razao_social=cliente.razao_social,
+            usuario_responsavel=cliente.responsavel,
+            
+            # Questão 1 (OBRIGATÓRIA)
+            posicionamento=data.get('posicionamento'),
+            
+            # Questão 2 (OPCIONAL)
+            beneficio_engajamento=json.dumps(beneficio_engajamento) if beneficio_engajamento else None,
+            
+            # Questão 3 (OBRIGATÓRIA)
+            beneficio_preferido=data.get('beneficio_preferido'),
+            
+            # Questão 4 (OPCIONAL) - usar get com valor padrão 0
+            margem_lucro=int(data.get('margem_lucro', 0)),
+            qualidade_produtos=int(data.get('qualidade_produtos', 0)),
+            suporte_comercial=int(data.get('suporte_comercial', 0)),
+            condicoes_comerciais=int(data.get('condicoes_comerciais', 0)),
+            reconhecimento_marca=int(data.get('reconhecimento_marca', 0)),
+            velocidade_resposta=int(data.get('velocidade_resposta', 0)),
+            facilidade_pedidos=int(data.get('facilidade_pedidos', 0)),
+            
+            # Questões 5-9 (OPCIONAIS)
+            dificuldade_participacao=data.get('dificuldade_participacao'),
+            tipo_campanha_impacto=data.get('tipo_campanha_impacto'),
+            beneficio_venda=data.get('beneficio_venda'),
+            aumento_volume=data.get('aumento_volume'),
+            competitividade=data.get('competitividade'),
+            
+            # Questão 10 (OBRIGATÓRIA)
+            valor_parceiro=data.get('valor_parceiro'),
+            
+            # Campos "Outro" (OPCIONAIS)
+            outro_questao2=data.get('outro_questao2'),
+            outro_questao3=data.get('outro_questao3'),
+            outro_questao5=data.get('outro_questao5'),
+            outro_questao6=data.get('outro_questao6'),
+            outro_questao8=data.get('outro_questao8'),
+            outro_questao10=data.get('outro_questao10'),
+            
+            comentarios_gerais=data.get('comentarios_gerais'),
+            ip=request.remote_addr
+        )
+        
+        db.session.add(pesquisa)
+        db.session.commit()
+        
+        registrar_log('pesquisa_marketing_respondida', 'pesquisa_mkt', {
+            'pesquisa_id': pesquisa.id,
+            'cnpj': cliente.cnpj,
+            'razao_social': cliente.razao_social,
+            'responsavel': cliente.responsavel
+        })
+        
+        return jsonify({'success': True, 'message': 'Pesquisa de marketing enviada com sucesso!'})
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Erro ao salvar pesquisa marketing: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro ao enviar pesquisa: {str(e)}'})
+@app.route('/fix-pesquisa-table')
+def fix_pesquisa_table():
+    """Corrige a tabela pesquisa_marketing para permitir valores nulos"""
+    try:
+        with db.engine.connect() as conn:
+            # Altera as colunas para permitir NULL
+            conn.execute(db.text("""
+                ALTER TABLE pesquisa_marketing 
+                ALTER COLUMN dificuldade_participacao DROP NOT NULL,
+                ALTER COLUMN tipo_campanha_impacto DROP NOT NULL,
+                ALTER COLUMN beneficio_venda DROP NOT NULL,
+                ALTER COLUMN aumento_volume DROP NOT NULL,
+                ALTER COLUMN competitividade DROP NOT NULL;
+            """))
+            conn.commit()
+        
+        return jsonify({'success': True, 'message': 'Tabela corrigida com sucesso!'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    
+@app.route('/relatorio-pesquisas-marketing')
+@login_required
+@permissao_required('relatorio_pesquisas_mkt')
+def relatorio_pesquisas_marketing():
+    pesquisas = PesquisaMarketing.query.order_by(PesquisaMarketing.data_resposta.desc()).all()
+    
+    total_pesquisas = len(pesquisas)
+    pesquisas_identificadas = len([p for p in pesquisas if p.cnpj_identificado])
+    
+    # Calcular médias para questão 4
+    campos_questao4 = ['margem_lucro', 'qualidade_produtos', 'suporte_comercial', 'condicoes_comerciais', 
+                      'reconhecimento_marca', 'velocidade_resposta', 'facilidade_pedidos']
+    
+    medias = {}
+    for campo in campos_questao4:
+        if total_pesquisas > 0:
+            valores = [getattr(p, campo) for p in pesquisas if getattr(p, campo) > 0]
+            medias[campo] = sum(valores) / len(valores) if valores else 0
+        else:
+            medias[campo] = 0
+    
+    # Estatísticas para questões de múltipla escolha
+    stats = {
+        'posicionamento': {},
+        'beneficio_preferido': {},
+        'dificuldade_participacao': {},
+        'tipo_campanha_impacto': {},
+        'aumento_volume': {},
+        'competitividade': {},
+        'valor_parceiro': {},
+        'beneficio_engajamento': {}
+    }
+    
+    for pesquisa in pesquisas:
+        # Questão 1
+        stats['posicionamento'][pesquisa.posicionamento] = stats['posicionamento'].get(pesquisa.posicionamento, 0) + 1
+        
+        # Questão 3
+        stats['beneficio_preferido'][pesquisa.beneficio_preferido] = stats['beneficio_preferido'].get(pesquisa.beneficio_preferido, 0) + 1
+        
+        # Questão 5
+        stats['dificuldade_participacao'][pesquisa.dificuldade_participacao] = stats['dificuldade_participacao'].get(pesquisa.dificuldade_participacao, 0) + 1
+        
+        # Questão 6
+        stats['tipo_campanha_impacto'][pesquisa.tipo_campanha_impacto] = stats['tipo_campanha_impacto'].get(pesquisa.tipo_campanha_impacto, 0) + 1
+        
+        # Questão 8
+        stats['aumento_volume'][pesquisa.aumento_volume] = stats['aumento_volume'].get(pesquisa.aumento_volume, 0) + 1
+        
+        # Questão 9
+        stats['competitividade'][pesquisa.competitividade] = stats['competitividade'].get(pesquisa.competitividade, 0) + 1
+        
+        # Questão 10
+        stats['valor_parceiro'][pesquisa.valor_parceiro] = stats['valor_parceiro'].get(pesquisa.valor_parceiro, 0) + 1
+        
+        # Questão 2 (múltipla)
+        beneficios = json.loads(pesquisa.beneficio_engajamento) if pesquisa.beneficio_engajamento else []
+        for beneficio in beneficios:
+            stats['beneficio_engajamento'][beneficio] = stats['beneficio_engajamento'].get(beneficio, 0) + 1
+    
+    return render_template('relatorio_pesquisas_marketing.html',
+                         pesquisas=pesquisas,
+                         total_pesquisas=total_pesquisas,
+                         pesquisas_identificadas=pesquisas_identificadas,
+                         medias=medias,
+                         stats=stats)
+
+@app.route('/exportar-pesquisas-marketing')
+@login_required
+@permissao_required('exportacao')
+def exportar_pesquisas_marketing():
+    pesquisas = PesquisaMarketing.query.order_by(PesquisaMarketing.data_resposta.desc()).all()
+    
+    data = []
+    for pesquisa in pesquisas:
+        beneficios_engajamento = json.loads(pesquisa.beneficio_engajamento) if pesquisa.beneficio_engajamento else []
+        
+        data.append({
+            'ID': pesquisa.id,
+            'Data/Hora': pesquisa.data_resposta.strftime('%d/%m/%Y %H:%M'),
+            'CNPJ': pesquisa.cnpj_identificado or 'N/A',
+            'Razão Social': pesquisa.razao_social or 'N/A',
+            'Responsável': pesquisa.usuario_responsavel or 'N/A',
+            'Posicionamento': pesquisa.posicionamento,
+            'Benefícios Engajamento': ', '.join(beneficios_engajamento),
+            'Outro Benefício Engajamento': pesquisa.outro_questao2 or 'N/A',
+            'Benefício Preferido': pesquisa.beneficio_preferido,
+            'Outro Benefício Preferido': pesquisa.outro_questao3 or 'N/A',
+            'Margem Lucro (1-5)': pesquisa.margem_lucro,
+            'Qualidade Produtos (1-5)': pesquisa.qualidade_produtos,
+            'Suporte Comercial (1-5)': pesquisa.suporte_comercial,
+            'Condições Comerciais (1-5)': pesquisa.condicoes_comerciais,
+            'Reconhecimento Marca (1-5)': pesquisa.reconhecimento_marca,
+            'Velocidade Resposta (1-5)': pesquisa.velocidade_resposta,
+            'Facilidade Pedidos (1-5)': pesquisa.facilidade_pedidos,
+            'Dificuldade Participação': pesquisa.dificuldade_participacao,
+            'Outra Dificuldade': pesquisa.outro_questao5 or 'N/A',
+            'Tipo Campanha Impacto': pesquisa.tipo_campanha_impacto,
+            'Outro Tipo Campanha': pesquisa.outro_questao6 or 'N/A',
+            'Benefício Venda': pesquisa.beneficio_venda or 'N/A',
+            'Aumento Volume': pesquisa.aumento_volume,
+            'Outro Aumento Volume': pesquisa.outro_questao8 or 'N/A',
+            'Competitividade': pesquisa.competitividade,
+            'Valor Parceiro': pesquisa.valor_parceiro,
+            'Outro Valor Parceiro': pesquisa.outro_questao10 or 'N/A',
+            'Comentários Gerais': pesquisa.comentarios_gerais or 'N/A',
+            'IP': pesquisa.ip
+        })
+    
+    output = export_to_excel(data, 'pesquisas_marketing.xlsx', 'Pesquisas Marketing')
+    
+    registrar_log('exportacao_pesquisas_marketing', 'exportacao', {
+        'quantidade_pesquisas': len(pesquisas)
+    })
+    
+    return send_file(output,
+                    download_name='pesquisas_marketing_ro_experience.xlsx',
+                    as_attachment=True,
+                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     
     
     

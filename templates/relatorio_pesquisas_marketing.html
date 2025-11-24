@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary-custom text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">📊 Relatório - Pesquisa Marketing</h2>
+                            <p class="mb-0 opacity-75">Análise estratégica das respostas coletadas</p>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                📋 Seletor de Pesquisas
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('relatorio_pesquisas') }}">📝 Pesquisa Pública</a></li>
+                                <li><a class="dropdown-item active" href="{{ url_for('relatorio_pesquisas_marketing') }}">📈 Pesquisa Marketing</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Gerais -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success-custom text-white text-center">
+                <div class="card-body">
+                    <h3 class="display-4">{{ total_pesquisas }}</h3>
+                    <p class="mb-0">Total de Pesquisas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info-custom text-white text-center">
+                <div class="card-body">
+                    <h3 class="display-4">{{ pesquisas_identificadas }}</h3>
+                    <p class="mb-0">Identificadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white text-center">
+                <div class="card-body">
+                    <h3 class="display-4">{{ (total_pesquisas - pesquisas_identificadas) }}</h3>
+                    <p class="mb-0">Anônimas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary-custom text-white text-center">
+                <div class="card-body">
+                    {% set soma_medias = medias.margem_lucro + medias.qualidade_produtos + medias.suporte_comercial + 
+                                          medias.condicoes_comerciais + medias.reconhecimento_marca + medias.velocidade_resposta + 
+                                          medias.facilidade_pedidos %}
+                    <h3 class="display-4">{{ "%.1f"|format(soma_medias / 7) if soma_medias > 0 else "0.0" }}</h3>
+                    <p class="mb-0">Média Geral (Q4)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Médias da Questão 4 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">📈 Fatores de Influência (Questão 4)</h5>
+                    <p class="text-muted mb-0">Avaliação de 1 a 5 - O que mais influencia sua decisão de revender</p>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-primary">{{ "%.1f"|format(medias.margem_lucro) }}</h3>
+                                <p class="mb-1"><strong>Margem de Lucro</strong></p>
+                                <small class="text-muted">Rentabilidade</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-primary">{{ "%.1f"|format(medias.qualidade_produtos) }}</h3>
+                                <p class="mb-1"><strong>Qualidade</strong></p>
+                                <small class="text-muted">Dos produtos</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-success">{{ "%.1f"|format(medias.suporte_comercial) }}</h3>
+                                <p class="mb-1"><strong>Suporte</strong></p>
+                                <small class="text-muted">Comercial</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-success">{{ "%.1f"|format(medias.condicoes_comerciais) }}</h3>
+                                <p class="mb-1"><strong>Condições</strong></p>
+                                <small class="text-muted">Comerciais</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row text-center mt-3">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-warning">{{ "%.1f"|format(medias.reconhecimento_marca) }}</h3>
+                                <p class="mb-1"><strong>Reconhecimento</strong></p>
+                                <small class="text-muted">Da marca</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-warning">{{ "%.1f"|format(medias.velocidade_resposta) }}</h3>
+                                <p class="mb-1"><strong>Velocidade</strong></p>
+                                <small class="text-muted">De resposta</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-info">{{ "%.1f"|format(medias.facilidade_pedidos) }}</h3>
+                                <p class="mb-1"><strong>Facilidade</strong></p>
+                                <small class="text-muted">Nos pedidos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas por Questão -->
+    <div class="row mb-4">
+        <!-- Questão 1 - Posicionamento -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">🎯 Posicionamento Competitivo</h6>
+                </div>
+                <div class="card-body">
+                    {% for posicionamento, count in stats.posicionamento.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% if posicionamento == 'muito_superior' %}Muito superior
+                            {% elif posicionamento == 'superior' %}Superior
+                            {% elif posicionamento == 'igual' %}Igual
+                            {% elif posicionamento == 'inferior' %}Inferior
+                            {% elif posicionamento == 'muito_inferior' %}Muito inferior
+                            {% else %}{{ posicionamento }}{% endif %}
+                        </span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-primary" style="width: {{ (count / total_pesquisas * 100) if total_pesquisas > 0 else 0 }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ count }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Questão 9 - Competitividade -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">💪 Competitividade Comercial</h6>
+                </div>
+                <div class="card-body">
+                    {% for competitividade, count in stats.competitividade.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% if competitividade == 'muito_competitiva' %}Muito competitiva
+                            {% elif competitividade == 'competitiva' %}Competitiva
+                            {% elif competitividade == 'neutra' %}Neutra
+                            {% elif competitividade == 'pouco_competitiva' %}Pouco competitiva
+                            {% elif competitividade == 'nada_competitiva' %}Nada competitiva
+                            {% else %}{{ competitividade }}{% endif %}
+                        </span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-success" style="width: {{ (count / total_pesquisas * 100) if total_pesquisas > 0 else 0 }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ count }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benefícios e Preferências -->
+    <div class="row mb-4">
+        <!-- Questão 2 - Benefícios de Engajamento -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">💰 Benefícios que Motivam Engajamento</h6>
+                    <small class="text-muted">Escolha múltipla - até 2 opções</small>
+                </div>
+                <div class="card-body">
+                    {% for beneficio, count in stats.beneficio_engajamento.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% if beneficio == 'cashback' %}Cashback financeiro
+                            {% elif beneficio == 'premiacao_metas' %}Premiação por metas
+                            {% elif beneficio == 'marketing_cooperado' %}Marketing cooperado
+                            {% elif beneficio == 'descontos_volume' %}Descontos por volume
+                            {% elif beneficio == 'treinamentos' %}Treinamentos
+                            {% elif beneficio == 'outro' %}Outro
+                            {% else %}{{ beneficio }}{% endif %}
+                        </span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-warning" style="width: {{ (count / total_pesquisas * 100) if total_pesquisas > 0 else 0 }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ count }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Questão 3 - Benefício Preferido -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">⭐ Benefício Mais Preferido</h6>
+                </div>
+                <div class="card-body">
+                    {% for beneficio, count in stats.beneficio_preferido.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% if beneficio == 'cashback_dinheiro' %}Cashback em dinheiro
+                            {% elif beneficio == 'desconto_adicional' %}Desconto adicional
+                            {% elif beneficio == 'pontos_troca' %}Pontos para troca
+                            {% elif beneficio == 'premiacao_performance' %}Premiação por performance
+                            {% elif beneficio == 'acao_marketing' %}Ação de marketing
+                            {% elif beneficio == 'brindes_campanha' %}Brindes para campanha
+                            {% elif beneficio == 'outro' %}Outro
+                            {% else %}{{ beneficio }}{% endif %}
+                        </span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-info" style="width: {{ (count / total_pesquisas * 100) if total_pesquisas > 0 else 0 }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ count }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dificuldades e Campanhas -->
+    <div class="row mb-4">
+        <!-- Questão 5 - Dificuldades -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">🚧 Dificuldades em Participar</h6>
+                </div>
+                <div class="card-body">
+                    {% for dificuldade, count in stats.dificuldade_participacao.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% if dificuldade == 'metas_altas' %}Metas altas demais
+                            {% elif dificuldade == 'mecanica_complicada' %}Mecânica complicada
+                            {% elif dificuldade == 'falta_retorno' %}Falta de retorno financeiro
+                            {% elif dificuldade == 'falta_divulgacao' %}Falta de divulgação
+                            {% elif dificuldade == 'falta_engajamento' %}Falta de engajamento
+                            {% elif dificuldade == 'periodo_inadequado' %}Período inadequado
+                            {% elif dificuldade == 'sem_vantagem' %}Não vejo vantagem
+                            {% elif dificuldade == 'outro' %}Outro
+                            {% else %}{{ dificuldade }}{% endif %}
+                        </span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-danger" style="width: {{ (count / total_pesquisas * 100) if total_pesquisas > 0 else 0 }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ count }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Questão 6 - Tipo de Campanha -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">📈 Tipo de Campanha com Maior Impacto</h6>
+                </div>
+                <div class="card-body">
+                    {% for campanha, count in stats.tipo_campanha_impacto.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% if campanha == 'desconto_revenda' %}Campanha com desconto
+                            {% elif campanha == 'cashback_item' %}Cashback por item
+                            {% elif campanha == 'competicao_premiacao' %}Competição entre revendas
+                            {% elif campanha == 'acoes_marketing' %}Ações de marketing
+                            {% elif campanha == 'outro' %}Outro
+                            {% else %}{{ campanha }}{% endif %}
+                        </span>
+                        <div class="d-flex align-items-center">
+                            <div class="progress me-2" style="width: 100px; height: 10px;">
+                                <div class="progress-bar bg-success" style="width: {{ (count / total_pesquisas * 100) if total_pesquisas > 0 else 0 }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ count }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Pesquisas Detalhadas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📝 Respostas Detalhadas</h5>
+                    <a href="{{ url_for('exportar_pesquisas_marketing') }}" class="btn btn-custom">
+                        📥 Exportar para Excel
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if pesquisas %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Empresa</th>
+                                    <th>Posicionamento</th>
+                                    <th>Competitividade</th>
+                                    <th>Benefício Preferido</th>
+                                    <th>Média Q4</th>
+                                    <th>Detalhes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pesquisa in pesquisas %}
+                                <tr>
+                                    <td>{{ pesquisa.data_resposta.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        {% if pesquisa.cnpj_identificado %}
+                                        <strong>{{ pesquisa.cnpj_identificado|cnpj }}</strong><br>
+                                        <small>{{ pesquisa.razao_social }}</small>
+                                        {% else %}
+                                        <em class="text-muted">Anônimo</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if pesquisa.posicionamento == 'muito_superior' %}
+                                        <span class="badge bg-success">Muito superior</span>
+                                        {% elif pesquisa.posicionamento == 'superior' %}
+                                        <span class="badge bg-primary">Superior</span>
+                                        {% elif pesquisa.posicionamento == 'igual' %}
+                                        <span class="badge bg-secondary">Igual</span>
+                                        {% elif pesquisa.posicionamento == 'inferior' %}
+                                        <span class="badge bg-warning">Inferior</span>
+                                        {% elif pesquisa.posicionamento == 'muito_inferior' %}
+                                        <span class="badge bg-danger">Muito inferior</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if pesquisa.competitividade == 'muito_competitiva' %}
+                                        <span class="badge bg-success">Muito competitiva</span>
+                                        {% elif pesquisa.competitividade == 'competitiva' %}
+                                        <span class="badge bg-primary">Competitiva</span>
+                                        {% elif pesquisa.competitividade == 'neutra' %}
+                                        <span class="badge bg-secondary">Neutra</span>
+                                        {% elif pesquisa.competitividade == 'pouco_competitiva' %}
+                                        <span class="badge bg-warning">Pouco competitiva</span>
+                                        {% elif pesquisa.competitividade == 'nada_competitiva' %}
+                                        <span class="badge bg-danger">Nada competitiva</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if pesquisa.beneficio_preferido == 'cashback_dinheiro' %}
+                                        <small>Cashback</small>
+                                        {% elif pesquisa.beneficio_preferido == 'desconto_adicional' %}
+                                        <small>Desconto</small>
+                                        {% elif pesquisa.beneficio_preferido == 'pontos_troca' %}
+                                        <small>Pontos</small>
+                                        {% elif pesquisa.beneficio_preferido == 'premiacao_performance' %}
+                                        <small>Premiação</small>
+                                        {% elif pesquisa.beneficio_preferido == 'acao_marketing' %}
+                                        <small>Marketing</small>
+                                        {% elif pesquisa.beneficio_preferido == 'brindes_campanha' %}
+                                        <small>Brindes</small>
+                                        {% else %}
+                                        <small>Outro</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set media_q4 = (pesquisa.margem_lucro + pesquisa.qualidade_produtos + pesquisa.suporte_comercial + 
+                                                          pesquisa.condicoes_comerciais + pesquisa.reconhecimento_marca + pesquisa.velocidade_resposta + 
+                                                          pesquisa.facilidade_pedidos) / 7 %}
+                                        <span class="badge bg-info">{{ "%.1f"|format(media_q4) }}</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                type="button"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalDetalhes{{ pesquisa.id }}">
+                                            👁️ Ver
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="display-1 text-muted mb-3">📋</div>
+                        <h4 class="text-muted">Nenhuma pesquisa de marketing respondida ainda</h4>
+                        <p class="text-muted">As respostas da pesquisa de marketing aparecerão aqui.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modais para Detalhes -->
+{% for pesquisa in pesquisas %}
+<div class="modal fade" id="modalDetalhes{{ pesquisa.id }}" tabindex="-1" aria-labelledby="modalDetalhesLabel{{ pesquisa.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetalhesLabel{{ pesquisa.id }}">
+                    📊 Detalhes da Pesquisa - {{ pesquisa.data_resposta.strftime('%d/%m/%Y %H:%M') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>📋 Informações da Empresa</h6>
+                        <p>
+                            <strong>CNPJ:</strong> {{ pesquisa.cnpj_identificado|cnpj if pesquisa.cnpj_identificado else 'Anônimo' }}<br>
+                            <strong>Razão Social:</strong> {{ pesquisa.razao_social or 'Anônimo' }}<br>
+                            <strong>Responsável:</strong> {{ pesquisa.usuario_responsavel or 'N/A' }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>🎯 Avaliações Principais</h6>
+                        <p>
+                            <strong>Posicionamento:</strong> 
+                            {% if pesquisa.posicionamento == 'muito_superior' %}Muito superior
+                            {% elif pesquisa.posicionamento == 'superior' %}Superior
+                            {% elif pesquisa.posicionamento == 'igual' %}Igual
+                            {% elif pesquisa.posicionamento == 'inferior' %}Inferior
+                            {% elif pesquisa.posicionamento == 'muito_inferior' %}Muito inferior
+                            {% endif %}<br>
+                            <strong>Competitividade:</strong> 
+                            {% if pesquisa.competitividade == 'muito_competitiva' %}Muito competitiva
+                            {% elif pesquisa.competitividade == 'competitiva' %}Competitiva
+                            {% elif pesquisa.competitividade == 'neutra' %}Neutra
+                            {% elif pesquisa.competitividade == 'pouco_competitiva' %}Pouco competitiva
+                            {% elif pesquisa.competitividade == 'nada_competitiva' %}Nada competitiva
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6>📈 Fatores de Influência (1-5)</h6>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-2">
+                        <small>Margem Lucro: <strong>{{ pesquisa.margem_lucro }}</strong></small>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <small>Qualidade: <strong>{{ pesquisa.qualidade_produtos }}</strong></small>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <small>Suporte: <strong>{{ pesquisa.suporte_comercial }}</strong></small>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <small>Condições: <strong>{{ pesquisa.condicoes_comerciais }}</strong></small>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <small>Marca: <strong>{{ pesquisa.reconhecimento_marca }}</strong></small>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <small>Velocidade: <strong>{{ pesquisa.velocidade_resposta }}</strong></small>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <small>Facilidade: <strong>{{ pesquisa.facilidade_pedidos }}</strong></small>
+                    </div>
+                </div>
+
+                {% if pesquisa.comentarios_gerais %}
+                <hr>
+                <h6>💬 Comentários Adicionais</h6>
+                <div class="p-3 bg-light rounded">
+                    {{ pesquisa.comentarios_gerais }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+.progress {
+    background-color: #e9ecef;
+    border-radius: 5px;
+}
+
+.progress-bar {
+    border-radius: 5px;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

@@ -6,8 +6,19 @@
         <div class="card bg-primary-custom text-white">
             <div class="card-body text-center py-4">
                 <h1 class="display-5 mb-3">📊 Relatório de Pesquisas</h1>
-                <p class="lead mb-2">Pesquisa de Satisfação R.O Experience 2025</p>
-                <small class="opacity-75">Análise das respostas coletadas</small>
+                <p class="lead mb-2">Análise das respostas coletadas - R.O Experience 2025</p>
+                
+                <!-- Seletor de Pesquisas -->
+                <div class="btn-group mt-3" role="group">
+                    <a href="{{ url_for('relatorio_pesquisas') }}" 
+                       class="btn {% if request.endpoint == 'relatorio_pesquisas' %}btn-warning{% else %}btn-light{% endif %} btn-lg">
+                       📝 Pesquisa Pública
+                    </a>
+                    <a href="{{ url_for('relatorio_pesquisas_marketing') }}" 
+                       class="btn {% if request.endpoint == 'relatorio_pesquisas_marketing' %}btn-warning{% else %}btn-light{% endif %} btn-lg">
+                       📈 Pesquisa Marketing
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -58,7 +69,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header bg-white">
-                <h5 class="mb-0">📈 Médias por Categoria</h5>
+                <h5 class="mb-0">📈 Médias por Categoria - Pesquisa Pública</h5>
             </div>
             <div class="card-body">
                 <div class="row text-center">
@@ -183,7 +194,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">📝 Respostas Detalhadas</h5>
+                <h5 class="mb-0">📝 Respostas Detalhadas - Pesquisa Pública</h5>
                 <a href="{{ url_for('exportar_pesquisas') }}" class="btn btn-custom">
                     📥 Exportar para Excel
                 </a>
@@ -340,6 +351,36 @@
     
     .badge {
         font-size: 0.7rem;
+    }
+
+    /* Estilos para o seletor */
+    .btn-group .btn {
+        border-radius: 10px;
+        margin: 0 5px;
+        font-weight: 600;
+    }
+
+    .btn-group .btn-light {
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+    }
+
+    .btn-group .btn-warning {
+        background-color: #ffc107;
+        border: 2px solid #ffc107;
+        color: #000;
+    }
+
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .btn-group .btn {
+            margin: 5px 0;
+            width: 100%;
+        }
     }
 </style>
 
