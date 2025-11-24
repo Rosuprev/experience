@@ -123,19 +123,6 @@
                     </div>
                     {% endif %}
 
-                    <!-- Relatório Pesquisas Marketing -->
-                    {% if tem_permissao('relatorio_pesquisas_mkt') %}
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('relatorio_pesquisas_marketing') }}" class="card menu-card-standard text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-success mb-2">📊</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Relatório Marketing</h6>
-                                <small class="menu-desc text-muted">Análise comercial</small>
-                            </div>
-                        </a>
-                    </div>
-                    {% endif %}
-
                     <!-- ==================== -->
                     <!-- MÓDULOS DE PESQUISA -->
                     <!-- ==================== -->
@@ -183,20 +170,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Exportação -->
-                    {% if tem_permissao('exportacao') %}
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('exportar_clientes') }}" class="card menu-card-standard text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-info mb-2">📤</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Exportar</h6>
-                                <small class="menu-desc text-muted">Exportar dados</small>
-                            </div>
-                        </a>
-                    </div>
-                    {% endif %}
-
-                    <!-- Brindes -->
+                                        <!-- Brindes -->
                     {% if tem_permissao('brindes') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('brindes') }}" class="card menu-card-standard text-decoration-none h-100">
@@ -241,29 +215,7 @@
                     <!-- MÓDULOS ADMIN (se for admin) -->
                     <!-- ==================== -->
                     
-                    {% if session.nivel_acesso == 'admin' %}
-                    <!-- Gestão de Usuários -->
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('gestao_usuarios') }}" class="card menu-card-standard text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-danger mb-2">👥</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Gestão Usuários</h6>
-                                <small class="menu-desc text-muted">Gerenciar acessos</small>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Logs de Auditoria -->
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('logs_auditoria') }}" class="card menu-card-standard text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-secondary mb-2">📊</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Logs Auditoria</h6>
-                                <small class="menu-desc text-muted">Registros do sistema</small>
-                            </div>
-                        </a>
-                    </div>
-                    {% endif %}
+                    
 
                 </div>
             </div>
