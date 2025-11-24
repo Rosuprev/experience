@@ -138,7 +138,7 @@
                         </a>
                     </div>
 
-                    <!-- Confirmar Entrega (nova permissão) -->
+                    <!-- Confirmar Entrega -->
                     {% if tem_permissao('entrega_brindes') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('confirmar_entrega_page') }}" class="card menu-card-standard text-decoration-none h-100">
@@ -149,6 +149,9 @@
                             </div>
                         </a>
                     </div>
+                    {% endif %}
+
+                    <!-- Relatório Pesquisas -->
                     {% if tem_permissao('relatorios') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('relatorio_pesquisas') }}" class="card menu-card-standard text-decoration-none h-100">
@@ -159,6 +162,10 @@
                             </div>
                         </a>
                     </div>
+                    {% endif %}
+
+                    <!-- Pesquisa Pública -->
+                    {% if tem_permissao('relatorios') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('pesquisa_publica') }}" class="card menu-card-standard text-decoration-none h-100" target="_blank">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
@@ -168,6 +175,10 @@
                             </div>
                         </a>
                     </div>
+                    {% endif %}
+
+                    <!-- Pesquisa Marketing -->
+                    {% if tem_permissao('relatorios') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('pesquisa_marketing') }}" class="card menu-card-standard text-decoration-none h-100">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
@@ -177,11 +188,9 @@
                             </div>
                         </a>
                     </div>
-                    
                     {% endif %}
-                    {% endif %}
-                </div><!-- Adicionar este card após o último módulo existente -->
-                
+
+                </div>
             </div>
         </div>
     </div>
@@ -190,7 +199,7 @@
 <!-- Se não tiver nenhum módulo -->
 {% if not (tem_permissao('dashboard') or tem_permissao('checkin') or tem_permissao('vendas') or 
            tem_permissao('estoque') or tem_permissao('sorteio') or tem_permissao('relatorios') or 
-           tem_permissao('brindes') or tem_permissao('importacao')) %}
+           tem_permissao('brindes') or tem_permissao('importacao') or tem_permissao('entrega_brindes')) %}
 <div class="row mt-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
