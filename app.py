@@ -2467,7 +2467,7 @@ def api_verificar_cnpj_marketing():
 
 @app.route('/submit_pesquisa_marketing', methods=['POST'])
 @login_required
-@permissao_required('pesquisa_mkt')
+@permissao_required('pesquisa_marketing')
 def submit_pesquisa_marketing():
     try:
         data = request.get_json()
