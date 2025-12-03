@@ -3488,32 +3488,34 @@ def api_analise_marca(marca):
         db.func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_medio_unitario')
     ).filter(VendaEvento.marca == marca).first()
     
-    # Top clientes da marca (por NFs)
-    top_clientes = db.session.query(
-        VendaEvento.cliente_nome,
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor'),
-        db.func.sum(VendaEvento.quantidade).label('total_quantidade')
-    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.cliente_nome).order_by(db.desc('total_nfs')).limit(10).all()
-    
-    # Top vendedores da marca (por NFs)
-    top_vendedores = db.session.query(
-        VendaEvento.vendedor,
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor'),
-        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
-        db.func.count(db.distinct(VendaEvento.cliente_nome)).label('clientes_atendidos')
-    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.vendedor).order_by(db.desc('total_nfs')).limit(10).all()
-    
-    # Top produtos da marca
-    top_produtos = db.session.query(
-        VendaEvento.descricao_produto,
-        VendaEvento.familia,
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor'),
-        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
-        db.func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_unitario_medio')
-    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.descricao_produto, VendaEvento.familia).order_by(db.desc('total_nfs')).limit(15).all()
+    # No código Python, na rota /api/analise-marca/<marca>, faça estas alterações:
+
+# Top clientes da marca (por VALOR, não por NFs)
+top_clientes = query.with_entities(
+    VendaEvento.cliente_nome,
+    func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
+    func.sum(VendaEvento.valor_total).label('total_valor'),
+    func.sum(VendaEvento.quantidade).label('total_quantidade')
+).group_by(VendaEvento.cliente_nome).order_by(func.sum(VendaEvento.valor_total).desc()).limit(10).all()  # Mudei para .desc() no valor
+
+# Top vendedores da marca (por VALOR, não por NFs)
+top_vendedores = query.with_entities(
+    VendaEvento.vendedor,
+    func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
+    func.sum(VendaEvento.valor_total).label('total_valor'),
+    func.sum(VendaEvento.quantidade).label('total_quantidade'),
+    func.count(func.distinct(VendaEvento.cliente_nome)).label('clientes_atendidos')
+).group_by(VendaEvento.vendedor).order_by(func.sum(VendaEvento.valor_total).desc()).limit(10).all()  # Mudei para .desc() no valor
+
+# Top produtos da marca (por VALOR, não por NFs)
+top_produtos = query.with_entities(
+    VendaEvento.descricao_produto,
+    VendaEvento.familia,
+    func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
+    func.sum(VendaEvento.valor_total).label('total_valor'),
+    func.sum(VendaEvento.quantidade).label('total_quantidade'),
+    func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_unitario_medio')
+).group_by(VendaEvento.descricao_produto, VendaEvento.familia).order_by(func.sum(VendaEvento.valor_total).desc()).limit(15).all()  # Mudei para .desc() no valor
     
     # NFs por dia da marca
     nfs_por_dia = db.session.query(
