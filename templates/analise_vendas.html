@@ -5,72 +5,77 @@
 <!-- Header do Dashboard de Análise -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card bg-primary-custom text-white">
-            <div class="card-body text-center py-4">
-                <h1 class="display-5 mb-2">📊 Análise Completa de Vendas</h1>
-                <p class="lead mb-0">Dashboard completo com análise de vendas e capilaridade por Nota Fiscal</p>
+        <div class="card bg-gradient-primary text-white shadow-lg">
+            <div class="card-body d-flex align-items-center py-4">
+                <div class="me-3">
+                    <i class="fas fa-chart-bar fa-3x opacity-75"></i>
+                </div>
+                <div>
+                    <h1 class="h2 mb-2 fw-bold">📊 Análise de Vendas Power BI</h1>
+                    <p class="lead mb-0 opacity-90">Dashboard completo com análise de vendas e métricas de desempenho</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Botões de Ação Rápida -->
+<!-- Botões de Ação Rápida - Estilo Power BI -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-secondary text-white">
-                <h6 class="mb-0">⚡ Ações Rápidas</h6>
+            <div class="card-header bg-dark text-white py-3">
+                <h6 class="mb-0 fw-bold">⚡ Ações Rápidas</h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     {% if tem_permissao('importacao_vendas') %}
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('importar_vendas_evento') }}" class="card menu-card-standard text-decoration-none h-100">
+                        <a href="{{ url_for('importar_vendas_evento') }}" class="card menu-card-powerbi text-decoration-none h-100">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-success mb-2">📤</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Nova Importação</h6>
-                                <small class="menu-desc text-muted">Adicionar dados</small>
+                                <div class="menu-icon-powerbi text-success mb-2"><i class="fas fa-file-upload fa-2x"></i></div>
+                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Nova Importação</h6>
+                                <small class="menu-desc-powerbi text-muted">Adicionar dados</small>
                             </div>
                         </a>
                     </div>
                     {% endif %}
                     
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="#" class="card menu-card-standard text-decoration-none h-100" id="btnExportarAnalise">
+                        <a href="#" class="card menu-card-powerbi text-decoration-none h-100" id="btnExportarAnalise">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-warning mb-2">📋</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Exportar Relatório</h6>
-                                <small class="menu-desc text-muted">Dados filtrados</small>
+                                <div class="menu-icon-powerbi text-warning mb-2"><i class="fas fa-file-export fa-2x"></i></div>
+                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Exportar Relatório</h6>
+                                <small class="menu-desc-powerbi text-muted">Dados filtrados</small>
                             </div>
                         </a>
                     </div>
                     
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="#" class="card menu-card-standard text-decoration-none h-100" id="btnResetarFiltros">
+                        <a href="#" class="card menu-card-powerbi text-decoration-none h-100" id="btnResetarFiltros">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-danger mb-2">🔄</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Limpar Filtros</h6>
-                                <small class="menu-desc text-muted">Restaurar visual</small>
+                                <div class="menu-icon-powerbi text-danger mb-2"><i class="fas fa-redo fa-2x"></i></div>
+                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Limpar Filtros</h6>
+                                <small class="menu-desc-powerbi text-muted">Restaurar visual</small>
                             </div>
                         </a>
                     </div>
                     
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('relatorios') }}" class="card menu-card-standard text-decoration-none h-100">
+                        <a href="{{ url_for('relatorios') }}" class="card menu-card-powerbi text-decoration-none h-100">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-purple mb-2">📊</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Relatórios</h6>
-                                <small class="menu-desc text-muted">Análises gerais</small>
+                                <div class="menu-icon-powerbi text-purple mb-2"><i class="fas fa-chart-pie fa-2x"></i></div>
+                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Relatórios</h6>
+                                <small class="menu-desc-powerbi text-muted">Análises gerais</small>
                             </div>
                         </a>
                     </div>
                     
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <button class="card menu-card-standard text-decoration-none h-100 border-0 w-100 p-0" id="btnRecarregarDados">
+                        <button class="card menu-card-powerbi text-decoration-none h-100 border-0 w-100 p-0" id="btnRecarregarDados">
                             <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-info mb-2">🔄</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Recarregar</h6>
-                                <small class="menu-desc text-muted">Atualizar dados</small>
+                                <div class="menu-icon-powerbi text-info mb-2"><i class="fas fa-sync fa-2x"></i></div>
+                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Recarregar</h6>
+                                <small class="menu-desc-powerbi text-muted">Atualizar dados</small>
                             </div>
                         </button>
                     </div>
@@ -80,174 +85,158 @@
     </div>
 </div>
 
-<!-- Filtros -->
+<!-- Linha de KPI Cards - Estilo Power BI -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h6 class="mb-0">🔍 Filtros Combinados</h6>
+        <div class="row g-3" id="kpiRow">
+            <!-- KPI Cards serão atualizados via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Filtros Sidebar + Conteúdo Principal -->
+<div class="row mb-4">
+    <!-- Sidebar de Filtros -->
+    <div class="col-lg-3 col-md-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-gradient-dark text-white py-3">
+                <h6 class="mb-0 fw-bold"><i class="fas fa-filter me-2"></i>Filtros</h6>
             </div>
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Cliente</label>
-                        <select class="form-select" id="filtroCliente">
-                            <option value="todos">Todos os Clientes</option>
-                            {% for cliente in clientes %}
-                            <option value="{{ cliente }}">{{ cliente }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Vendedor</label>
-                        <select class="form-select" id="filtroVendedor">
-                            <option value="todos">Todos os Vendedores</option>
-                            {% for vendedor in vendedores %}
-                            <option value="{{ vendedor }}">{{ vendedor }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Marca</label>
-                        <select class="form-select" id="filtroMarca">
-                            <option value="todos">Todas as Marcas</option>
-                            {% for marca in marcas %}
-                            <option value="{{ marca }}">{{ marca }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Equipe</label>
-                        <select class="form-select" id="filtroEquipe">
-                            <option value="todos">Todas as Equipes</option>
-                            {% for equipe in equipes %}
-                            <option value="{{ equipe }}">{{ equipe }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Família</label>
-                        <select class="form-select" id="filtroFamilia">
-                            <option value="todos">Todas as Famílias</option>
-                            {% for familia in familias %}
-                            <option value="{{ familia }}">{{ familia }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Data Início</label>
-                        <input type="date" class="form-control" id="filtroDataInicio" 
-                               value="{{ min_date.strftime('%Y-%m-%d') if min_date else '' }}">
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Data Fim</label>
-                        <input type="date" class="form-control" id="filtroDataFim"
-                               value="{{ max_date.strftime('%Y-%m-%d') if max_date else '' }}">
-                    </div>
-                    
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button class="btn btn-primary-custom w-100" id="btnAplicarFiltros">
-                            <i class="fas fa-filter me-2"></i>Aplicar Filtros
-                        </button>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">CLIENTE</label>
+                    <select class="form-select form-select-sm" id="filtroCliente">
+                        <option value="todos">Todos os Clientes</option>
+                        {% for cliente in clientes %}
+                        <option value="{{ cliente }}">{{ cliente }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-secondary" id="btnLimparFiltros">
-                                <i class="fas fa-times me-2"></i>Limpar Filtros
-                            </button>
-                            <button class="btn btn-success" id="btnExportarExcel">
-                                <i class="fas fa-file-excel me-2"></i>Exportar Excel
-                            </button>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">VENDEDOR</label>
+                    <select class="form-select form-select-sm" id="filtroVendedor">
+                        <option value="todos">Todos os Vendedores</option>
+                        {% for vendedor in vendedores %}
+                        <option value="{{ vendedor }}">{{ vendedor }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">MARCA</label>
+                    <select class="form-select form-select-sm" id="filtroMarca">
+                        <option value="todos">Todas as Marcas</option>
+                        {% for marca in marcas %}
+                        <option value="{{ marca }}">{{ marca }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">EQUIPE</label>
+                    <select class="form-select form-select-sm" id="filtroEquipe">
+                        <option value="todos">Todas as Equipes</option>
+                        {% for equipe in equipes %}
+                        <option value="{{ equipe }}">{{ equipe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">FAMÍLIA</label>
+                    <select class="form-select form-select-sm" id="filtroFamilia">
+                        <option value="todos">Todas as Famílias</option>
+                        {% for familia in familias %}
+                        <option value="{{ familia }}">{{ familia }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">DATA INÍCIO</label>
+                    <input type="date" class="form-control form-control-sm" id="filtroDataInicio" 
+                           value="{{ min_date.strftime('%Y-%m-%d') if min_date else '' }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">DATA FIM</label>
+                    <input type="date" class="form-control form-control-sm" id="filtroDataFim"
+                           value="{{ max_date.strftime('%Y-%m-%d') if max_date else '' }}">
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-sm fw-bold" id="btnAplicarFiltros">
+                        <i class="fas fa-filter me-1"></i>Aplicar Filtros
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" id="btnLimparFiltros">
+                        <i class="fas fa-times me-1"></i>Limpar Filtros
+                    </button>
+                    <button class="btn btn-success btn-sm fw-bold" id="btnExportarExcel">
+                        <i class="fas fa-file-excel me-1"></i>Exportar Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Conteúdo Principal -->
+    <div class="col-lg-9 col-md-8">
+        <!-- Top Performers -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-header bg-gradient-success text-white py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-trophy me-2"></i>Maior Nota Fiscal</h6>
+                    </div>
+                    <div class="card-body text-center py-4" id="maiorNF">
+                        <div class="placeholder-content">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <p class="text-muted">Carregando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-header bg-gradient-primary text-white py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-crown me-2"></i>Cliente Top (NFs)</h6>
+                    </div>
+                    <div class="card-body text-center py-4" id="clienteTop">
+                        <div class="placeholder-content">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <p class="text-muted">Carregando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-header bg-gradient-warning text-white py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-star me-2"></i>Vendedor Top (NFs)</h6>
+                    </div>
+                    <div class="card-body text-center py-4" id="vendedorTop">
+                        <div class="placeholder-content">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <p class="text-muted">Carregando...</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Métricas Gerais -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-info text-white">
-                <h6 class="mb-0">📊 Métricas Gerais por Nota Fiscal</h6>
-            </div>
-            <div class="card-body">
-                <div class="row text-center" id="metricasGerais">
-                    <!-- Carregado via JavaScript -->
-                    <div class="col-12 text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Carregando...</span>
-                        </div>
-                        <p class="mt-2">Carregando métricas gerais...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Top Performers -->
-<div class="row mb-4">
-    <!-- Maior NF -->
-    <div class="col-md-4 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-success text-white">
-                <h6 class="mb-0">🏆 Maior Nota Fiscal</h6>
-            </div>
-            <div class="card-body text-center" id="maiorNF">
-                <!-- Carregado via JavaScript -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Cliente Top -->
-    <div class="col-md-4 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-primary text-white">
-                <h6 class="mb-0">🥇 Cliente Top (NFs)</h6>
-            </div>
-            <div class="card-body text-center" id="clienteTop">
-                <!-- Carregado via JavaScript -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Vendedor Top -->
-    <div class="col-md-4 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-warning text-dark">
-                <h6 class="mb-0">🌟 Vendedor Top (NFs)</h6>
-            </div>
-            <div class="card-body text-center" id="vendedorTop">
-                <!-- Carregado via JavaScript -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- SEÇÃO DE CAPILARIDADE -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-purple text-white">
-                <h6 class="mb-0"><i class="fas fa-sitemap me-2"></i>Análise de Capilaridade</h6>
+        <!-- SEÇÃO DE CAPILARIDADE -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-gradient-purple text-white py-3">
+                <h6 class="mb-0 fw-bold"><i class="fas fa-sitemap me-2"></i>Análise de Capilaridade</h6>
                 <small class="opacity-75">Distribuição de vendas por cliente, vendedor e marca</small>
             </div>
             <div class="card-body">
                 
                 <!-- Abas de Navegação -->
-                <ul class="nav nav-tabs mb-4" id="capilaridadeTabs" role="tablist">
+                <ul class="nav nav-tabs nav-tabs-powerbi mb-4" id="capilaridadeTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="tab-clientes" data-bs-toggle="tab" data-bs-target="#clientes-tab" type="button" role="tab">
                             <i class="fas fa-building me-1"></i> Por Cliente
@@ -273,13 +262,13 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-success text-white">
-                                        <h6 class="mb-0">📋 Estatísticas por Cliente</h6>
+                                    <div class="card-header bg-gradient-success text-white py-3">
+                                        <h6 class="mb-0 fw-bold">📋 Estatísticas por Cliente</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
-                                            <table class="table table-sm table-hover" id="tabelaClientes">
-                                                <thead>
+                                            <table class="table table-sm table-hover table-striped" id="tabelaClientes">
+                                                <thead class="table-light">
                                                     <tr>
                                                         <th>Cliente</th>
                                                         <th class="text-end">NFs</th>
@@ -298,8 +287,8 @@
                             
                             <div class="col-md-6 mb-3">
                                 <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-info text-white">
-                                        <h6 class="mb-0">📈 Métricas de Diversificação</h6>
+                                    <div class="card-header bg-gradient-info text-white py-3">
+                                        <h6 class="mb-0 fw-bold">📈 Métricas de Diversificação</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row text-center" id="metricasClientes">
@@ -316,13 +305,13 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-primary text-white">
-                                        <h6 class="mb-0">👥 Desempenho por Vendedor</h6>
+                                    <div class="card-header bg-gradient-primary text-white py-3">
+                                        <h6 class="mb-0 fw-bold">👥 Desempenho por Vendedor</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
-                                            <table class="table table-sm table-hover" id="tabelaVendedores">
-                                                <thead>
+                                            <table class="table table-sm table-hover table-striped" id="tabelaVendedores">
+                                                <thead class="table-light">
                                                     <tr>
                                                         <th>Vendedor</th>
                                                         <th>Equipe</th>
@@ -342,8 +331,8 @@
                             
                             <div class="col-md-6 mb-3">
                                 <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h6 class="mb-0">📊 Eficiência Comercial</h6>
+                                    <div class="card-header bg-gradient-warning text-white py-3">
+                                        <h6 class="mb-0 fw-bold">📊 Eficiência Comercial</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row text-center" id="metricasVendedores">
@@ -360,13 +349,13 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-purple text-white">
-                                        <h6 class="mb-0">🏷️ Performance por Marca</h6>
+                                    <div class="card-header bg-gradient-purple text-white py-3">
+                                        <h6 class="mb-0 fw-bold">🏷️ Performance por Marca</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
-                                            <table class="table table-sm table-hover" id="tabelaMarcas">
-                                                <thead>
+                                            <table class="table table-sm table-hover table-striped" id="tabelaMarcas">
+                                                <thead class="table-light">
                                                     <tr>
                                                         <th>Marca</th>
                                                         <th class="text-end">NFs</th>
@@ -386,8 +375,8 @@
                             
                             <div class="col-md-6 mb-3">
                                 <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-danger text-white">
-                                        <h6 class="mb-0">📈 Penetração de Mercado</h6>
+                                    <div class="card-header bg-gradient-danger text-white py-3">
+                                        <h6 class="mb-0 fw-bold">📈 Penetração de Mercado</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row text-center" id="metricasMarcas">
@@ -408,14 +397,14 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Análise Detalhada por Marca</h6>
+            <div class="card-header bg-gradient-dark text-white py-3">
+                <h6 class="mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i>Análise Detalhada por Marca</h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Selecione uma Marca para Análise:</label>
-                        <select class="form-select" id="selecaoMarcaDetalhes">
+                        <label class="form-label fw-bold text-muted">Selecione uma Marca para Análise:</label>
+                        <select class="form-select form-select-sm" id="selecaoMarcaDetalhes">
                             <option value="">Selecione uma marca...</option>
                             {% for marca in marcas %}
                             <option value="{{ marca }}">{{ marca }}</option>
@@ -423,7 +412,7 @@
                         </select>
                     </div>
                     <div class="col-md-8">
-                        <div class="alert alert-info">
+                        <div class="alert alert-info alert-powerbi mb-0">
                             <i class="fas fa-info-circle me-2"></i>
                             Selecione uma marca para ver análise detalhada com top clientes, vendedores e produtos específicos.
                         </div>
@@ -442,14 +431,27 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h6 class="mb-0"><i class="fas fa-list me-2"></i>Vendas Detalhadas</h6>
-                <small class="opacity-75">Todos os itens vendidos com filtros aplicados</small>
+            <div class="card-header bg-gradient-dark text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i>Vendas Detalhadas</h6>
+                        <small class="opacity-75">Todos os itens vendidos com filtros aplicados</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-light me-2" id="btnRefreshVendas">
+                            <i class="fas fa-sync-alt me-1"></i>Atualizar
+                        </button>
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-database me-1"></i>
+                            <span id="totalRegistros">0</span> registros
+                        </span>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover" id="tabelaVendas">
-                        <thead>
+                    <table class="table table-hover table-sm" id="tabelaVendas">
+                        <thead class="table-light">
                             <tr>
                                 <th>NF</th>
                                 <th>Data</th>
@@ -471,7 +473,7 @@
                 </div>
                 
                 <!-- Paginação -->
-                <nav aria-label="Paginação" id="paginacao">
+                <nav aria-label="Paginação" id="paginacao" class="mt-3">
                     <!-- Carregado via JavaScript -->
                 </nav>
             </div>
@@ -501,6 +503,7 @@ async function carregarTodasMetricas() {
         
     } catch (error) {
         console.error('Erro ao carregar métricas:', error);
+        mostrarErro('Erro ao carregar dados. Tente novamente.');
     }
 }
 
@@ -511,14 +514,14 @@ async function carregarMetricasGerais() {
         const data = await response.json();
         
         // Atualizar métricas gerais
-        atualizarMetricasGerais(data);
+        atualizarKPIs(data);
         
         // Atualizar top performers
         atualizarTopPerformers(data);
         
     } catch (error) {
         console.error('Erro ao carregar métricas gerais:', error);
-        document.getElementById('metricasGerais').innerHTML = `
+        document.getElementById('kpiRow').innerHTML = `
             <div class="col-12 text-center py-4 text-danger">
                 <i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar métricas
             </div>
@@ -526,76 +529,73 @@ async function carregarMetricasGerais() {
     }
 }
 
-// Função para carregar dados de capilaridade
-async function carregarCapilaridade() {
-    try {
-        const response = await fetch('/api/capilaridade-vendas');
-        const data = await response.json();
-        
-        // Atualizar dados de capilaridade
-        atualizarCapilaridadeClientes(data);
-        atualizarCapilaridadeVendedores(data);
-        atualizarCapilaridadeMarcas(data);
-        
-    } catch (error) {
-        console.error('Erro ao carregar capilaridade:', error);
-    }
-}
-
-// ========== FUNÇÕES DE ATUALIZAÇÃO ==========
-
-// Atualizar métricas gerais
-function atualizarMetricasGerais(data) {
-    document.getElementById('metricasGerais').innerHTML = `
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card bg-light border-0">
-                <div class="card-body py-3">
-                    <h4 class="text-primary mb-1">${data.totais_por_nf.total_nfs.toLocaleString('pt-BR')}</h4>
-                    <small class="text-muted">Total de NFs</small>
+// Atualizar KPI cards
+function atualizarKPIs(data) {
+    const kpiTemplates = [
+        {
+            bg: 'linear-gradient(135deg, #2c3e50 0%, #4a6491 100%)',
+            icon: 'fas fa-file-invoice',
+            value: data.totais_por_nf.total_nfs.toLocaleString('pt-BR'),
+            label: 'Total de NFs'
+        },
+        {
+            bg: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)',
+            icon: 'fas fa-money-bill-wave',
+            value: 'R$ ' + data.totais_por_nf.total_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2}),
+            label: 'Valor Total'
+        },
+        {
+            bg: 'linear-gradient(135deg, #2980b9 0%, #3498db 100%)',
+            icon: 'fas fa-boxes',
+            value: data.totais_por_nf.total_itens.toLocaleString('pt-BR'),
+            label: 'Itens Vendidos'
+        },
+        {
+            bg: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)',
+            icon: 'fas fa-users',
+            value: data.estatisticas_gerais ? data.estatisticas_gerais.total_clientes.toLocaleString('pt-BR') : '0',
+            label: 'Clientes Únicos'
+        },
+        {
+            bg: 'linear-gradient(135deg, #d35400 0%, #e67e22 100%)',
+            icon: 'fas fa-shopping-cart',
+            value: data.totais_por_nf.media_itens_por_nf.toFixed(1),
+            label: 'Média Itens/NF'
+        },
+        {
+            bg: 'linear-gradient(135deg, #c0392b 0%, #e74c3c 100%)',
+            icon: 'fas fa-chart-line',
+            value: 'R$ ' + data.totais_por_nf.media_valor_por_nf.toLocaleString('pt-BR', {minimumFractionDigits: 2}),
+            label: 'Média Valor/NF'
+        }
+    ];
+    
+    let kpiHTML = '';
+    kpiTemplates.forEach((kpi, index) => {
+        kpiHTML += `
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card kpi-card shadow-sm border-0" style="background: ${kpi.bg}">
+                    <div class="card-body text-center p-3">
+                        <div class="kpi-icon text-white mb-2">
+                            <i class="${kpi.icon} fa-2x"></i>
+                        </div>
+                        <h3 class="kpi-value text-white mb-1">${kpi.value}</h3>
+                        <p class="kpi-label text-white-50 mb-0">${kpi.label}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card bg-light border-0">
-                <div class="card-body py-3">
-                    <h4 class="text-success mb-1">R$ ${data.totais_por_nf.total_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h4>
-                    <small class="text-muted">Valor Total</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card bg-light border-0">
-                <div class="card-body py-3">
-                    <h4 class="text-info mb-1">${data.totais_por_nf.total_itens.toLocaleString('pt-BR')}</h4>
-                    <small class="text-muted">Itens Vendidos</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card bg-light border-0">
-                <div class="card-body py-3">
-                    <h4 class="text-warning mb-1">${data.estatisticas_gerais ? data.estatisticas_gerais.total_clientes.toLocaleString('pt-BR') : '0'}</h4>
-                    <small class="text-muted">Clientes Únicos</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card bg-light border-0">
-                <div class="card-body py-3">
-                    <h4 class="text-purple mb-1">${data.totais_por_nf.media_itens_por_nf.toFixed(1)}</h4>
-                    <small class="text-muted">Média Itens/NF</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card bg-light border-0">
-                <div class="card-body py-3">
-                    <h4 class="text-danger mb-1">R$ ${data.totais_por_nf.media_valor_por_nf.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h4>
-                    <small class="text-muted">Média Valor/NF</small>
-                </div>
-            </div>
-        </div>
-    `;
+        `;
+    });
+    
+    document.getElementById('kpiRow').innerHTML = kpiHTML;
+    
+    // Aplicar animações
+    setTimeout(() => {
+        document.querySelectorAll('.kpi-card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate__animated', 'animate__fadeInUp');
+        });
+    }, 100);
 }
 
 // Atualizar top performers
@@ -646,6 +646,22 @@ function atualizarTopPerformers(data) {
     ` : '<p class="text-muted">Nenhum vendedor encontrado</p>';
 }
 
+// Função para carregar dados de capilaridade
+async function carregarCapilaridade() {
+    try {
+        const response = await fetch('/api/capilaridade-vendas');
+        const data = await response.json();
+        
+        // Atualizar dados de capilaridade
+        atualizarCapilaridadeClientes(data);
+        atualizarCapilaridadeVendedores(data);
+        atualizarCapilaridadeMarcas(data);
+        
+    } catch (error) {
+        console.error('Erro ao carregar capilaridade:', error);
+    }
+}
+
 // Atualizar capilaridade por cliente
 function atualizarCapilaridadeClientes(data) {
     const clientes = data.capilaridade_cliente || [];
@@ -662,6 +678,11 @@ function atualizarCapilaridadeClientes(data) {
             </tr>
         `;
     });
+    
+    if (tabelaHTML === '') {
+        tabelaHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Nenhum dado encontrado</td></tr>';
+    }
+    
     document.getElementById('corpoTabelaClientes').innerHTML = tabelaHTML;
     
     // Métricas de clientes
@@ -684,6 +705,12 @@ function atualizarCapilaridadeClientes(data) {
                 <small class="text-muted">Vendedores/Cliente (Top)</small>
             </div>
         `;
+    } else {
+        document.getElementById('metricasClientes').innerHTML = `
+            <div class="col-12 text-center py-4 text-muted">
+                Nenhuma métrica disponível
+            </div>
+        `;
     }
 }
 
@@ -704,6 +731,11 @@ function atualizarCapilaridadeVendedores(data) {
             </tr>
         `;
     });
+    
+    if (tabelaHTML === '') {
+        tabelaHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Nenhum dado encontrado</td></tr>';
+    }
+    
     document.getElementById('corpoTabelaVendedores').innerHTML = tabelaHTML;
     
     // Métricas de vendedores
@@ -724,6 +756,12 @@ function atualizarCapilaridadeVendedores(data) {
             <div class="col-6">
                 <h5 class="text-warning">R$ ${vendedores[0] ? vendedores[0].media_valor_por_nf.toLocaleString('pt-BR', {minimumFractionDigits: 0}) : '0'}</h5>
                 <small class="text-muted">Valor Médio/NF (Top)</small>
+            </div>
+        `;
+    } else {
+        document.getElementById('metricasVendedores').innerHTML = `
+            <div class="col-12 text-center py-4 text-muted">
+                Nenhuma métrica disponível
             </div>
         `;
     }
@@ -747,6 +785,11 @@ function atualizarCapilaridadeMarcas(data) {
             </tr>
         `;
     });
+    
+    if (tabelaHTML === '') {
+        tabelaHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Nenhum dado encontrado</td></tr>';
+    }
+    
     document.getElementById('corpoTabelaMarcas').innerHTML = tabelaHTML;
     
     // Métricas de marcas
@@ -767,6 +810,12 @@ function atualizarCapilaridadeMarcas(data) {
             <div class="col-6">
                 <h5 class="text-warning">${marcas[0] ? marcas[0].media_itens_por_nf.toFixed(1) : '0'}</h5>
                 <small class="text-muted">Itens/NF (Top)</small>
+            </div>
+        `;
+    } else {
+        document.getElementById('metricasMarcas').innerHTML = `
+            <div class="col-12 text-center py-4 text-muted">
+                Nenhuma métrica disponível
             </div>
         `;
     }
@@ -811,6 +860,9 @@ async function carregarVendas(pagina = 1) {
         
         paginaAtual = data.page;
         totalPaginas = data.pages;
+        
+        // Atualizar contador de registros
+        document.getElementById('totalRegistros').textContent = data.total || 0;
         
         // Atualizar tabela
         let tabelaHTML = '';
@@ -863,7 +915,7 @@ async function carregarVendas(pagina = 1) {
 // Função para atualizar paginação
 function atualizarPaginacao() {
     let paginacaoHTML = `
-        <ul class="pagination justify-content-center">
+        <ul class="pagination pagination-sm justify-content-center">
     `;
     
     // Botão anterior
@@ -917,10 +969,10 @@ async function carregarAnaliseMarca(marca) {
         
         document.getElementById('analiseMarcaDetalhada').style.display = 'block';
         document.getElementById('analiseMarcaDetalhada').innerHTML = `
-            <div class="row">
+            <div class="row mt-4">
                 <!-- Métricas da Marca -->
                 <div class="col-md-12 mb-4">
-                    <div class="card border-0 bg-light">
+                    <div class="card border-0 bg-light shadow-sm">
                         <div class="card-body">
                             <div class="row text-center">
                                 <div class="col-md-3 col-6 mb-3">
@@ -947,8 +999,8 @@ async function carregarAnaliseMarca(marca) {
                 <!-- Top Clientes -->
                 <div class="col-md-6 mb-3">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0">🏆 Top Clientes</h6>
+                        <div class="card-header bg-gradient-success text-white py-3">
+                            <h6 class="mb-0 fw-bold">🏆 Top Clientes</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -978,8 +1030,8 @@ async function carregarAnaliseMarca(marca) {
                 <!-- Top Vendedores -->
                 <div class="col-md-6 mb-3">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h6 class="mb-0">🌟 Top Vendedores</h6>
+                        <div class="card-header bg-gradient-primary text-white py-3">
+                            <h6 class="mb-0 fw-bold">🌟 Top Vendedores</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -1009,8 +1061,8 @@ async function carregarAnaliseMarca(marca) {
                 <!-- Top Produtos -->
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0">📦 Top Produtos</h6>
+                        <div class="card-header bg-gradient-warning text-white py-3">
+                            <h6 class="mb-0 fw-bold">📦 Top Produtos</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -1079,6 +1131,18 @@ function exportarExcel() {
     document.body.removeChild(form);
 }
 
+// Função para mostrar erro
+function mostrarErro(mensagem) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        ${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').prepend(alertDiv);
+}
+
 // ========== EVENT LISTENERS ==========
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1138,6 +1202,15 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => this.classList.remove('btn-success'), 1000);
     });
     
+    // Botão de atualizar vendas
+    document.getElementById('btnRefreshVendas').addEventListener('click', function() {
+        carregarVendas(paginaAtual);
+        this.querySelector('i').classList.add('fa-spin');
+        setTimeout(() => {
+            this.querySelector('i').classList.remove('fa-spin');
+        }, 1000);
+    });
+    
     // Análise por marca
     document.getElementById('selecaoMarcaDetalhes').addEventListener('change', function() {
         carregarAnaliseMarca(this.value);
@@ -1146,105 +1219,299 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-/* Estilos específicos para análise de vendas */
-.card-header {
-    border-radius: 8px 8px 0 0 !important;
+/* Estilos Power BI */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%) !important;
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #2dc9e8 100%) !important;
+}
+
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%) !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+}
+
+.kpi-card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: none;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25) !important;
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.kpi-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.kpi-icon {
+    opacity: 0.9;
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
+}
+
+.nav-tabs-powerbi .nav-link {
+    border: none;
+    font-weight: 600;
+    color: #6c757d;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs-powerbi .nav-link:hover {
+    color: #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.nav-tabs-powerbi .nav-link.active {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.menu-card-powerbi {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    cursor: pointer;
+}
+
+.menu-card-powerbi:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.menu-icon-powerbi {
+    font-size: 2.5rem;
+    transition: transform 0.3s ease;
+}
+
+.menu-card-powerbi:hover .menu-icon-powerbi {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.menu-title-powerbi {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.menu-desc-powerbi {
+    font-size: 0.8rem;
+    font-weight: 500;
 }
 
 .table th {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
     background-color: #f8f9fa;
-    font-weight: 600;
-    font-size: 0.85rem;
+    border-bottom: 3px solid #dee2e6;
 }
 
 .table td {
     font-size: 0.85rem;
     vertical-align: middle;
+    border-color: #f1f3f4;
+    padding: 0.75rem;
 }
 
-.badge {
-    font-size: 0.75em;
-    padding: 4px 8px;
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.02);
 }
 
-.form-select, .form-control {
-    border-radius: 6px;
+.table-hover tbody tr:hover {
+    background-color: rgba(52, 152, 219, 0.08);
+    transform: scale(1.001);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.3);
+    transform: scale(1.01);
+}
+
+.form-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: #495057;
+    letter-spacing: 0.3px;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border-color: #2980b9;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
 }
 
-.menu-card-standard {
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    background-color: #ffffff;
-    cursor: pointer;
-}
-
-.menu-card-standard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    border-color: #0d6efd;
-}
-
-.menu-icon {
-    font-size: 2rem;
-    transition: transform 0.3s ease;
-}
-
-.menu-card-standard:hover .menu-icon {
-    transform: scale(1.1);
-}
-
-.nav-tabs .nav-link {
-    font-weight: 500;
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    border: 2px solid #e0e0e0;
     color: #495057;
-}
-
-.nav-tabs .nav-link.active {
     font-weight: 600;
-    color: #0d6efd;
-    border-bottom: 3px solid #0d6efd;
+    padding: 0.5rem 0.9rem;
 }
 
-.tab-content {
-    padding-top: 1rem;
+.pagination .page-link:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    border-color: #3498db;
+}
+
+.badge {
+    border-radius: 20px;
+    font-weight: 600;
+    padding: 0.35em 0.8em;
+    font-size: 0.75em;
+}
+
+.alert-powerbi {
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #1976d2;
+    font-weight: 500;
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate__fadeInUp {
+    animation-name: fadeInUp;
+    animation-duration: 0.6s;
+    animation-fill-mode: both;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.fa-spin {
+    animation: fa-spin 1s linear infinite;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
-    .card-body .row > div {
-        margin-bottom: 10px;
+    .kpi-value {
+        font-size: 1.4rem;
+    }
+    
+    .kpi-card {
+        min-height: 100px;
+        margin-bottom: 15px;
     }
     
     .table-responsive {
-        font-size: 0.8em;
-    }
-    
-    .menu-card-standard {
-        margin-bottom: 10px;
-    }
-    
-    .nav-tabs .nav-link {
         font-size: 0.8rem;
-        padding: 0.5rem;
+    }
+    
+    .nav-tabs-powerbi .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .menu-card-powerbi {
+        margin-bottom: 15px;
+    }
+    
+    .menu-icon-powerbi {
+        font-size: 2rem;
     }
 }
 
-/* Cores personalizadas */
-.bg-purple {
-    background-color: #6f42c1 !important;
+/* Scroll personalizado */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
 }
 
-.text-purple {
-    color: #6f42c1 !important;
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
 }
 
-.bg-primary-custom {
-    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+.table-responsive::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #2980b9 0%, #1f639b 100%);
 }
 </style>
 {% endblock %}
