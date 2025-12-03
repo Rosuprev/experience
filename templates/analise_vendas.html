@@ -16,14 +16,14 @@
 <!-- Painel de Filtros -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-info text-white">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-success-custom text-white">
                 <h6 class="mb-0">🔍 Filtros de Análise</h6>
             </div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-lg-3 col-md-6">
-                        <label class="form-label">Cliente</label>
+                        <label class="form-label text-dark"><strong>Cliente</strong></label>
                         <select class="form-select" id="filtroCliente">
                             <option value="todos">Todos os Clientes</option>
                             {% for cliente in clientes %}
@@ -32,7 +32,7 @@
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label class="form-label">Vendedor</label>
+                        <label class="form-label text-dark"><strong>Vendedor</strong></label>
                         <select class="form-select" id="filtroVendedor">
                             <option value="todos">Todos os Vendedores</option>
                             {% for vendedor in vendedores %}
@@ -41,7 +41,7 @@
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label class="form-label">Marca</label>
+                        <label class="form-label text-dark"><strong>Marca</strong></label>
                         <select class="form-select" id="filtroMarca">
                             <option value="todos">Todas as Marcas</option>
                             {% for marca in marcas %}
@@ -50,7 +50,7 @@
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label class="form-label">Equipe</label>
+                        <label class="form-label text-dark"><strong>Equipe</strong></label>
                         <select class="form-select" id="filtroEquipe">
                             <option value="todos">Todas as Equipes</option>
                             {% for equipe in equipes %}
@@ -59,7 +59,7 @@
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label class="form-label">Família</label>
+                        <label class="form-label text-dark"><strong>Família</strong></label>
                         <select class="form-select" id="filtroFamilia">
                             <option value="todos">Todas as Famílias</option>
                             {% for familia in familias %}
@@ -68,15 +68,15 @@
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label class="form-label">Data Início</label>
+                        <label class="form-label text-dark"><strong>Data Início</strong></label>
                         <input type="date" class="form-control" id="filtroDataInicio" value="{{ min_date }}">
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label class="form-label">Data Fim</label>
+                        <label class="form-label text-dark"><strong>Data Fim</strong></label>
                         <input type="date" class="form-control" id="filtroDataFim" value="{{ max_date }}">
                     </div>
                     <div class="col-lg-3 col-md-6 d-flex align-items-end">
-                        <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
+                        <button class="btn btn-success-custom w-100" onclick="aplicarFiltros()">
                             🔄 Aplicar Filtros
                         </button>
                     </div>
@@ -84,13 +84,13 @@
                 <div class="row mt-3">
                     <div class="col-12">
                         <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-primary" onclick="exportarParaExcel()">
+                            <button class="btn btn-info" onclick="exportarParaExcel()">
                                 📥 Exportar Excel
                             </button>
-                            <button class="btn btn-outline-success" onclick="exportarParaPDF()">
+                            <button class="btn btn-warning" onclick="exportarParaPDF()">
                                 📊 Exportar PDF/Imagem
                             </button>
-                            <button class="btn btn-outline-secondary" onclick="resetarFiltros()">
+                            <button class="btn btn-secondary" onclick="resetarFiltros()">
                                 🗑️ Limpar Filtros
                             </button>
                         </div>
@@ -104,7 +104,7 @@
 <!-- Métricas Consolidadas -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm stat-card card-hover">
             <div class="card-header bg-success text-white">
                 <h6 class="mb-0">📈 Métricas Consolidadas</h6>
             </div>
@@ -112,7 +112,7 @@
                 <div class="row text-center">
                     <!-- Total de Vendas (Valor) -->
                     <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100">
+                        <div class="card bg-light border-0 h-100 card-hover">
                             <div class="card-body py-3">
                                 <h4 class="text-primary mb-1" id="totalValorVendas">R$ 0</h4>
                                 <small class="text-muted">Total Vendas (Valor)</small>
@@ -122,7 +122,7 @@
                     
                     <!-- Total de NFs -->
                     <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100">
+                        <div class="card bg-light border-0 h-100 card-hover">
                             <div class="card-body py-3">
                                 <h4 class="text-success mb-1" id="totalNFs">0</h4>
                                 <small class="text-muted">Total de NFs</small>
@@ -132,7 +132,7 @@
                     
                     <!-- Total de Itens -->
                     <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100">
+                        <div class="card bg-light border-0 h-100 card-hover">
                             <div class="card-body py-3">
                                 <h4 class="text-info mb-1" id="totalItens">0</h4>
                                 <small class="text-muted">Total de Itens</small>
@@ -140,27 +140,37 @@
                         </div>
                     </div>
                     
-                    <!-- Consultor Top -->
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card bg-light border-0 h-100">
+                    <!-- Ticket Médio -->
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0 h-100 card-hover">
                             <div class="card-body py-3">
-                                <h5 class="text-warning mb-1" id="topConsultor">N/A</h5>
-                                <small class="text-muted">Consultor que mais vendeu (Valor)</small>
+                                <h4 class="text-warning mb-1" id="ticketMedio">R$ 0</h4>
+                                <small class="text-muted">Ticket Médio</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Consultor Top -->
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0 h-100 card-hover">
+                            <div class="card-body py-3">
+                                <h5 class="text-purple mb-1" id="topConsultor">N/A</h5>
+                                <small class="text-muted">Consultor Top</small>
                                 <div class="mt-1">
-                                    <small id="topConsultorValor">R$ 0</small>
+                                    <small class="text-success" id="topConsultorValor">R$ 0</small>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Revenda Top -->
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card bg-light border-0 h-100">
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0 h-100 card-hover">
                             <div class="card-body py-3">
-                                <h5 class="text-purple mb-1" id="topRevenda">N/A</h5>
-                                <small class="text-muted">Revenda que mais comprou (Valor)</small>
+                                <h5 class="text-danger mb-1" id="topRevenda">N/A</h5>
+                                <small class="text-muted">Revenda Top</small>
                                 <div class="mt-1">
-                                    <small id="topRevendaValor">R$ 0</small>
+                                    <small class="text-success" id="topRevendaValor">R$ 0</small>
                                 </div>
                             </div>
                         </div>
@@ -170,8 +180,14 @@
                 <!-- Distribuição por Marca -->
                 <div class="row mt-4">
                     <div class="col-12">
-                        <h6 class="mb-3">💰 Distribuição por Marca (Valor)</h6>
-                        <div id="chartMarcas" style="height: 300px;"></div>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">💰 Distribuição por Marca (Valor)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="chartMarcas" style="height: 300px;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -183,33 +199,53 @@
 <div class="row mb-4">
     <!-- Capilaridade Geral -->
     <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-primary text-white">
+        <div class="card border-0 shadow-sm h-100 card-hover">
+            <div class="card-header bg-info text-white">
                 <h6 class="mb-0">🌐 Capilaridade Geral</h6>
             </div>
             <div class="card-body">
                 <div class="row text-center mb-3">
                     <div class="col-4">
-                        <h5 class="text-info" id="capClientes">0</h5>
-                        <small class="text-muted">Clientes</small>
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2">
+                                <h5 class="text-info mb-1" id="capClientes">0</h5>
+                                <small class="text-muted">Clientes</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-4">
-                        <h5 class="text-success" id="capVendedores">0</h5>
-                        <small class="text-muted">Vendedores</small>
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2">
+                                <h5 class="text-success mb-1" id="capVendedores">0</h5>
+                                <small class="text-muted">Vendedores</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-4">
-                        <h5 class="text-warning" id="capMarcas">0</h5>
-                        <small class="text-muted">Marcas</small>
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2">
+                                <h5 class="text-warning mb-1" id="capMarcas">0</h5>
+                                <small class="text-muted">Marcas</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row text-center mb-3">
                     <div class="col-6">
-                        <h5 class="text-secondary" id="capMediaItensNF">0.0</h5>
-                        <small class="text-muted">Média Itens/NF</small>
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2">
+                                <h5 class="text-secondary mb-1" id="capMediaItensNF">0.0</h5>
+                                <small class="text-muted">Média Itens/NF</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-6">
-                        <h5 class="text-secondary" id="capMediaValorNF">R$ 0</h5>
-                        <small class="text-muted">Média Valor/NF</small>
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2">
+                                <h5 class="text-secondary mb-1" id="capMediaValorNF">R$ 0</h5>
+                                <small class="text-muted">Média Valor/NF</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="chartCapilaridadeGeral" style="height: 200px;"></div>
@@ -219,14 +255,14 @@
     
     <!-- Capilaridade por Marca -->
     <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="card border-0 shadow-sm h-100 card-hover">
             <div class="card-header bg-warning text-dark">
-                <h6 class="mb-0">🏷️ Capilaridade por Marca</h6>
+                <h6 class="mb-0">🏷️ Capilaridade por Marca (Top 10)</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
-                        <thead>
+                        <thead class="table-light">
                             <tr>
                                 <th>Marca</th>
                                 <th>NFs</th>
@@ -237,6 +273,9 @@
                         </thead>
                         <tbody id="tabelaCapilaridadeMarca">
                             <!-- Dados serão preenchidos via JS -->
+                            <tr>
+                                <td colspan="5" class="text-center">Carregando dados...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -248,12 +287,12 @@
 <!-- Análise Detalhada por Marca -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-info text-white">
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">📊 Análise por Marca</h6>
-                    <div class="col-md-3">
-                        <select class="form-select form-select-sm" id="selecionarMarca" onchange="carregarAnaliseMarca(this.value)">
+                    <div class="col-md-4">
+                        <select class="form-select" id="selecionarMarca" onchange="carregarAnaliseMarca(this.value)">
                             <option value="">Selecione uma marca</option>
                             {% for marca in marcas %}
                             <option value="{{ marca }}">{{ marca }}</option>
@@ -265,20 +304,22 @@
             <div class="card-body">
                 <!-- Métricas da Marca Selecionada -->
                 <div class="row mb-4" id="metricasMarca">
-                    <!-- Dados serão preenchidos via JS -->
+                    <div class="col-12 text-center py-4">
+                        <p class="text-muted">Selecione uma marca para ver a análise detalhada</p>
+                    </div>
                 </div>
                 
-                <div class="row">
+                <div class="row" id="conteudoMarca" style="display: none;">
                     <!-- Top Itens Vendidos -->
                     <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 card-hover">
                             <div class="card-header bg-light">
                                 <h6 class="mb-0">🏆 Top Itens Vendidos</h6>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-sm">
-                                        <thead>
+                                        <thead class="table-light">
                                             <tr>
                                                 <th>Produto</th>
                                                 <th>NFs</th>
@@ -297,14 +338,14 @@
                     
                     <!-- Top Consultores -->
                     <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 card-hover">
                             <div class="card-header bg-light">
                                 <h6 class="mb-0">👥 Top Consultores</h6>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-sm">
-                                        <thead>
+                                        <thead class="table-light">
                                             <tr>
                                                 <th>Consultor</th>
                                                 <th>NFs</th>
@@ -322,17 +363,17 @@
                     </div>
                 </div>
                 
-                <div class="row">
+                <div class="row" id="conteudoMarca2" style="display: none;">
                     <!-- Top Clientes -->
                     <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 card-hover">
                             <div class="card-header bg-light">
                                 <h6 class="mb-0">🏢 Top Clientes</h6>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-sm">
-                                        <thead>
+                                        <thead class="table-light">
                                             <tr>
                                                 <th>Cliente</th>
                                                 <th>NFs</th>
@@ -351,7 +392,7 @@
                     
                     <!-- Distribuição por Família -->
                     <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 card-hover">
                             <div class="card-header bg-light">
                                 <h6 class="mb-0">📦 Distribuição por Família</h6>
                             </div>
@@ -369,14 +410,14 @@
 <!-- Tabela Detalhada de Vendas -->
 <div class="row">
     <div class="col-12">
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm card-hover">
             <div class="card-header bg-dark text-white">
                 <h6 class="mb-0">📋 Vendas Detalhadas</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover" id="tabelaVendas">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
                                 <th>NF</th>
                                 <th>Data</th>
@@ -393,6 +434,9 @@
                         </thead>
                         <tbody id="corpoTabelaVendas">
                             <!-- Dados serão preenchidos via JS -->
+                            <tr>
+                                <td colspan="11" class="text-center">Carregando dados...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -400,7 +444,7 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="d-flex align-items-center">
-                            <span class="me-2">Itens por página:</span>
+                            <span class="me-2 text-muted">Itens por página:</span>
                             <select class="form-select form-select-sm w-auto" id="itensPorPagina" onchange="carregarVendasFiltradas()">
                                 <option value="10">10</option>
                                 <option value="25">25</option>
@@ -431,49 +475,9 @@
     </div>
 </div>
 
-<!-- Modal para Exportação -->
-<div class="modal fade" id="modalExportacao" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">📤 Exportar Relatório</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Formato de Exportação</label>
-                    <select class="form-select" id="formatoExportacao">
-                        <option value="excel">Excel (.xlsx)</option>
-                        <option value="pdf">PDF Documento</option>
-                        <option value="png">Imagem PNG</option>
-                        <option value="jpg">Imagem JPG</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Qualidade da Imagem</label>
-                    <select class="form-select" id="qualidadeImagem">
-                        <option value="1">Baixa</option>
-                        <option value="2">Média</option>
-                        <option value="3" selected>Alta</option>
-                    </select>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="incluirFiltros">
-                    <label class="form-check-label">Incluir configurações de filtros</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="confirmarExportacao()">Exportar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Incluir Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 // Variáveis globais
@@ -486,21 +490,29 @@ let graficoDistribuicaoFamilia = null;
 
 // Inicializar dashboard
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("🔧 Inicializando dashboard de análise...");
     carregarMetricasConsolidadas();
     carregarCapilaridade();
     carregarVendasFiltradas();
-    
-    // Atualizar automaticamente a cada 30 segundos
-    setInterval(carregarMetricasConsolidadas, 30000);
-    setInterval(carregarCapilaridade, 30000);
 });
 
 // Função para aplicar filtros
 function aplicarFiltros() {
+    console.log("🔍 Aplicando filtros...");
     paginaAtual = 1;
     carregarMetricasConsolidadas();
     carregarCapilaridade();
     carregarVendasFiltradas();
+    
+    // Resetar análise de marca
+    document.getElementById('selecionarMarca').value = '';
+    document.getElementById('conteudoMarca').style.display = 'none';
+    document.getElementById('conteudoMarca2').style.display = 'none';
+    document.getElementById('metricasMarca').innerHTML = `
+        <div class="col-12 text-center py-4">
+            <p class="text-muted">Selecione uma marca para ver a análise detalhada</p>
+        </div>
+    `;
 }
 
 // Função para resetar filtros
@@ -519,6 +531,7 @@ function resetarFiltros() {
 // Carregar métricas consolidadas
 function carregarMetricasConsolidadas() {
     const filtros = obterFiltros();
+    console.log("📊 Carregando métricas com filtros:", filtros);
     
     fetch('/api/metricas-vendas-filtradas', {
         method: 'POST',
@@ -527,33 +540,60 @@ function carregarMetricasConsolidadas() {
         },
         body: JSON.stringify(filtros)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log("📈 Dados recebidos:", data);
+        
         // Atualizar métricas
         document.getElementById('totalValorVendas').textContent = 
-            'R$ ' + (data.totais_por_nf?.total_valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            'R$ ' + formatarNumero(data.totais_por_nf?.total_valor || 0);
         document.getElementById('totalNFs').textContent = data.totais_por_nf?.total_nfs || 0;
         document.getElementById('totalItens').textContent = data.totais_por_nf?.total_itens || 0;
+        document.getElementById('ticketMedio').textContent = 
+            'R$ ' + formatarNumero(data.totais_por_nf?.media_valor_por_nf || 0);
         
         // Top consultor
-        if (data.vendedores?.maior_valor) {
-            document.getElementById('topConsultor').textContent = data.vendedores.maior_valor.nome;
+        if (data.vendedores?.maior_valor && data.vendedores.maior_valor.nome) {
+            document.getElementById('topConsultor').textContent = 
+                data.vendedores.maior_valor.nome.length > 20 ? 
+                data.vendedores.maior_valor.nome.substring(0, 20) + '...' : 
+                data.vendedores.maior_valor.nome;
             document.getElementById('topConsultorValor').textContent = 
-                'R$ ' + data.vendedores.maior_valor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                'R$ ' + formatarNumero(data.vendedores.maior_valor.valor || 0);
+        } else {
+            document.getElementById('topConsultor').textContent = 'N/A';
+            document.getElementById('topConsultorValor').textContent = 'R$ 0';
         }
         
         // Top revenda
-        if (data.clientes?.maior_valor) {
-            document.getElementById('topRevenda').textContent = data.clientes.maior_valor.nome;
+        if (data.clientes?.maior_valor && data.clientes.maior_valor.nome) {
+            document.getElementById('topRevenda').textContent = 
+                data.clientes.maior_valor.nome.length > 20 ? 
+                data.clientes.maior_valor.nome.substring(0, 20) + '...' : 
+                data.clientes.maior_valor.nome;
             document.getElementById('topRevendaValor').textContent = 
-                'R$ ' + data.clientes.maior_valor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                'R$ ' + formatarNumero(data.clientes.maior_valor.valor || 0);
+        } else {
+            document.getElementById('topRevenda').textContent = 'N/A';
+            document.getElementById('topRevendaValor').textContent = 'R$ 0';
         }
         
         // Criar gráfico de marcas
-        criarGraficoMarcas(data.marcas_por_nf || []);
+        if (data.marcas_por_nf && data.marcas_por_nf.length > 0) {
+            criarGraficoMarcas(data.marcas_por_nf);
+        } else {
+            // Criar gráfico vazio
+            criarGraficoMarcas([]);
+        }
     })
     .catch(error => {
-        console.error('Erro ao carregar métricas:', error);
+        console.error('❌ Erro ao carregar métricas:', error);
+        mostrarErro('totalValorVendas', 'Erro ao carregar');
     });
 }
 
@@ -568,8 +608,15 @@ function carregarCapilaridade() {
         },
         body: JSON.stringify(filtros)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log("🌐 Dados de capilaridade:", data);
+        
         // Atualizar métricas de capilaridade
         document.getElementById('capClientes').textContent = data.estatisticas_gerais?.total_clientes || 0;
         document.getElementById('capVendedores').textContent = data.estatisticas_gerais?.total_vendedores || 0;
@@ -577,62 +624,93 @@ function carregarCapilaridade() {
         document.getElementById('capMediaItensNF').textContent = 
             (data.estatisticas_gerais?.media_itens_por_nf || 0).toFixed(1);
         document.getElementById('capMediaValorNF').textContent = 
-            'R$ ' + (data.estatisticas_gerais?.media_valor_por_nf || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            'R$ ' + formatarNumero(data.estatisticas_gerais?.media_valor_por_nf || 0);
         
         // Atualizar tabela de capilaridade por marca
-        atualizarTabelaCapilaridadeMarca(data.capilaridade_marca || []);
+        if (data.capilaridade_marca && data.capilaridade_marca.length > 0) {
+            atualizarTabelaCapilaridadeMarca(data.capilaridade_marca);
+        } else {
+            document.getElementById('tabelaCapilaridadeMarca').innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Nenhum dado encontrado</td>
+                </tr>
+            `;
+        }
         
         // Criar gráfico de capilaridade geral
         criarGraficoCapilaridadeGeral(data);
     })
     .catch(error => {
-        console.error('Erro ao carregar capilaridade:', error);
+        console.error('❌ Erro ao carregar capilaridade:', error);
     });
 }
 
 // Carregar análise de marca específica
 function carregarAnaliseMarca(marca) {
-    if (!marca) return;
+    if (!marca) {
+        document.getElementById('conteudoMarca').style.display = 'none';
+        document.getElementById('conteudoMarca2').style.display = 'none';
+        document.getElementById('metricasMarca').innerHTML = `
+            <div class="col-12 text-center py-4">
+                <p class="text-muted">Selecione uma marca para ver a análise detalhada</p>
+            </div>
+        `;
+        return;
+    }
     
-    fetch(`/api/analise-marca-filtrada/${marca}`, {
+    console.log(`📊 Carregando análise da marca: ${marca}`);
+    const filtros = obterFiltros();
+    
+    fetch(`/api/analise-marca-filtrada/${encodeURIComponent(marca)}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(obterFiltros())
+        body: JSON.stringify(filtros)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log(`✅ Dados da marca ${marca}:`, data);
+        
+        // Mostrar conteúdo
+        document.getElementById('conteudoMarca').style.display = 'flex';
+        document.getElementById('conteudoMarca2').style.display = 'flex';
+        
         // Atualizar métricas da marca
         const metricasHtml = `
             <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-light border-0 h-100">
+                <div class="card bg-light border-0 h-100 card-hover">
                     <div class="card-body text-center py-3">
-                        <h5 class="text-primary mb-1">${data.dados_gerais?.total_nfs || 0}</h5>
+                        <h4 class="text-primary mb-1">${data.dados_gerais?.total_nfs || 0}</h4>
                         <small class="text-muted">NFs da Marca</small>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-light border-0 h-100">
+                <div class="card bg-light border-0 h-100 card-hover">
                     <div class="card-body text-center py-3">
-                        <h5 class="text-success mb-1">R$ ${(data.dados_gerais?.total_valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                        <h4 class="text-success mb-1">R$ ${formatarNumero(data.dados_gerais?.total_valor || 0)}</h4>
                         <small class="text-muted">Valor Total</small>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-light border-0 h-100">
+                <div class="card bg-light border-0 h-100 card-hover">
                     <div class="card-body text-center py-3">
-                        <h5 class="text-warning mb-1">${data.dados_gerais?.total_quantidade || 0}</h5>
+                        <h4 class="text-warning mb-1">${data.dados_gerais?.total_quantidade || 0}</h4>
                         <small class="text-muted">Quantidade Total</small>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-light border-0 h-100">
+                <div class="card bg-light border-0 h-100 card-hover">
                     <div class="card-body text-center py-3">
-                        <h5 class="text-info mb-1">R$ ${(data.dados_gerais?.valor_medio_unitario || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                        <h4 class="text-info mb-1">R$ ${formatarNumero(data.dados_gerais?.valor_medio_unitario || 0)}</h4>
                         <small class="text-muted">Ticket Médio</small>
                     </div>
                 </div>
@@ -641,15 +719,55 @@ function carregarAnaliseMarca(marca) {
         document.getElementById('metricasMarca').innerHTML = metricasHtml;
         
         // Atualizar tabelas
-        atualizarTabelaTopItens(data.top_produtos || []);
-        atualizarTabelaTopConsultores(data.top_vendedores || []);
-        atualizarTabelaTopClientes(data.top_clientes || []);
+        if (data.top_produtos && data.top_produtos.length > 0) {
+            atualizarTabelaTopItens(data.top_produtos);
+        } else {
+            document.getElementById('tabelaTopItens').innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Nenhum produto encontrado</td>
+                </tr>
+            `;
+        }
+        
+        if (data.top_vendedores && data.top_vendedores.length > 0) {
+            atualizarTabelaTopConsultores(data.top_vendedores);
+        } else {
+            document.getElementById('tabelaTopConsultores').innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Nenhum consultor encontrado</td>
+                </tr>
+            `;
+        }
+        
+        if (data.top_clientes && data.top_clientes.length > 0) {
+            atualizarTabelaTopClientes(data.top_clientes);
+        } else {
+            document.getElementById('tabelaTopClientes').innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Nenhum cliente encontrado</td>
+                </tr>
+            `;
+        }
         
         // Criar gráfico de distribuição por família
-        criarGraficoDistribuicaoFamilia(data);
+        if (data.distribuicao_familia && data.distribuicao_familia.length > 0) {
+            criarGraficoDistribuicaoFamilia(data.distribuicao_familia);
+        } else {
+            // Limpar gráfico se não houver dados
+            const ctx = document.getElementById('chartDistribuicaoFamilia')?.getContext('2d');
+            if (ctx && graficoDistribuicaoFamilia) {
+                graficoDistribuicaoFamilia.destroy();
+                graficoDistribuicaoFamilia = null;
+            }
+        }
     })
     .catch(error => {
-        console.error('Erro ao carregar análise da marca:', error);
+        console.error(`❌ Erro ao carregar análise da marca ${marca}:`, error);
+        document.getElementById('metricasMarca').innerHTML = `
+            <div class="col-12 text-center py-4">
+                <p class="text-danger">Erro ao carregar dados da marca: ${error.message}</p>
+            </div>
+        `;
     });
 }
 
@@ -659,6 +777,8 @@ function carregarVendasFiltradas() {
     filtros.page = paginaAtual;
     filtros.per_page = parseInt(document.getElementById('itensPorPagina').value);
     
+    console.log("📋 Carregando vendas com filtros:", filtros);
+    
     fetch('/api/vendas-filtradas', {
         method: 'POST',
         headers: {
@@ -666,8 +786,14 @@ function carregarVendasFiltradas() {
         },
         body: JSON.stringify(filtros)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log("✅ Vendas carregadas:", data.vendas?.length || 0, "itens");
         vendasFiltradas = data.vendas || [];
         
         // Atualizar tabela
@@ -677,7 +803,14 @@ function carregarVendasFiltradas() {
         atualizarPaginacao(data.total_vendas || 0, data.page || 1, data.pages || 1);
     })
     .catch(error => {
-        console.error('Erro ao carregar vendas filtradas:', error);
+        console.error('❌ Erro ao carregar vendas filtradas:', error);
+        document.getElementById('corpoTabelaVendas').innerHTML = `
+            <tr>
+                <td colspan="11" class="text-center text-danger">
+                    Erro ao carregar dados: ${error.message}
+                </td>
+            </tr>
+        `;
     });
 }
 
@@ -698,7 +831,13 @@ function obterFiltros() {
 
 // Criar gráfico de marcas
 function criarGraficoMarcas(dadosMarcas) {
-    const ctx = document.getElementById('chartMarcas').getContext('2d');
+    const ctx = document.getElementById('chartMarcas');
+    if (!ctx) {
+        console.error("❌ Elemento chartMarcas não encontrado!");
+        return;
+    }
+    
+    const context = ctx.getContext('2d');
     
     // Destruir gráfico anterior se existir
     if (graficoMarcas) {
@@ -706,57 +845,56 @@ function criarGraficoMarcas(dadosMarcas) {
     }
     
     // Preparar dados
-    const labels = dadosMarcas.map(marca => marca.marca);
-    const valores = dadosMarcas.map(marca => marca.valor);
+    const labels = dadosMarcas.map(marca => marca.marca || 'Desconhecida');
+    const valores = dadosMarcas.map(marca => marca.valor || 0);
+    
+    if (valores.length === 0) {
+        // Gráfico vazio
+        graficoMarcas = new Chart(context, {
+            type: 'bar',
+            data: {
+                labels: ['Sem dados'],
+                datasets: [{
+                    label: 'Valor por Marca (R$)',
+                    data: [0],
+                    backgroundColor: 'rgba(200, 200, 200, 0.5)',
+                    borderColor: 'rgba(200, 200, 200, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: getChartOptions('Nenhuma venda encontrada com os filtros atuais')
+        });
+        return;
+    }
+    
+    // Cores do dashboard original
     const cores = [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-        '#FF9F40', '#8AC926', '#1982C4', '#6A4C93', '#F15BB5'
+        '#28a745', '#20c997', '#17a2b8', '#007bff', '#6f42c1',
+        '#e83e8c', '#fd7e14', '#ffc107', '#dc3545', '#343a40'
     ];
     
-    graficoMarcas = new Chart(ctx, {
+    graficoMarcas = new Chart(context, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
                 label: 'Valor por Marca (R$)',
                 data: valores,
-                backgroundColor: cores,
-                borderColor: cores.map(cor => cor.replace('0.8', '1')),
+                backgroundColor: cores.slice(0, valores.length),
+                borderColor: cores.slice(0, valores.length).map(cor => cor.replace('0.8', '1')),
                 borderWidth: 1
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `R$ ${context.raw.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 0});
-                        }
-                    }
-                }
-            }
-        }
+        options: getChartOptions()
     });
 }
 
 // Criar gráfico de capilaridade geral
 function criarGraficoCapilaridadeGeral(data) {
-    const ctx = document.getElementById('chartCapilaridadeGeral').getContext('2d');
+    const ctx = document.getElementById('chartCapilaridadeGeral');
+    if (!ctx) return;
+    
+    const context = ctx.getContext('2d');
     
     // Destruir gráfico anterior se existir
     if (graficoCapilaridadeGeral) {
@@ -772,7 +910,7 @@ function criarGraficoCapilaridadeGeral(data) {
         data.estatisticas_gerais?.total_nfs || 0
     ];
     
-    graficoCapilaridadeGeral = new Chart(ctx, {
+    graficoCapilaridadeGeral = new Chart(context, {
         type: 'radar',
         data: {
             labels: labels,
@@ -792,7 +930,7 @@ function criarGraficoCapilaridadeGeral(data) {
                 r: {
                     beginAtZero: true,
                     ticks: {
-                        stepSize: 1
+                        stepSize: Math.max(1, Math.ceil(Math.max(...valores) / 5))
                     }
                 }
             }
@@ -801,34 +939,35 @@ function criarGraficoCapilaridadeGeral(data) {
 }
 
 // Criar gráfico de distribuição por família
-function criarGraficoDistribuicaoFamilia(data) {
-    const ctx = document.getElementById('chartDistribuicaoFamilia').getContext('2d');
+function criarGraficoDistribuicaoFamilia(dadosFamilia) {
+    const ctx = document.getElementById('chartDistribuicaoFamilia');
+    if (!ctx) return;
+    
+    const context = ctx.getContext('2d');
     
     // Destruir gráfico anterior se existir
     if (graficoDistribuicaoFamilia) {
         graficoDistribuicaoFamilia.destroy();
     }
     
-    // Agrupar por família (simulado - você precisará ajustar isso)
-    const familias = {};
-    data.top_produtos?.forEach(produto => {
-        const familia = produto.familia || 'Sem Família';
-        familias[familia] = (familias[familia] || 0) + produto.valor;
-    });
+    // Preparar dados
+    const labels = dadosFamilia.map(item => item.familia || 'Sem Família');
+    const valores = dadosFamilia.map(item => item.valor || 0);
     
-    const labels = Object.keys(familias);
-    const valores = Object.values(familias);
+    // Cores
+    const cores = [
+        '#28a745', '#20c997', '#17a2b8', '#007bff', '#6f42c1',
+        '#e83e8c', '#fd7e14', '#ffc107', '#dc3545', '#343a40'
+    ];
     
-    graficoDistribuicaoFamilia = new Chart(ctx, {
+    graficoDistribuicaoFamilia = new Chart(context, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
                 data: valores,
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                    '#FF9F40', '#8AC926', '#1982C4', '#6A4C93', '#F15BB5'
-                ]
+                backgroundColor: cores.slice(0, valores.length),
+                borderWidth: 1
             }]
         },
         options: {
@@ -836,7 +975,19 @@ function criarGraficoDistribuicaoFamilia(data) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'right'
+                    position: 'right',
+                    labels: {
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `R$ ${formatarNumero(context.raw)}`;
+                        }
+                    }
                 }
             }
         }
@@ -848,17 +999,25 @@ function atualizarTabelaCapilaridadeMarca(dados) {
     const tbody = document.getElementById('tabelaCapilaridadeMarca');
     let html = '';
     
-    dados.slice(0, 10).forEach(marca => {
+    dados.slice(0, 10).forEach((marca, index) => {
         html += `
             <tr>
-                <td><strong>${marca.marca}</strong></td>
-                <td>${marca.total_nfs}</td>
-                <td>${marca.clientes_diferentes}</td>
-                <td>${marca.vendedores_diferentes}</td>
-                <td>R$ ${marca.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td><strong>${marca.marca || 'Desconhecida'}</strong></td>
+                <td><span class="badge bg-primary">${marca.total_nfs || 0}</span></td>
+                <td>${marca.clientes_diferentes || 0}</td>
+                <td>${marca.vendedores_diferentes || 0}</td>
+                <td><strong>R$ ${formatarNumero(marca.valor_total || 0)}</strong></td>
             </tr>
         `;
     });
+    
+    if (html === '') {
+        html = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">Nenhuma marca encontrada</td>
+            </tr>
+        `;
+    }
     
     tbody.innerHTML = html;
 }
@@ -871,10 +1030,14 @@ function atualizarTabelaTopItens(dados) {
     dados.slice(0, 10).forEach(item => {
         html += `
             <tr>
-                <td>${item.produto}</td>
-                <td>${item.nfs}</td>
-                <td>${item.quantidade}</td>
-                <td>R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td title="${item.produto || 'Desconhecido'}">
+                    ${(item.produto || 'Desconhecido').length > 30 ? 
+                      (item.produto || 'Desconhecido').substring(0, 30) + '...' : 
+                      (item.produto || 'Desconhecido')}
+                </td>
+                <td><span class="badge bg-info">${item.nfs || 0}</span></td>
+                <td>${item.quantidade || 0}</td>
+                <td><strong>R$ ${formatarNumero(item.valor || 0)}</strong></td>
             </tr>
         `;
     });
@@ -890,10 +1053,10 @@ function atualizarTabelaTopConsultores(dados) {
     dados.slice(0, 10).forEach(consultor => {
         html += `
             <tr>
-                <td>${consultor.vendedor}</td>
-                <td>${consultor.nfs}</td>
-                <td>${consultor.clientes_atendidos}</td>
-                <td>R$ ${consultor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td>${consultor.vendedor || 'Desconhecido'}</td>
+                <td><span class="badge bg-success">${consultor.nfs || 0}</span></td>
+                <td>${consultor.clientes_atendidos || 0}</td>
+                <td><strong>R$ ${formatarNumero(consultor.valor || 0)}</strong></td>
             </tr>
         `;
     });
@@ -907,13 +1070,17 @@ function atualizarTabelaTopClientes(dados) {
     let html = '';
     
     dados.slice(0, 10).forEach(cliente => {
-        const ticketMedio = cliente.valor / cliente.nfs;
+        const ticketMedio = cliente.valor / (cliente.nfs || 1);
         html += `
             <tr>
-                <td>${cliente.cliente}</td>
-                <td>${cliente.nfs}</td>
-                <td>R$ ${cliente.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td>R$ ${ticketMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td title="${cliente.cliente || 'Desconhecido'}">
+                    ${(cliente.cliente || 'Desconhecido').length > 25 ? 
+                      (cliente.cliente || 'Desconhecido').substring(0, 25) + '...' : 
+                      (cliente.cliente || 'Desconhecido')}
+                </td>
+                <td><span class="badge bg-warning">${cliente.nfs || 0}</span></td>
+                <td><strong>R$ ${formatarNumero(cliente.valor || 0)}</strong></td>
+                <td>R$ ${formatarNumero(ticketMedio)}</td>
             </tr>
         `;
     });
@@ -926,23 +1093,41 @@ function atualizarTabelaVendas(dados) {
     const tbody = document.getElementById('corpoTabelaVendas');
     let html = '';
     
-    dados.forEach(venda => {
-        html += `
+    if (dados.length === 0) {
+        html = `
             <tr>
-                <td>${venda.numero_nf}</td>
-                <td>${venda.data_emissao}</td>
-                <td>${venda.cliente_nome}</td>
-                <td>${venda.vendedor}</td>
-                <td>${venda.equipe}</td>
-                <td>${venda.descricao_produto}</td>
-                <td>${venda.marca}</td>
-                <td>${venda.familia || 'N/A'}</td>
-                <td>${venda.quantidade}</td>
-                <td>R$ ${venda.valor_unitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td><strong>R$ ${venda.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                <td colspan="11" class="text-center text-muted">
+                    Nenhuma venda encontrada com os filtros atuais
+                </td>
             </tr>
         `;
-    });
+    } else {
+        dados.forEach(venda => {
+            html += `
+                <tr>
+                    <td><code>${venda.numero_nf || 'N/A'}</code></td>
+                    <td>${venda.data_emissao || ''}</td>
+                    <td title="${venda.cliente_nome || ''}">
+                        ${(venda.cliente_nome || '').length > 20 ? 
+                          (venda.cliente_nome || '').substring(0, 20) + '...' : 
+                          (venda.cliente_nome || '')}
+                    </td>
+                    <td>${venda.vendedor || ''}</td>
+                    <td><span class="badge bg-secondary">${venda.equipe || ''}</span></td>
+                    <td title="${venda.descricao_produto || ''}">
+                        ${(venda.descricao_produto || '').length > 25 ? 
+                          (venda.descricao_produto || '').substring(0, 25) + '...' : 
+                          (venda.descricao_produto || '')}
+                    </td>
+                    <td><span class="badge" style="background-color: #28a745;">${venda.marca || ''}</span></td>
+                    <td>${venda.familia || 'N/A'}</td>
+                    <td>${venda.quantidade || 0}</td>
+                    <td>R$ ${formatarNumero(venda.valor_unitario || 0)}</td>
+                    <td><strong class="text-success">R$ ${formatarNumero(venda.valor_total || 0)}</strong></td>
+                </tr>
+            `;
+        });
+    }
     
     tbody.innerHTML = html;
 }
@@ -952,10 +1137,17 @@ function atualizarPaginacao(total, pagina, totalPaginas) {
     const paginacao = document.getElementById('paginacao');
     let html = '';
     
+    if (totalPaginas <= 1) {
+        paginacao.innerHTML = '';
+        return;
+    }
+    
     // Botão anterior
     html += `
         <li class="page-item ${pagina === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="mudarPagina(${pagina - 1})">Anterior</a>
+            <a class="page-link" href="#" onclick="mudarPagina(${pagina - 1}); return false;">
+                &laquo; Anterior
+            </a>
         </li>
     `;
     
@@ -963,18 +1155,28 @@ function atualizarPaginacao(total, pagina, totalPaginas) {
     const inicio = Math.max(1, pagina - 2);
     const fim = Math.min(totalPaginas, pagina + 2);
     
+    if (inicio > 1) {
+        html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+    
     for (let i = inicio; i <= fim; i++) {
         html += `
             <li class="page-item ${i === pagina ? 'active' : ''}">
-                <a class="page-link" href="#" onclick="mudarPagina(${i})">${i}</a>
+                <a class="page-link" href="#" onclick="mudarPagina(${i}); return false;">${i}</a>
             </li>
         `;
+    }
+    
+    if (fim < totalPaginas) {
+        html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
     }
     
     // Botão próximo
     html += `
         <li class="page-item ${pagina === totalPaginas ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="mudarPagina(${pagina + 1})">Próximo</a>
+            <a class="page-link" href="#" onclick="mudarPagina(${pagina + 1}); return false;">
+                Próximo &raquo;
+            </a>
         </li>
     `;
     
@@ -990,113 +1192,191 @@ function mudarPagina(novaPagina) {
 // Exportar para Excel
 function exportarParaExcel() {
     const filtros = obterFiltros();
-    const params = new URLSearchParams(filtros).toString();
-    window.location.href = `/exportar-vendas-filtradas?${params}`;
+    const params = new URLSearchParams();
+    
+    Object.keys(filtros).forEach(key => {
+        if (filtros[key]) {
+            params.append(key, filtros[key]);
+        }
+    });
+    
+    window.location.href = `/exportar-vendas-filtradas?${params.toString()}`;
 }
 
 // Exportar para PDF/Imagem
 function exportarParaPDF() {
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('modalExportacao'));
-    modal.show();
-}
-
-// Confirmar exportação
-function confirmarExportacao() {
-    const formato = document.getElementById('formatoExportacao').value;
-    
-    if (formato === 'excel') {
-        exportarParaExcel();
-    } else if (formato === 'pdf') {
-        gerarPDF();
-    } else {
-        gerarImagem(formato);
-    }
-    
-    // Fechar modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalExportacao'));
-    modal.hide();
-}
-
-// Gerar PDF
-function gerarPDF() {
-    // Implementação simplificada - você pode usar html2canvas + jsPDF
-    html2canvas(document.querySelector(".card")).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save('relatorio_vendas.pdf');
-    });
-}
-
-// Gerar imagem
-function gerarImagem(formato) {
-    html2canvas(document.querySelector(".card")).then(canvas => {
+    html2canvas(document.querySelector(".container-fluid")).then(canvas => {
         const link = document.createElement('a');
-        link.download = `relatorio_vendas.${formato}`;
-        link.href = canvas.toDataURL(`image/${formato}`);
+        link.download = `relatorio_vendas_${new Date().toISOString().split('T')[0]}.png`;
+        link.href = canvas.toDataURL('image/png');
         link.click();
     });
 }
 
-// Função para atualizar itens por página
-document.getElementById('itensPorPagina').addEventListener('change', function() {
-    itensPorPagina = parseInt(this.value);
-    paginaAtual = 1;
-    carregarVendasFiltradas();
-});
+// Funções auxiliares
+function formatarNumero(valor) {
+    return parseFloat(valor || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function mostrarErro(elementId, mensagem) {
+    const elemento = document.getElementById(elementId);
+    if (elemento) {
+        elemento.textContent = mensagem;
+        elemento.classList.add('text-danger');
+    }
+}
+
+function getChartOptions(titulo) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: titulo ? {
+                display: true,
+                text: titulo,
+                font: {
+                    size: 14
+                }
+            } : null,
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `R$ ${formatarNumero(context.raw)}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'R$ ' + formatarNumero(value);
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Inicializar ao carregar
+window.onload = function() {
+    // Carregar dados iniciais após um pequeno delay
+    setTimeout(() => {
+        aplicarFiltros();
+    }, 500);
+};
 </script>
 
 <style>
-.card {
+/* Estilos do dashboard original */
+.stat-card {
     border-radius: 12px;
     transition: all 0.3s ease;
 }
 
-.card:hover {
+.card-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+}
+
+.bg-success-custom {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
 }
 
 .bg-primary-custom {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%) !important;
 }
 
 .text-purple {
     color: #6f42c1 !important;
 }
 
-.table-hover tbody tr:hover {
-    background-color: rgba(0,123,255,.1);
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.display-4 {
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.card-header {
+    font-weight: 600;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: 700;
 }
 
 .table th {
     font-weight: 600;
-    color: #495057;
+    background-color: #f8f9fa;
+}
+
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.btn-success-custom {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    border: none;
+    color: white;
+    font-weight: 600;
+}
+
+.btn-success-custom:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ba487 100%) !important;
+    transform: translateY(-1px);
+}
+
+.page-item.active .page-link {
+    background-color: #28a745;
+    border-color: #28a745;
 }
 
 .chart-container {
     position: relative;
-    height: 300px;
-    width: 100%;
+    margin: 0 auto;
 }
 
-.form-select-sm {
-    padding: .25rem .5rem;
-    font-size: .875rem;
-}
-
-.page-item.active .page-link {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.modal-content {
-    border-radius: 12px;
-    border: none;
+/* Responsividade */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
 }
 </style>
 {% endblock %}
