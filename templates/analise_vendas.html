@@ -1126,56 +1126,21 @@ function formatarNumero(valor) {
 </script>
 
 <style>
-    /* Estilos do dashboard original - AJUSTADOS para não afetar navbar */
-    .stat-card {
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
+    /* ESTILOS MÍNIMOS para análise de vendas - NÃO AFETA NAVBAR */
     
+    /* Apenas para cards específicos deste template */
     .card-hover:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
     }
     
-    /* Apenas para CARDS com estas classes */
-    .card.bg-success-custom {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    /* Apenas para os gráficos e tabelas DESTE template */
+    #chartMarcas,
+    #chartDistribuicaoFamilia {
+        max-height: 300px;
     }
     
-    .card.bg-primary-custom {
-        background: linear-gradient(135deg, #007bff 0%, #6610f2 100%) !important;
-    }
-    
-    .text-purple {
-        color: #6f42c1 !important;
-    }
-    
-    .progress {
-        border-radius: 10px;
-    }
-    
-    .progress-bar {
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 0.8rem;
-    }
-    
-    .display-4 {
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    /* Apenas para HEADERS de CARDS */
-    .card .card-header {
-        font-weight: 600;
-        border-radius: 10px 10px 0 0 !important;
-    }
-    
-    .h1, .h2, .h3, .h4, .h5, .h6 {
-        font-weight: 700;
-    }
-    
-    /* Apenas para TABELAS dentro deste template */
+    /* Apenas para tabelas DESTE template */
     #tabelaVendas th,
     #tabelaCapilaridadeMarca th,
     #tabelaTopItens th,
@@ -1185,84 +1150,21 @@ function formatarNumero(valor) {
         background-color: #f8f9fa;
     }
     
-    /* Apenas BADGES dentro deste template */
-    .card .badge {
-        font-weight: 600;
-        padding: 0.35em 0.65em;
-    }
-    
-    /* FORMULÁRIOS dentro deste template */
-    #filtroCliente,
-    #filtroVendedor, 
-    #filtroMarca,
-    #filtroEquipe,
-    #filtroFamilia,
-    #filtroDataInicio,
-    #filtroDataFim,
-    #selecionarMarca {
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-    }
-    
-    #filtroCliente:focus,
-    #filtroVendedor:focus, 
-    #filtroMarca:focus,
-    #filtroEquipe:focus,
-    #filtroFamilia:focus,
-    #filtroDataInicio:focus,
-    #filtroDataFim:focus,
-    #selecionarMarca:focus {
-        border-color: #28a745;
-        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-    }
-    
-    /* BOTÕES específicos deste template */
-    .btn-primary-custom {
-        background: linear-gradient(135deg, #007bff 0%, #6610f2 100%) !important;
-        border: none;
-        color: white;
-        font-weight: 600;
-    }
-    
-    .btn-primary-custom:hover {
-        background: linear-gradient(135deg, #0056b3 0%, #520dc2 100%) !important;
-        transform: translateY(-1px);
-    }
-    
-    /* PAGINAÇÃO apenas dentro deste template */
+    /* Apenas para paginação DESTE template */
     #paginacao .page-item.active .page-link {
         background-color: #28a745;
         border-color: #28a745;
     }
     
-    /* Responsividade */
+    /* Responsividade apenas para elementos deste template */
     @media (max-width: 768px) {
-        .display-4 {
-            font-size: 2rem;
-        }
-        
-        .card-body {
-            padding: 1rem;
-        }
-        
-        .table-responsive {
+        #tabelaVendas,
+        #tabelaCapilaridadeMarca,
+        #tabelaTopItens,
+        #tabelaTopConsultores,
+        #tabelaTopClientes {
             font-size: 0.9rem;
         }
-    }
-    
-    /* GARANTIR que não afeta navbar */
-    .navbar {
-        /* Reset qualquer estilo que possa ter sido aplicado */
-        background: inherit !important;
-    }
-    
-    /* REMOVER qualquer estilo global que afete elementos fora do template */
-    body {
-        /* Não aplicar estilos globais */
-    }
-    
-    * {
-        /* Não aplicar estilos globais */
     }
     </style>
 {% endblock %}
