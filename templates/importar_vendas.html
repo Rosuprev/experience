@@ -1,0 +1,159 @@
+<!-- templates/importar_vendas.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary-custom text-white">
+            <div class="card-body text-center py-4">
+                <h1 class="display-5 mb-2">📥 Importar Vendas do Evento</h1>
+                <p class="lead mb-0">Importe os dados históricos de vendas para análise pós-evento</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas Atuais -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">📊 Vendas Importadas</h6>
+            </div>
+            <div class="card-body text-center">
+                <h2 class="text-success">{{ total_vendas }}</h2>
+                <small class="text-muted">Registros no sistema</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">🏢 Clientes</h6>
+            </div>
+            <div class="card-body text-center">
+                <h2 class="text-primary">{{ total_clientes }}</h2>
+                <small class="text-muted">Clientes únicos</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">👥 Vendedores</h6>
+            </div>
+            <div class="card-body text-center">
+                <h2 class="text-warning">{{ total_vendedores }}</h2>
+                <small class="text-muted">Vendedores únicos</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulário de Importação -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h6 class="mb-0">📤 Importar Arquivo</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">Selecione o arquivo Excel (.xlsx ou .xls)</label>
+                        <input class="form-control" type="file" name="file" id="file" accept=".xlsx,.xls" required>
+                        <div class="form-text">
+                            O arquivo deve conter as colunas: DATA_EMISSAO, CLIENTE_NOME, VENDEDOR, EQUIPE, DESCRICAO_PRODUTO, MARCA, VALOR_PRODUTOS, QUANTIDADE (FAMILIA é opcional)
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Importante!</h6>
+                        <ul class="mb-0">
+                            <li>O sistema atualizará registros duplicados (mesma data, cliente e produto)</li>
+                            <li>Recomendado: importar uma vez e depois fazer atualizações pontuais</li>
+                            <li>O processo pode levar alguns minutos para arquivos grandes</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary-custom btn-lg">
+                            <i class="fas fa-upload me-2"></i>Importar Dados
+                        </button>
+                        <a href="{{ url_for('download_template_vendas') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-download me-2"></i>Baixar Template
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">📋 Estrutura do Arquivo</h6>
+            </div>
+            <div class="card-body">
+                <h6>Colunas obrigatórias:</h6>
+                <ul class="mb-3">
+                    <li><strong>DATA_EMISSAO</strong>: Data da venda (DD/MM/AAAA)</li>
+                    <li><strong>CLIENTE_NOME</strong>: Nome do cliente</li>
+                    <li><strong>VENDEDOR</strong>: Nome do vendedor</li>
+                    <li><strong>EQUIPE</strong>: Equipe do vendedor</li>
+                    <li><strong>DESCRICAO_PRODUTO</strong>: Descrição do produto</li>
+                    <li><strong>MARCA</strong>: Marca do produto</li>
+                    <li><strong>VALOR_PRODUTOS</strong>: Valor unitário (decimal)</li>
+                    <li><strong>QUANTIDADE</strong>: Quantidade vendida (inteiro)</li>
+                </ul>
+                
+                <h6>Coluna opcional:</h6>
+                <ul>
+                    <li><strong>FAMILIA</strong>: Família do produto</li>
+                </ul>
+                
+                <hr>
+                
+                <h6>Exemplo de dados:</h6>
+                <div class="small">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>DATA_EMISSAO</th>
+                                <th>CLIENTE_NOME</th>
+                                <th>VENDEDOR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>15/10/2025</td>
+                                <td>Empresa ABC Ltda</td>
+                                <td>João Silva</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botões de Navegação -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-home me-2"></i>Voltar para Início
+            </a>
+            
+            {% if total_vendas > 0 %}
+            <a href="{{ url_for('analise_vendas') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-chart-bar me-2"></i>Ver Análise de Vendas
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

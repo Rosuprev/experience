@@ -1,0 +1,715 @@
+<!-- templates/analise_vendas.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Header do Dashboard de Análise -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary-custom text-white">
+            <div class="card-body text-center py-4">
+                <h1 class="display-5 mb-2">📊 Análise de Vendas do Evento</h1>
+                <p class="lead mb-0">Análise detalhada das vendas realizadas durante o R.O Experience 2025</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h6 class="mb-0">🔍 Filtros Combinados</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" id="filtroCliente">
+                            <option value="todos">Todos os Clientes</option>
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente }}">{{ cliente }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Vendedor</label>
+                        <select class="form-select" id="filtroVendedor">
+                            <option value="todos">Todos os Vendedores</option>
+                            {% for vendedor in vendedores %}
+                            <option value="{{ vendedor }}">{{ vendedor }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Equipe</label>
+                        <select class="form-select" id="filtroEquipe">
+                            <option value="todos">Todas as Equipes</option>
+                            {% for equipe in equipes %}
+                            <option value="{{ equipe }}">{{ equipe }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Marca</label>
+                        <select class="form-select" id="filtroMarca">
+                            <option value="todos">Todas as Marcas</option>
+                            {% for marca in marcas %}
+                            <option value="{{ marca }}">{{ marca }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Família</label>
+                        <select class="form-select" id="filtroFamilia">
+                            <option value="todos">Todas as Famílias</option>
+                            {% for familia in familias %}
+                            <option value="{{ familia }}">{{ familia }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="filtroDataInicio" 
+                               value="{{ min_date.strftime('%Y-%m-%d') if min_date else '' }}">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="filtroDataFim"
+                               value="{{ max_date.strftime('%Y-%m-%d') if max_date else '' }}">
+                    </div>
+                    
+                    <div class="col-12 mt-3">
+                        <button class="btn btn-primary-custom" id="btnAplicarFiltros">
+                            <i class="fas fa-filter me-2"></i>Aplicar Filtros
+                        </button>
+                        <button class="btn btn-secondary" id="btnLimparFiltros">
+                            <i class="fas fa-times me-2"></i>Limpar Filtros
+                        </button>
+                        <button class="btn btn-success" id="btnExportarExcel">
+                            <i class="fas fa-file-excel me-2"></i>Exportar Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas Gerais -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">📈 Métricas Gerais</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center" id="metricasGerais">
+                    <!-- Carregado via JavaScript -->
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2">Carregando métricas...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Performers -->
+<div class="row mb-4">
+    <!-- Cliente Top -->
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">🥇 Cliente Top</h6>
+            </div>
+            <div class="card-body" id="clienteTop">
+                <!-- Carregado via JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vendedor Top -->
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">🏆 Vendedor Top</h6>
+            </div>
+            <div class="card-body" id="vendedorTop">
+                <!-- Carregado via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Análise por Marca -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">📊 Análise por Marca</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Selecione uma Marca para Detalhes:</label>
+                        <select class="form-select" id="selecaoMarcaDetalhes">
+                            <option value="">Selecione uma marca...</option>
+                            {% for marca in marcas %}
+                            <option value="{{ marca }}">{{ marca }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Selecione uma marca para ver análise detalhada com top clientes, vendedores e produtos.
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="analiseMarcaDetalhada" style="display: none;">
+                    <!-- Conteúdo carregado via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Vendas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h6 class="mb-0">📋 Vendas Detalhadas</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="tabelaVendas">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Vendedor</th>
+                                <th>Equipe</th>
+                                <th>Produto</th>
+                                <th>Marca</th>
+                                <th>Família</th>
+                                <th>Valor Unit.</th>
+                                <th>Quantidade</th>
+                                <th>Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabelaVendas">
+                            <!-- Carregado via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Paginação -->
+                <nav aria-label="Paginação" id="paginacao">
+                    <!-- Carregado via JavaScript -->
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+// Variáveis globais
+let paginaAtual = 1;
+let totalPaginas = 1;
+
+// Função para carregar métricas
+function carregarMetricas() {
+    fetch('/api/metricas-vendas')
+    .then(response => response.json())
+    .then(data => {
+        // Atualizar métricas gerais
+        document.getElementById('metricasGerais').innerHTML = `
+            <div class="col-xl-2 col-md-4 col-6 mb-3">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-3">
+                        <h4 class="text-primary mb-1">${data.totais.total_vendas.toLocaleString('pt-BR')}</h4>
+                        <small class="text-muted">Total Vendas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-3">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-3">
+                        <h4 class="text-success mb-1">R$ ${data.totais.total_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h4>
+                        <small class="text-muted">Valor Total</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-3">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-3">
+                        <h4 class="text-info mb-1">${data.totais.total_quantidade.toLocaleString('pt-BR')}</h4>
+                        <small class="text-muted">Quantidade Total</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-3">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-3">
+                        <h4 class="text-warning mb-1">R$ ${data.totais.ticket_medio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h4>
+                        <small class="text-muted">Ticket Médio</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-3">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-3">
+                        <h4 class="text-purple mb-1">${data.maior_venda.valor ? 'R$ ' + data.maior_venda.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2}) : 'N/A'}</h4>
+                        <small class="text-muted">Maior Venda</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-3">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-3">
+                        <h4 class="text-danger mb-1">${data.vendas_por_marca.length}</h4>
+                        <small class="text-muted">Marcas Diferentes</small>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Atualizar cliente top
+        document.getElementById('clienteTop').innerHTML = data.clientes.maior_valor.nome ? `
+            <div class="text-center mb-3">
+                <h3 class="text-success">${data.clientes.maior_valor.nome}</h3>
+                <p class="text-muted mb-1">Maior faturamento</p>
+            </div>
+            <div class="row text-center">
+                <div class="col-6">
+                    <h5 class="text-primary">R$ ${data.clientes.maior_valor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                    <small class="text-muted">Valor Total</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-info">${data.clientes.maior_valor.quantidade.toLocaleString('pt-BR')}</h5>
+                    <small class="text-muted">Quantidade</small>
+                </div>
+            </div>
+            <div class="mt-3">
+                <small class="text-muted">${data.clientes.maior_valor.vendas} vendas realizadas</small>
+            </div>
+        ` : '<p class="text-center text-muted">Nenhum dado disponível</p>';
+        
+        // Atualizar vendedor top
+        document.getElementById('vendedorTop').innerHTML = data.vendedores.maior_valor.nome ? `
+            <div class="text-center mb-3">
+                <h3 class="text-primary">${data.vendedores.maior_valor.nome}</h3>
+                <p class="text-muted mb-1">Maior faturamento</p>
+            </div>
+            <div class="row text-center">
+                <div class="col-6">
+                    <h5 class="text-success">R$ ${data.vendedores.maior_valor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                    <small class="text-muted">Valor Total</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-warning">${data.vendedores.maior_valor.vendas}</h5>
+                    <small class="text-muted">Vendas Realizadas</small>
+                </div>
+            </div>
+            <div class="mt-3">
+                <small class="text-muted">Equipe: ${data.equipes.maior_valor.nome || 'N/A'}</small>
+            </div>
+        ` : '<p class="text-center text-muted">Nenhum dado disponível</p>';
+    })
+    .catch(error => {
+        console.error('Erro ao carregar métricas:', error);
+    });
+}
+
+// Função para carregar vendas com filtros
+function carregarVendas(pagina = 1) {
+    const filtros = {
+        cliente: document.getElementById('filtroCliente').value,
+        vendedor: document.getElementById('filtroVendedor').value,
+        equipe: document.getElementById('filtroEquipe').value,
+        marca: document.getElementById('filtroMarca').value,
+        familia: document.getElementById('filtroFamilia').value,
+        data_inicio: document.getElementById('filtroDataInicio').value,
+        data_fim: document.getElementById('filtroDataFim').value,
+        page: pagina,
+        per_page: 50
+    };
+    
+    // Mostrar loading
+    document.getElementById('corpoTabelaVendas').innerHTML = `
+        <tr>
+            <td colspan="10" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2">Carregando vendas...</p>
+            </td>
+        </tr>
+    `;
+    
+    fetch('/api/vendas-filtradas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filtros)
+    })
+    .then(response => response.json())
+    .then(data => {
+        paginaAtual = data.page;
+        totalPaginas = data.pages;
+        
+        // Atualizar tabela
+        let tabelaHTML = '';
+        
+        if (data.vendas.length === 0) {
+            tabelaHTML = `
+                <tr>
+                    <td colspan="10" class="text-center py-4 text-muted">
+                        <i class="fas fa-search me-2"></i>Nenhuma venda encontrada com os filtros aplicados
+                    </td>
+                </tr>
+            `;
+        } else {
+            data.vendas.forEach(venda => {
+                tabelaHTML += `
+                    <tr>
+                        <td>${venda.data_emissao}</td>
+                        <td>${venda.cliente_nome}</td>
+                        <td>${venda.vendedor}</td>
+                        <td>${venda.equipe}</td>
+                        <td>${venda.descricao_produto}</td>
+                        <td><span class="badge bg-secondary">${venda.marca}</span></td>
+                        <td>${venda.familia}</td>
+                        <td class="text-end">R$ ${venda.valor_produtos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td class="text-center">${venda.quantidade.toLocaleString('pt-BR')}</td>
+                        <td class="text-end fw-bold text-success">R$ ${venda.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+        }
+        
+        document.getElementById('corpoTabelaVendas').innerHTML = tabelaHTML;
+        
+        // Atualizar paginação
+        atualizarPaginacao();
+    })
+    .catch(error => {
+        console.error('Erro ao carregar vendas:', error);
+        document.getElementById('corpoTabelaVendas').innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center py-4 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar vendas
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Função para atualizar paginação
+function atualizarPaginacao() {
+    let paginacaoHTML = `
+        <ul class="pagination justify-content-center">
+    `;
+    
+    // Botão anterior
+    paginacaoHTML += `
+        <li class="page-item ${paginaAtual === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual - 1})">Anterior</a>
+        </li>
+    `;
+    
+    // Números de página
+    const inicio = Math.max(1, paginaAtual - 2);
+    const fim = Math.min(totalPaginas, paginaAtual + 2);
+    
+    for (let i = inicio; i <= fim; i++) {
+        paginacaoHTML += `
+            <li class="page-item ${i === paginaAtual ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="mudarPagina(${i})">${i}</a>
+            </li>
+        `;
+    }
+    
+    // Botão próximo
+    paginacaoHTML += `
+        <li class="page-item ${paginaAtual === totalPaginas ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual + 1})">Próxima</a>
+        </li>
+    `;
+    
+    paginacaoHTML += `</ul>`;
+    
+    document.getElementById('paginacao').innerHTML = paginacaoHTML;
+}
+
+// Função para mudar página
+function mudarPagina(pagina) {
+    if (pagina >= 1 && pagina <= totalPaginas) {
+        carregarVendas(pagina);
+    }
+}
+
+// Função para carregar análise detalhada da marca
+function carregarAnaliseMarca(marca) {
+    if (!marca) {
+        document.getElementById('analiseMarcaDetalhada').style.display = 'none';
+        return;
+    }
+    
+    fetch(`/api/analise-marca/${encodeURIComponent(marca)}`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('analiseMarcaDetalhada').style.display = 'block';
+        document.getElementById('analiseMarcaDetalhada').innerHTML = `
+            <div class="row">
+                <!-- Métricas da Marca -->
+                <div class="col-md-12 mb-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3 col-6 mb-3">
+                                    <h4 class="text-primary">R$ ${data.dados_gerais.total_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h4>
+                                    <small class="text-muted">Valor Total</small>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <h4 class="text-success">${data.dados_gerais.total_quantidade.toLocaleString('pt-BR')}</h4>
+                                    <small class="text-muted">Quantidade Total</small>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <h4 class="text-info">${data.dados_gerais.total_vendas.toLocaleString('pt-BR')}</h4>
+                                    <small class="text-muted">Vendas Realizadas</small>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <h4 class="text-warning">R$ ${data.dados_gerais.ticket_medio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h4>
+                                    <small class="text-muted">Ticket Médio</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Clientes -->
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">🏆 Top Clientes</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th class="text-end">Valor</th>
+                                            <th class="text-center">Qtd</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.top_clientes.map(cliente => `
+                                            <tr>
+                                                <td>${cliente.cliente}</td>
+                                                <td class="text-end">R$ ${cliente.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                                                <td class="text-center">${cliente.quantidade}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Vendedores -->
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">🌟 Top Vendedores</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Vendedor</th>
+                                            <th class="text-end">Valor</th>
+                                            <th class="text-center">Vendas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.top_vendedores.map(vendedor => `
+                                            <tr>
+                                                <td>${vendedor.vendedor}</td>
+                                                <td class="text-end">R$ ${vendedor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                                                <td class="text-center">${vendedor.vendas}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Produtos -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">📦 Top Produtos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Produto</th>
+                                            <th>Família</th>
+                                            <th class="text-end">Valor</th>
+                                            <th class="text-center">Qtd</th>
+                                            <th class="text-center">Vendas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.top_produtos.map(produto => `
+                                            <tr>
+                                                <td>${produto.produto}</td>
+                                                <td><span class="badge bg-secondary">${produto.familia}</span></td>
+                                                <td class="text-end">R$ ${produto.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                                                <td class="text-center">${produto.quantidade}</td>
+                                                <td class="text-center">${produto.vendas}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    })
+    .catch(error => {
+        console.error('Erro ao carregar análise da marca:', error);
+    });
+}
+
+// Função para exportar Excel
+function exportarExcel() {
+    const filtros = {
+        cliente: document.getElementById('filtroCliente').value,
+        vendedor: document.getElementById('filtroVendedor').value,
+        equipe: document.getElementById('filtroEquipe').value,
+        marca: document.getElementById('filtroMarca').value,
+        familia: document.getElementById('filtroFamilia').value,
+        data_inicio: document.getElementById('filtroDataInicio').value,
+        data_fim: document.getElementById('filtroDataFim').value,
+        exportar: true
+    };
+    
+    // Criar formulário dinâmico para POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/exportar-vendas-filtradas';
+    
+    for (const [key, value] of Object.entries(filtros)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Carregar dados iniciais
+    carregarMetricas();
+    carregarVendas();
+    
+    // Aplicar filtros
+    document.getElementById('btnAplicarFiltros').addEventListener('click', function() {
+        carregarMetricas();
+        carregarVendas(1);
+    });
+    
+    // Limpar filtros
+    document.getElementById('btnLimparFiltros').addEventListener('click', function() {
+        document.getElementById('filtroCliente').value = 'todos';
+        document.getElementById('filtroVendedor').value = 'todos';
+        document.getElementById('filtroEquipe').value = 'todos';
+        document.getElementById('filtroMarca').value = 'todos';
+        document.getElementById('filtroFamilia').value = 'todos';
+        
+        const minDate = '{{ min_date.strftime("%Y-%m-%d") if min_date else "" }}';
+        const maxDate = '{{ max_date.strftime("%Y-%m-%d") if max_date else "" }}';
+        
+        document.getElementById('filtroDataInicio').value = minDate;
+        document.getElementById('filtroDataFim').value = maxDate;
+        
+        carregarMetricas();
+        carregarVendas(1);
+    });
+    
+    // Exportar Excel
+    document.getElementById('btnExportarExcel').addEventListener('click', exportarExcel);
+    
+    // Análise por marca
+    document.getElementById('selecaoMarcaDetalhes').addEventListener('change', function() {
+        carregarAnaliseMarca(this.value);
+    });
+});
+</script>
+
+<style>
+/* Estilos específicos para análise de vendas */
+.card-header {
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.form-select, .form-control {
+    border-radius: 6px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .card-body .row > div {
+        margin-bottom: 10px;
+    }
+    
+    .table-responsive {
+        font-size: 0.9em;
+    }
+}
+</style>
+{% endblock %}

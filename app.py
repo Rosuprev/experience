@@ -89,6 +89,34 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Modelos
+
+# NOVO MODELO PARA VENDAS DO EVENTO (DADOS HISTÓRICOS)
+class VendaEvento(db.Model):
+    __tablename__ = 'venda_evento'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    data_emissao = db.Column(db.Date, nullable=False)
+    cliente_nome = db.Column(db.String(200), nullable=False)
+    vendedor = db.Column(db.String(100), nullable=False)
+    equipe = db.Column(db.String(100), nullable=False)
+    descricao_produto = db.Column(db.String(300), nullable=False)
+    marca = db.Column(db.String(100), nullable=False)
+    valor_produtos = db.Column(db.Float, nullable=False)
+    quantidade = db.Column(db.Integer, nullable=False, default=1)
+    familia = db.Column(db.String(100))
+    valor_total = db.Column(db.Float, nullable=False)
+    data_importacao = db.Column(db.DateTime, default=agora)
+    importado_por = db.Column(db.String(100))
+    
+    # Índices para melhor performance nas consultas
+    __table_args__ = (
+        db.Index('idx_venda_evento_cliente', 'cliente_nome'),
+        db.Index('idx_venda_evento_vendedor', 'vendedor'),
+        db.Index('idx_venda_evento_data', 'data_emissao'),
+        db.Index('idx_venda_evento_marca', 'marca'),
+        db.Index('idx_venda_evento_familia', 'familia'),
+    )
+
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -277,7 +305,9 @@ MODULOS_SISTEMA = {
     'pesquisa_publica': {'nome': '📝 Pesquisa Pública', 'descricao': 'Pesquisa de satisfação do evento'},
     'pesquisa_marketing': {'nome': '📈 Pesquisa Marketing', 'descricao': 'Pesquisa de estratégia comercial'},
     'relatorio_pesquisas': {'nome': '📊 Relatório Pesquisas', 'descricao': 'Relatórios das pesquisas de satisfação'},
-    'relatorio_pesquisas_mkt': {'nome': '📈 Relatório Pesq. Marketing', 'descricao': 'Relatórios das pesquisas de marketing'}
+    'relatorio_pesquisas_mkt': {'nome': '📈 Relatório Pesq. Marketing', 'descricao': 'Relatórios das pesquisas de marketing'},
+    'analise_vendas': {'nome': '📊 Análise de Vendas', 'descricao': 'Análise detalhada das vendas do evento'},
+    'importacao_vendas': {'nome': '📥 Importar Vendas', 'descricao': 'Importar dados históricos de vendas'},
 }
 
 
@@ -2870,6 +2900,646 @@ def criar_banco_se_nao_existir(app):
     finally:
         if conn:
             conn.close()  
+
+@app.route('/importar-vendas-evento', methods=['GET', 'POST'])
+@login_required
+@permissao_required('importacao_vendas')
+def importar_vendas_evento():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('Nenhum arquivo selecionado', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('Nenhum arquivo selecionado', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.endswith(('.xlsx', '.xls')):
+            try:
+                data = read_excel_file(file)
+                
+                # Verificar colunas necessárias
+                colunas_necessarias = ['DATA_EMISSAO', 'CLIENTE_NOME', 'VENDEDOR', 'EQUIPE', 
+                                      'DESCRICAO_PRODUTO', 'MARCA', 'VALOR_PRODUTOS', 'QUANTIDADE']
+                
+                if data and data[0]:
+                    colunas_arquivo = [key.upper() for key in data[0].keys()]
+                    colunas_faltando = [c for c in colunas_necessarias if c not in colunas_arquivo]
+                    
+                    if colunas_faltando:
+                        flash(f'Colunas faltando no arquivo: {", ".join(colunas_faltando)}', 'error')
+                        return redirect(request.url)
+                else:
+                    flash('Arquivo vazio ou formato inválido', 'error')
+                    return redirect(request.url)
+                
+                vendas_importadas = 0
+                vendas_atualizadas = 0
+                erros = []
+                
+                for i, row in enumerate(data, 1):
+                    try:
+                        # Converter data
+                        data_str = str(row.get('DATA_EMISSAO', ''))
+                        if data_str:
+                            try:
+                                # Tentar diferentes formatos de data
+                                if '-' in data_str:
+                                    data_emissao = datetime.strptime(data_str, '%Y-%m-%d').date()
+                                elif '/' in data_str:
+                                    data_emissao = datetime.strptime(data_str, '%d/%m/%Y').date()
+                                else:
+                                    # Tentar como timestamp
+                                    data_emissao = datetime.fromtimestamp(float(data_str)).date()
+                            except:
+                                data_emissao = agora().date()
+                        else:
+                            data_emissao = agora().date()
+                        
+                        # Obter valores
+                        cliente_nome = str(row.get('CLIENTE_NOME', '')).strip()
+                        vendedor = str(row.get('VENDEDOR', '')).strip()
+                        equipe = str(row.get('EQUIPE', '')).strip()
+                        descricao = str(row.get('DESCRICAO_PRODUTO', '')).strip()
+                        marca = str(row.get('MARCA', '')).strip()
+                        familia = str(row.get('FAMILIA', '')).strip() if row.get('FAMILIA') else None
+                        
+                        # Converter valores numéricos
+                        try:
+                            valor_produtos = float(str(row.get('VALOR_PRODUTOS', '0')).replace(',', '.'))
+                        except:
+                            valor_produtos = 0.0
+                        
+                        try:
+                            quantidade = int(float(str(row.get('QUANTIDADE', '1'))))
+                        except:
+                            quantidade = 1
+                        
+                        # Calcular valor total
+                        valor_total = valor_produtos * quantidade
+                        
+                        # Verificar se já existe (para evitar duplicatas)
+                        # Aqui você pode definir sua lógica de verificação de duplicidade
+                        # Por exemplo, combinação de data, cliente e descrição
+                        venda_existente = VendaEvento.query.filter_by(
+                            data_emissao=data_emissao,
+                            cliente_nome=cliente_nome,
+                            descricao_produto=descricao,
+                            valor_produtos=valor_produtos
+                        ).first()
+                        
+                        if venda_existente:
+                            # Atualizar se existir
+                            venda_existente.quantidade = quantidade
+                            venda_existente.valor_total = valor_total
+                            venda_existente.marca = marca
+                            venda_existente.familia = familia
+                            vendas_atualizadas += 1
+                        else:
+                            # Criar nova venda
+                            venda = VendaEvento(
+                                data_emissao=data_emissao,
+                                cliente_nome=cliente_nome,
+                                vendedor=vendedor,
+                                equipe=equipe,
+                                descricao_produto=descricao,
+                                marca=marca,
+                                valor_produtos=valor_produtos,
+                                quantidade=quantidade,
+                                familia=familia,
+                                valor_total=valor_total,
+                                importado_por=session.get('nome', 'Sistema')
+                            )
+                            db.session.add(venda)
+                            vendas_importadas += 1
+                            
+                    except Exception as e:
+                        erros.append(f'Linha {i}: {str(e)}')
+                        continue
+                
+                db.session.commit()
+                
+                # Registrar log
+                registrar_log('importacao_vendas_evento', 'importacao_vendas', {
+                    'vendas_importadas': vendas_importadas,
+                    'vendas_atualizadas': vendas_atualizadas,
+                    'total_linhas': len(data),
+                    'erros': len(erros),
+                    'arquivo': file.filename
+                })
+                
+                mensagem = f'✅ Importação concluída!<br>'
+                mensagem += f'📊 {vendas_importadas} novas vendas importadas<br>'
+                mensagem += f'🔄 {vendas_atualizadas} vendas atualizadas<br>'
+                mensagem += f'📈 Total processado: {len(data)} linhas'
+                
+                if erros:
+                    mensagem += f'<br>⚠️ {len(erros)} erros encontrados'
+                    flash(mensagem, 'warning')
+                else:
+                    flash(mensagem, 'success')
+                
+                return redirect(url_for('analise_vendas'))
+                
+            except Exception as e:
+                flash(f'Erro na importação: {str(e)}', 'error')
+                return redirect(request.url)
+    
+    # GET - mostrar página de importação
+    total_vendas = VendaEvento.query.count()
+    total_clientes = db.session.query(VendaEvento.cliente_nome).distinct().count()
+    total_vendedores = db.session.query(VendaEvento.vendedor).distinct().count()
+    
+    return render_template('importar_vendas.html',
+                         total_vendas=total_vendas,
+                         total_clientes=total_clientes,
+                         total_vendedores=total_vendedores)
+
+@app.route('/analise-vendas')
+@login_required
+@permissao_required('analise_vendas')
+def analise_vendas():
+    """Dashboard de análise de vendas do evento"""
+    
+    # Obter dados para filtros
+    clientes = db.session.query(VendaEvento.cliente_nome).distinct().order_by(VendaEvento.cliente_nome).all()
+    vendedores = db.session.query(VendaEvento.vendedor).distinct().order_by(VendaEvento.vendedor).all()
+    equipes = db.session.query(VendaEvento.equipe).distinct().order_by(VendaEvento.equipe).all()
+    marcas = db.session.query(VendaEvento.marca).distinct().order_by(VendaEvento.marca).all()
+    familias = db.session.query(VendaEvento.familia).distinct().filter(VendaEvento.familia.isnot(None)).order_by(VendaEvento.familia).all()
+    
+    # Datas mínima e máxima
+    min_date = db.session.query(db.func.min(VendaEvento.data_emissao)).scalar()
+    max_date = db.session.query(db.func.max(VendaEvento.data_emissao)).scalar()
+    
+    return render_template('analise_vendas.html',
+                         clientes=[c[0] for c in clientes],
+                         vendedores=[v[0] for v in vendedores],
+                         equipes=[e[0] for e in equipes],
+                         marcas=[m[0] for m in marcas],
+                         familias=[f[0] for f in familias],
+                         min_date=min_date,
+                         max_date=max_date)
+
+@app.route('/api/vendas-filtradas', methods=['POST'])
+@login_required
+def api_vendas_filtradas():
+    """API para obter vendas com filtros"""
+    data = request.get_json()
+    
+    # Construir query
+    query = VendaEvento.query
+    
+    # Aplicar filtros
+    if data.get('cliente') and data['cliente'] != 'todos':
+        query = query.filter(VendaEvento.cliente_nome == data['cliente'])
+    
+    if data.get('vendedor') and data['vendedor'] != 'todos':
+        query = query.filter(VendaEvento.vendedor == data['vendedor'])
+    
+    if data.get('equipe') and data['equipe'] != 'todos':
+        query = query.filter(VendaEvento.equipe == data['equipe'])
+    
+    if data.get('marca') and data['marca'] != 'todos':
+        query = query.filter(VendaEvento.marca == data['marca'])
+    
+    if data.get('familia') and data['familia'] != 'todos':
+        query = query.filter(VendaEvento.familia == data['familia'])
+    
+    if data.get('data_inicio'):
+        try:
+            data_inicio = datetime.strptime(data['data_inicio'], '%Y-%m-%d').date()
+            query = query.filter(VendaEvento.data_emissao >= data_inicio)
+        except:
+            pass
+    
+    if data.get('data_fim'):
+        try:
+            data_fim = datetime.strptime(data['data_fim'], '%Y-%m-%d').date()
+            query = query.filter(VendaEvento.data_emissao <= data_fim)
+        except:
+            pass
+    
+    # Ordenar
+    sort_by = data.get('sort_by', 'data_emissao')
+    sort_order = data.get('sort_order', 'desc')
+    
+    if sort_order == 'desc':
+        query = query.order_by(db.desc(getattr(VendaEvento, sort_by, 'data_emissao')))
+    else:
+        query = query.order_by(getattr(VendaEvento, sort_by, 'data_emissao'))
+    
+    # Paginação
+    page = data.get('page', 1)
+    per_page = data.get('per_page', 50)
+    
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    vendas = pagination.items
+    
+    # Calcular totais
+    total_vendas = query.count()
+    total_valor = db.session.query(db.func.sum(VendaEvento.valor_total)).filter(VendaEvento.id.in_([v.id for v in vendas])).scalar() or 0
+    total_quantidade = db.session.query(db.func.sum(VendaEvento.quantidade)).filter(VendaEvento.id.in_([v.id for v in vendas])).scalar() or 0
+    
+    result = []
+    for venda in vendas:
+        result.append({
+            'id': venda.id,
+            'data_emissao': venda.data_emissao.strftime('%d/%m/%Y'),
+            'cliente_nome': venda.cliente_nome,
+            'vendedor': venda.vendedor,
+            'equipe': venda.equipe,
+            'descricao_produto': venda.descricao_produto,
+            'marca': venda.marca,
+            'valor_produtos': float(venda.valor_produtos),
+            'quantidade': venda.quantidade,
+            'familia': venda.familia or 'N/A',
+            'valor_total': float(venda.valor_total)
+        })
+    
+    return jsonify({
+        'vendas': result,
+        'total_vendas': total_vendas,
+        'total_valor': float(total_valor),
+        'total_quantidade': int(total_quantidade),
+        'page': pagination.page,
+        'pages': pagination.pages,
+        'per_page': pagination.per_page
+    })
+
+@app.route('/api/metricas-vendas')
+@login_required
+def api_metricas_vendas():
+    """API para métricas gerais de vendas"""
+    
+    # Totais gerais
+    total_vendas = VendaEvento.query.count()
+    total_valor = db.session.query(db.func.sum(VendaEvento.valor_total)).scalar() or 0
+    total_quantidade = db.session.query(db.func.sum(VendaEvento.quantidade)).scalar() or 0
+    
+    # Maior venda
+    maior_venda = VendaEvento.query.order_by(VendaEvento.valor_total.desc()).first()
+    
+    # Cliente que mais comprou (valor)
+    cliente_maior_valor = db.session.query(
+        VendaEvento.cliente_nome,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).group_by(VendaEvento.cliente_nome).order_by(db.desc('total_valor')).first()
+    
+    # Cliente que mais comprou (quantidade)
+    cliente_maior_quantidade = db.session.query(
+        VendaEvento.cliente_nome,
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.sum(VendaEvento.valor_total).label('total_valor')
+    ).group_by(VendaEvento.cliente_nome).order_by(db.desc('total_quantidade')).first()
+    
+    # Vendedor que mais vendeu (valor)
+    vendedor_maior_valor = db.session.query(
+        VendaEvento.vendedor,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).group_by(VendaEvento.vendedor).order_by(db.desc('total_valor')).first()
+    
+    # Vendedor que mais vendeu (quantidade)
+    vendedor_maior_quantidade = db.session.query(
+        VendaEvento.vendedor,
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.sum(VendaEvento.valor_total).label('total_valor')
+    ).group_by(VendaEvento.vendedor).order_by(db.desc('total_quantidade')).first()
+    
+    # Equipe que mais vendeu (valor)
+    equipe_maior_valor = db.session.query(
+        VendaEvento.equipe,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).group_by(VendaEvento.equipe).order_by(db.desc('total_valor')).first()
+    
+    # Equipe que mais vendeu (quantidade)
+    equipe_maior_quantidade = db.session.query(
+        VendaEvento.equipe,
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.sum(VendaEvento.valor_total).label('total_valor')
+    ).group_by(VendaEvento.equipe).order_by(db.desc('total_quantidade')).first()
+    
+    # Vendas por marca (top 10)
+    vendas_por_marca = db.session.query(
+        VendaEvento.marca,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).group_by(VendaEvento.marca).order_by(db.desc('total_valor')).limit(10).all()
+    
+    # Vendas por dia
+    vendas_por_dia = db.session.query(
+        VendaEvento.data_emissao,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).group_by(VendaEvento.data_emissao).order_by(VendaEvento.data_emissao).all()
+    
+    return jsonify({
+        'totais': {
+            'total_vendas': total_vendas,
+            'total_valor': float(total_valor),
+            'total_quantidade': int(total_quantidade),
+            'ticket_medio': float(total_valor / total_vendas) if total_vendas > 0 else 0
+        },
+        'maior_venda': {
+            'cliente': maior_venda.cliente_nome if maior_venda else None,
+            'valor': float(maior_venda.valor_total) if maior_venda else 0,
+            'descricao': maior_venda.descricao_produto if maior_venda else None,
+            'data': maior_venda.data_emissao.strftime('%d/%m/%Y') if maior_venda else None
+        },
+        'clientes': {
+            'maior_valor': {
+                'nome': cliente_maior_valor[0] if cliente_maior_valor else None,
+                'valor': float(cliente_maior_valor[1]) if cliente_maior_valor else 0,
+                'quantidade': int(cliente_maior_valor[2]) if cliente_maior_valor else 0,
+                'vendas': cliente_maior_valor[3] if cliente_maior_valor else 0
+            },
+            'maior_quantidade': {
+                'nome': cliente_maior_quantidade[0] if cliente_maior_quantidade else None,
+                'quantidade': int(cliente_maior_quantidade[1]) if cliente_maior_quantidade else 0,
+                'valor': float(cliente_maior_quantidade[2]) if cliente_maior_quantidade else 0
+            }
+        },
+        'vendedores': {
+            'maior_valor': {
+                'nome': vendedor_maior_valor[0] if vendedor_maior_valor else None,
+                'valor': float(vendedor_maior_valor[1]) if vendedor_maior_valor else 0,
+                'vendas': vendedor_maior_valor[2] if vendedor_maior_valor else 0
+            },
+            'maior_quantidade': {
+                'nome': vendedor_maior_quantidade[0] if vendedor_maior_quantidade else None,
+                'quantidade': int(vendedor_maior_quantidade[1]) if vendedor_maior_quantidade else 0,
+                'valor': float(vendedor_maior_quantidade[2]) if vendedor_maior_quantidade else 0
+            }
+        },
+        'equipes': {
+            'maior_valor': {
+                'nome': equipe_maior_valor[0] if equipe_maior_valor else None,
+                'valor': float(equipe_maior_valor[1]) if equipe_maior_valor else 0,
+                'vendas': equipe_maior_valor[2] if equipe_maior_valor else 0
+            },
+            'maior_quantidade': {
+                'nome': equipe_maior_quantidade[0] if equipe_maior_quantidade else None,
+                'quantidade': int(equipe_maior_quantidade[1]) if equipe_maior_quantidade else 0,
+                'valor': float(equipe_maior_quantidade[2]) if equipe_maior_quantidade else 0
+            }
+        },
+        'vendas_por_marca': [
+            {
+                'marca': marca,
+                'valor': float(valor),
+                'quantidade': int(quantidade),
+                'vendas': int(vendas),
+                'percentual': float(valor / total_valor * 100) if total_valor > 0 else 0
+            }
+            for marca, valor, quantidade, vendas in vendas_por_marca
+        ],
+        'vendas_por_dia': [
+            {
+                'data': data.strftime('%d/%m/%Y'),
+                'valor': float(valor),
+                'vendas': int(vendas)
+            }
+            for data, valor, vendas in vendas_por_dia
+        ]
+    })
+
+@app.route('/api/analise-marca/<marca>')
+@login_required
+def api_analise_marca(marca):
+    """Análise detalhada por marca específica"""
+    
+    # Dados da marca
+    dados_marca = db.session.query(
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.count(VendaEvento.id).label('total_vendas'),
+        db.func.avg(VendaEvento.valor_produtos).label('valor_medio_produto')
+    ).filter(VendaEvento.marca == marca).first()
+    
+    # Top clientes da marca
+    top_clientes = db.session.query(
+        VendaEvento.cliente_nome,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.cliente_nome).order_by(db.desc('total_valor')).limit(10).all()
+    
+    # Top vendedores da marca
+    top_vendedores = db.session.query(
+        VendaEvento.vendedor,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.vendedor).order_by(db.desc('total_valor')).limit(10).all()
+    
+    # Top produtos da marca
+    top_produtos = db.session.query(
+        VendaEvento.descricao_produto,
+        VendaEvento.familia,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.descricao_produto, VendaEvento.familia).order_by(db.desc('total_valor')).limit(15).all()
+    
+    # Vendas por dia da marca
+    vendas_por_dia = db.session.query(
+        VendaEvento.data_emissao,
+        db.func.sum(VendaEvento.valor_total).label('total_valor'),
+        db.func.count(VendaEvento.id).label('total_vendas')
+    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.data_emissao).order_by(VendaEvento.data_emissao).all()
+    
+    return jsonify({
+        'marca': marca,
+        'dados_gerais': {
+            'total_valor': float(dados_marca[0]) if dados_marca[0] else 0,
+            'total_quantidade': int(dados_marca[1]) if dados_marca[1] else 0,
+            'total_vendas': int(dados_marca[2]) if dados_marca[2] else 0,
+            'valor_medio_produto': float(dados_marca[3]) if dados_marca[3] else 0,
+            'ticket_medio': float(dados_marca[0] / dados_marca[2]) if dados_marca[2] and dados_marca[0] else 0
+        },
+        'top_clientes': [
+            {
+                'cliente': cliente,
+                'valor': float(valor),
+                'quantidade': int(quantidade),
+                'vendas': int(vendas)
+            }
+            for cliente, valor, quantidade, vendas in top_clientes
+        ],
+        'top_vendedores': [
+            {
+                'vendedor': vendedor,
+                'valor': float(valor),
+                'quantidade': int(quantidade),
+                'vendas': int(vendas)
+            }
+            for vendedor, valor, quantidade, vendas in top_vendedores
+        ],
+        'top_produtos': [
+            {
+                'produto': produto,
+                'familia': familia or 'N/A',
+                'valor': float(valor),
+                'quantidade': int(quantidade),
+                'vendas': int(vendas)
+            }
+            for produto, familia, valor, quantidade, vendas in top_produtos
+        ],
+        'vendas_por_dia': [
+            {
+                'data': data.strftime('%d/%m/%Y'),
+                'valor': float(valor),
+                'vendas': int(vendas)
+            }
+            for data, valor, vendas in vendas_por_dia
+        ]
+    })
+
+@app.route('/exportar-vendas-filtradas', methods=['POST'])
+@login_required
+@permissao_required('exportacao')
+def exportar_vendas_filtradas():
+    """Exportar vendas com filtros aplicados para Excel"""
+    # Obter filtros do formulário
+    cliente = request.form.get('cliente')
+    vendedor = request.form.get('vendedor')
+    equipe = request.form.get('equipe')
+    marca = request.form.get('marca')
+    familia = request.form.get('familia')
+    data_inicio = request.form.get('data_inicio')
+    data_fim = request.form.get('data_fim')
+    
+    # Construir query com filtros
+    query = VendaEvento.query
+    
+    if cliente and cliente != 'todos':
+        query = query.filter(VendaEvento.cliente_nome == cliente)
+    
+    if vendedor and vendedor != 'todos':
+        query = query.filter(VendaEvento.vendedor == vendedor)
+    
+    if equipe and equipe != 'todos':
+        query = query.filter(VendaEvento.equipe == equipe)
+    
+    if marca and marca != 'todos':
+        query = query.filter(VendaEvento.marca == marca)
+    
+    if familia and familia != 'todos':
+        query = query.filter(VendaEvento.familia == familia)
+    
+    if data_inicio:
+        try:
+            data_inicio_dt = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+            query = query.filter(VendaEvento.data_emissao >= data_inicio_dt)
+        except:
+            pass
+    
+    if data_fim:
+        try:
+            data_fim_dt = datetime.strptime(data_fim, '%Y-%m-%d').date()
+            query = query.filter(VendaEvento.data_emissao <= data_fim_dt)
+        except:
+            pass
+    
+    # Ordenar por data
+    query = query.order_by(VendaEvento.data_emissao.desc())
+    
+    # Buscar todas as vendas
+    vendas = query.all()
+    
+    # Preparar dados para exportação
+    data = []
+    for venda in vendas:
+        data.append({
+            'DATA_EMISSAO': venda.data_emissao.strftime('%d/%m/%Y'),
+            'CLIENTE_NOME': venda.cliente_nome,
+            'VENDEDOR': venda.vendedor,
+            'EQUIPE': venda.equipe,
+            'DESCRICAO_PRODUTO': venda.descricao_produto,
+            'MARCA': venda.marca,
+            'FAMILIA': venda.familia or 'N/A',
+            'VALOR_UNITARIO': float(venda.valor_produtos),
+            'QUANTIDADE': venda.quantidade,
+            'VALOR_TOTAL': float(venda.valor_total)
+        })
+    
+    output = export_to_excel(data, 'vendas_filtradas.xlsx', 'Vendas Filtradas')
+    
+    # Registrar log
+    registrar_log('exportacao_vendas_filtradas', 'exportacao', {
+        'quantidade_vendas': len(vendas),
+        'filtros_aplicados': {
+            'cliente': cliente,
+            'vendedor': vendedor,
+            'equipe': equipe,
+            'marca': marca,
+            'familia': familia,
+            'data_inicio': data_inicio,
+            'data_fim': data_fim
+        }
+    })
+    
+    return send_file(
+        output,
+        download_name='vendas_filtradas_ro_experience.xlsx',
+        as_attachment=True,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+@app.route('/download-template-vendas')
+@login_required
+def download_template_vendas():
+    """Download do template para importação de vendas"""
+    data = [
+        {
+            'DATA_EMISSAO': '15/10/2025',
+            'CLIENTE_NOME': 'Empresa ABC Ltda',
+            'VENDEDOR': 'João Silva',
+            'EQUIPE': 'Equipe Sul',
+            'DESCRICAO_PRODUTO': 'Produto X Premium',
+            'MARCA': 'Marca A',
+            'VALOR_PRODUTOS': '1500.00',
+            'QUANTIDADE': '2',
+            'FAMILIA': 'Premium'
+        },
+        {
+            'DATA_EMISSAO': '15/10/2025',
+            'CLIENTE_NOME': 'Comércio XYZ S/A',
+            'VENDEDOR': 'Maria Santos',
+            'EQUIPE': 'Equipe Norte',
+            'DESCRICAO_PRODUTO': 'Produto Y Standard',
+            'MARCA': 'Marca B',
+            'VALOR_PRODUTOS': '800.50',
+            'QUANTIDADE': '5',
+            'FAMILIA': 'Standard'
+        },
+        {
+            'DATA_EMISSAO': '16/10/2025',
+            'CLIENTE_NOME': 'Empresa ABC Ltda',
+            'VENDEDOR': 'João Silva',
+            'EQUIPE': 'Equipe Sul',
+            'DESCRICAO_PRODUTO': 'Produto Z Basic',
+            'MARCA': 'Marca A',
+            'VALOR_PRODUTOS': '300.00',
+            'QUANTIDADE': '10',
+            'FAMILIA': 'Basic'
+        }
+    ]
+    
+    output = export_to_excel(data, 'template_vendas_ro_experience.xlsx', 'Template Vendas')
+    
+    return send_file(
+        output,
+        download_name='template_vendas_ro_experience.xlsx',
+        as_attachment=True,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 if __name__ == '__main__':
     with app.app_context():

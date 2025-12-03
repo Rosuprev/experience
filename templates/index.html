@@ -200,6 +200,35 @@
                     </div>
                     {% endif %}
 
+                    <!-- Adicione estes botões onde for apropriado -->
+<div class="row">
+    <!-- Botão Análise de Vendas -->
+    {% if tem_permissao('analise_vendas') %}
+    <div class="col-xl-2 col-md-3 col-4 mb-3">
+        <a href="{{ url_for('analise_vendas') }}" class="card menu-card-standard text-decoration-none h-100">
+            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                <div class="menu-icon text-primary mb-2">📊</div>
+                <h6 class="menu-title text-dark fw-bold mb-1">Análise de Vendas</h6>
+                <small class="menu-desc text-muted">Dashboard pós-evento</small>
+            </div>
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Botão Importar Vendas -->
+    {% if tem_permissao('importacao_vendas') %}
+    <div class="col-xl-2 col-md-3 col-4 mb-3">
+        <a href="{{ url_for('importar_vendas_evento') }}" class="card menu-card-standard text-decoration-none h-100">
+            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                <div class="menu-icon text-success mb-2">📥</div>
+                <h6 class="menu-title text-dark fw-bold mb-1">Importar Vendas</h6>
+                <small class="menu-desc text-muted">Dados históricos</small>
+            </div>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
                     <!-- Estoque Público (sempre visível) -->
                     <div class="col-xl-2 col-md-3 col-4 mb-3">
                         <a href="{{ url_for('estoque_publico') }}" class="card menu-card-standard text-decoration-none h-100">
