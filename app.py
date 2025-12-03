@@ -2941,22 +2941,20 @@ def importar_vendas_evento():
                     return redirect(request.url)
                 
                 vendas_importadas = 0
-                vendas_atualizadas = 0
                 erros = []
                 
+                # REMOVER VERIFICAÇÃO DE DUPLICATAS - SEMPRE IMPORTA COMO NOVO
                 for i, row in enumerate(data, 1):
                     try:
                         # Converter data
                         data_str = str(row.get('DATA_EMISSAO', ''))
                         if data_str:
                             try:
-                                # Tentar diferentes formatos de data
                                 if '-' in data_str:
                                     data_emissao = datetime.strptime(data_str, '%Y-%m-%d').date()
                                 elif '/' in data_str:
                                     data_emissao = datetime.strptime(data_str, '%d/%m/%Y').date()
                                 else:
-                                    # Tentar como timestamp
                                     data_emissao = datetime.fromtimestamp(float(data_str)).date()
                             except:
                                 data_emissao = agora().date()
@@ -2971,7 +2969,7 @@ def importar_vendas_evento():
                         marca = str(row.get('MARCA', '')).strip()
                         familia = str(row.get('FAMILIA', '')).strip() if row.get('FAMILIA') else None
                         
-                        # Converter valores numéricos - AGORA valor_produtos é o TOTAL
+                        # Converter valores numéricos
                         try:
                             valor_produtos = float(str(row.get('VALOR_PRODUTOS', '0')).replace(',', '.'))
                         except:
@@ -2982,41 +2980,29 @@ def importar_vendas_evento():
                         except:
                             quantidade = 1
                         
-                        # AGORA: valor_total é igual a valor_produtos (já é o total)
-                        valor_total = valor_produtos  # Não multiplica mais!
+                        # Valor total = valor_produtos (já é o total)
+                        valor_total = valor_produtos
                         
-                        # Verificar se já existe (para evitar duplicatas)
-                        venda_existente = VendaEvento.query.filter_by(
+                        # SEMPRE CRIAR NOVO REGISTRO - SEM VERIFICAR SE JÁ EXISTE
+                        venda = VendaEvento(
                             data_emissao=data_emissao,
                             cliente_nome=cliente_nome,
+                            vendedor=vendedor,
+                            equipe=equipe,
                             descricao_produto=descricao,
+                            marca=marca,
                             valor_produtos=valor_produtos,
-                            quantidade=quantidade  # Também verifica quantidade
-                        ).first()
+                            quantidade=quantidade,
+                            familia=familia,
+                            valor_total=valor_total,
+                            importado_por=session.get('nome', 'Sistema')
+                        )
+                        db.session.add(venda)
+                        vendas_importadas += 1
                         
-                        if venda_existente:
-                            # Atualizar se existir
-                            venda_existente.marca = marca
-                            venda_existente.familia = familia
-                            venda_existente.valor_total = valor_total  # Atualiza valor_total também
-                            vendas_atualizadas += 1
-                        else:
-                            # Criar nova venda
-                            venda = VendaEvento(
-                                data_emissao=data_emissao,
-                                cliente_nome=cliente_nome,
-                                vendedor=vendedor,
-                                equipe=equipe,
-                                descricao_produto=descricao,
-                                marca=marca,
-                                valor_produtos=valor_produtos,
-                                quantidade=quantidade,
-                                familia=familia,
-                                valor_total=valor_total,  # Já é o valor total
-                                importado_por=session.get('nome', 'Sistema')
-                            )
-                            db.session.add(venda)
-                            vendas_importadas += 1
+                        # Log a cada 100 registros para monitorar progresso
+                        if vendas_importadas % 100 == 0:
+                            print(f"📊 Processados {vendas_importadas} registros...")
                             
                     except Exception as e:
                         erros.append(f'Linha {i}: {str(e)}')
@@ -3027,15 +3013,14 @@ def importar_vendas_evento():
                 # Registrar log
                 registrar_log('importacao_vendas_evento', 'importacao_vendas', {
                     'vendas_importadas': vendas_importadas,
-                    'vendas_atualizadas': vendas_atualizadas,
                     'total_linhas': len(data),
                     'erros': len(erros),
-                    'arquivo': file.filename
+                    'arquivo': file.filename,
+                    'tipo': 'importacao_completa_novos_registros'
                 })
                 
                 mensagem = f'✅ Importação concluída!<br>'
-                mensagem += f'📊 {vendas_importadas} novas vendas importadas<br>'
-                mensagem += f'🔄 {vendas_atualizadas} vendas atualizadas<br>'
+                mensagem += f'📊 {vendas_importadas} vendas importadas<br>'
                 mensagem += f'📈 Total processado: {len(data)} linhas'
                 
                 if erros:
