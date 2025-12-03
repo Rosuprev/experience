@@ -1,392 +1,244 @@
-<!-- templates/analise_vendas.html -->
 {% extends "base.html" %}
 
 {% block content %}
 <!-- Header do Dashboard de Análise -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card bg-gradient-primary text-white shadow-lg">
-            <div class="card-body d-flex align-items-center py-4">
-                <div class="me-3">
-                    <i class="fas fa-chart-bar fa-3x opacity-75"></i>
-                </div>
-                <div>
-                    <h1 class="h2 mb-2 fw-bold">📊 Análise de Vendas Power BI</h1>
-                    <p class="lead mb-0 opacity-90">Dashboard completo com análise de vendas e métricas de desempenho</p>
-                </div>
+        <div class="card bg-primary-custom text-white">
+            <div class="card-body text-center py-4">
+                <h1 class="display-5 mb-2">📊 Análise de Vendas - Evento 2025</h1>
+                <p class="lead mb-0">Dashboard completo com métricas de vendas, capilaridade e análise por marca</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Botões de Ação Rápida - Estilo Power BI -->
+<!-- Painel de Filtros -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white py-3">
-                <h6 class="mb-0 fw-bold">⚡ Ações Rápidas</h6>
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">🔍 Filtros de Análise</h6>
             </div>
             <div class="card-body">
-                <div class="row">
-                    {% if tem_permissao('importacao_vendas') %}
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('importar_vendas_evento') }}" class="card menu-card-powerbi text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon-powerbi text-success mb-2"><i class="fas fa-file-upload fa-2x"></i></div>
-                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Nova Importação</h6>
-                                <small class="menu-desc-powerbi text-muted">Adicionar dados</small>
-                            </div>
-                        </a>
+                <div class="row g-3">
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" id="filtroCliente">
+                            <option value="todos">Todos os Clientes</option>
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente }}">{{ cliente }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    {% endif %}
-                    
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="#" class="card menu-card-powerbi text-decoration-none h-100" id="btnExportarAnalise">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon-powerbi text-warning mb-2"><i class="fas fa-file-export fa-2x"></i></div>
-                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Exportar Relatório</h6>
-                                <small class="menu-desc-powerbi text-muted">Dados filtrados</small>
-                            </div>
-                        </a>
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">Vendedor</label>
+                        <select class="form-select" id="filtroVendedor">
+                            <option value="todos">Todos os Vendedores</option>
+                            {% for vendedor in vendedores %}
+                            <option value="{{ vendedor }}">{{ vendedor }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="#" class="card menu-card-powerbi text-decoration-none h-100" id="btnResetarFiltros">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon-powerbi text-danger mb-2"><i class="fas fa-redo fa-2x"></i></div>
-                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Limpar Filtros</h6>
-                                <small class="menu-desc-powerbi text-muted">Restaurar visual</small>
-                            </div>
-                        </a>
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">Marca</label>
+                        <select class="form-select" id="filtroMarca">
+                            <option value="todos">Todas as Marcas</option>
+                            {% for marca in marcas %}
+                            <option value="{{ marca }}">{{ marca }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('relatorios') }}" class="card menu-card-powerbi text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon-powerbi text-purple mb-2"><i class="fas fa-chart-pie fa-2x"></i></div>
-                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Relatórios</h6>
-                                <small class="menu-desc-powerbi text-muted">Análises gerais</small>
-                            </div>
-                        </a>
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">Equipe</label>
+                        <select class="form-select" id="filtroEquipe">
+                            <option value="todos">Todas as Equipes</option>
+                            {% for equipe in equipes %}
+                            <option value="{{ equipe }}">{{ equipe }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <button class="card menu-card-powerbi text-decoration-none h-100 border-0 w-100 p-0" id="btnRecarregarDados">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon-powerbi text-info mb-2"><i class="fas fa-sync fa-2x"></i></div>
-                                <h6 class="menu-title-powerbi text-dark fw-bold mb-1">Recarregar</h6>
-                                <small class="menu-desc-powerbi text-muted">Atualizar dados</small>
-                            </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">Família</label>
+                        <select class="form-select" id="filtroFamilia">
+                            <option value="todos">Todas as Famílias</option>
+                            {% for familia in familias %}
+                            <option value="{{ familia }}">{{ familia }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="filtroDataInicio" value="{{ min_date }}">
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="filtroDataFim" value="{{ max_date }}">
+                    </div>
+                    <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
+                            🔄 Aplicar Filtros
                         </button>
                     </div>
                 </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-outline-primary" onclick="exportarParaExcel()">
+                                📥 Exportar Excel
+                            </button>
+                            <button class="btn btn-outline-success" onclick="exportarParaPDF()">
+                                📊 Exportar PDF/Imagem
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="resetarFiltros()">
+                                🗑️ Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Linha de KPI Cards - Estilo Power BI -->
+<!-- Métricas Consolidadas -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="row g-3" id="kpiRow">
-            <!-- KPI Cards serão atualizados via JavaScript -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">📈 Métricas Consolidadas</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <!-- Total de Vendas (Valor) -->
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-body py-3">
+                                <h4 class="text-primary mb-1" id="totalValorVendas">R$ 0</h4>
+                                <small class="text-muted">Total Vendas (Valor)</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total de NFs -->
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-body py-3">
+                                <h4 class="text-success mb-1" id="totalNFs">0</h4>
+                                <small class="text-muted">Total de NFs</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total de Itens -->
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-body py-3">
+                                <h4 class="text-info mb-1" id="totalItens">0</h4>
+                                <small class="text-muted">Total de Itens</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Consultor Top -->
+                    <div class="col-xl-3 col-md-6 mb-3">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-body py-3">
+                                <h5 class="text-warning mb-1" id="topConsultor">N/A</h5>
+                                <small class="text-muted">Consultor que mais vendeu (Valor)</small>
+                                <div class="mt-1">
+                                    <small id="topConsultorValor">R$ 0</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Revenda Top -->
+                    <div class="col-xl-3 col-md-6 mb-3">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-body py-3">
+                                <h5 class="text-purple mb-1" id="topRevenda">N/A</h5>
+                                <small class="text-muted">Revenda que mais comprou (Valor)</small>
+                                <div class="mt-1">
+                                    <small id="topRevendaValor">R$ 0</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Distribuição por Marca -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6 class="mb-3">💰 Distribuição por Marca (Valor)</h6>
+                        <div id="chartMarcas" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Filtros Sidebar + Conteúdo Principal -->
+<!-- Análise de Capilaridade -->
 <div class="row mb-4">
-    <!-- Sidebar de Filtros -->
-    <div class="col-lg-3 col-md-4 mb-4">
+    <!-- Capilaridade Geral -->
+    <div class="col-lg-6 mb-4">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-gradient-dark text-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-filter me-2"></i>Filtros</h6>
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">🌐 Capilaridade Geral</h6>
             </div>
             <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">CLIENTE</label>
-                    <select class="form-select form-select-sm" id="filtroCliente">
-                        <option value="todos">Todos os Clientes</option>
-                        {% for cliente in clientes %}
-                        <option value="{{ cliente }}">{{ cliente }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <h5 class="text-info" id="capClientes">0</h5>
+                        <small class="text-muted">Clientes</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-success" id="capVendedores">0</h5>
+                        <small class="text-muted">Vendedores</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-warning" id="capMarcas">0</h5>
+                        <small class="text-muted">Marcas</small>
+                    </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">VENDEDOR</label>
-                    <select class="form-select form-select-sm" id="filtroVendedor">
-                        <option value="todos">Todos os Vendedores</option>
-                        {% for vendedor in vendedores %}
-                        <option value="{{ vendedor }}">{{ vendedor }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <h5 class="text-secondary" id="capMediaItensNF">0.0</h5>
+                        <small class="text-muted">Média Itens/NF</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-secondary" id="capMediaValorNF">R$ 0</h5>
+                        <small class="text-muted">Média Valor/NF</small>
+                    </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">MARCA</label>
-                    <select class="form-select form-select-sm" id="filtroMarca">
-                        <option value="todos">Todas as Marcas</option>
-                        {% for marca in marcas %}
-                        <option value="{{ marca }}">{{ marca }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">EQUIPE</label>
-                    <select class="form-select form-select-sm" id="filtroEquipe">
-                        <option value="todos">Todas as Equipes</option>
-                        {% for equipe in equipes %}
-                        <option value="{{ equipe }}">{{ equipe }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">FAMÍLIA</label>
-                    <select class="form-select form-select-sm" id="filtroFamilia">
-                        <option value="todos">Todas as Famílias</option>
-                        {% for familia in familias %}
-                        <option value="{{ familia }}">{{ familia }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">DATA INÍCIO</label>
-                    <input type="date" class="form-control form-control-sm" id="filtroDataInicio" 
-                           value="{{ min_date.strftime('%Y-%m-%d') if min_date else '' }}">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">DATA FIM</label>
-                    <input type="date" class="form-control form-control-sm" id="filtroDataFim"
-                           value="{{ max_date.strftime('%Y-%m-%d') if max_date else '' }}">
-                </div>
-                
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary btn-sm fw-bold" id="btnAplicarFiltros">
-                        <i class="fas fa-filter me-1"></i>Aplicar Filtros
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm" id="btnLimparFiltros">
-                        <i class="fas fa-times me-1"></i>Limpar Filtros
-                    </button>
-                    <button class="btn btn-success btn-sm fw-bold" id="btnExportarExcel">
-                        <i class="fas fa-file-excel me-1"></i>Exportar Excel
-                    </button>
-                </div>
+                <div id="chartCapilaridadeGeral" style="height: 200px;"></div>
             </div>
         </div>
     </div>
     
-    <!-- Conteúdo Principal -->
-    <div class="col-lg-9 col-md-8">
-        <!-- Top Performers -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="card border-0 shadow-sm h-100 hover-lift">
-                    <div class="card-header bg-gradient-success text-white py-3">
-                        <h6 class="mb-0 fw-bold"><i class="fas fa-trophy me-2"></i>Maior Nota Fiscal</h6>
-                    </div>
-                    <div class="card-body text-center py-4" id="maiorNF">
-                        <div class="placeholder-content">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <p class="text-muted">Carregando...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-3">
-                <div class="card border-0 shadow-sm h-100 hover-lift">
-                    <div class="card-header bg-gradient-primary text-white py-3">
-                        <h6 class="mb-0 fw-bold"><i class="fas fa-crown me-2"></i>Cliente Top (NFs)</h6>
-                    </div>
-                    <div class="card-body text-center py-4" id="clienteTop">
-                        <div class="placeholder-content">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <p class="text-muted">Carregando...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-3">
-                <div class="card border-0 shadow-sm h-100 hover-lift">
-                    <div class="card-header bg-gradient-warning text-white py-3">
-                        <h6 class="mb-0 fw-bold"><i class="fas fa-star me-2"></i>Vendedor Top (NFs)</h6>
-                    </div>
-                    <div class="card-body text-center py-4" id="vendedorTop">
-                        <div class="placeholder-content">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <p class="text-muted">Carregando...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEÇÃO DE CAPILARIDADE -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-gradient-purple text-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-sitemap me-2"></i>Análise de Capilaridade</h6>
-                <small class="opacity-75">Distribuição de vendas por cliente, vendedor e marca</small>
+    <!-- Capilaridade por Marca -->
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">🏷️ Capilaridade por Marca</h6>
             </div>
             <div class="card-body">
-                
-                <!-- Abas de Navegação -->
-                <ul class="nav nav-tabs nav-tabs-powerbi mb-4" id="capilaridadeTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="tab-clientes" data-bs-toggle="tab" data-bs-target="#clientes-tab" type="button" role="tab">
-                            <i class="fas fa-building me-1"></i> Por Cliente
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-vendedores" data-bs-toggle="tab" data-bs-target="#vendedores-tab" type="button" role="tab">
-                            <i class="fas fa-user-tie me-1"></i> Por Vendedor
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-marcas" data-bs-toggle="tab" data-bs-target="#marcas-tab" type="button" role="tab">
-                            <i class="fas fa-tag me-1"></i> Por Marca
-                        </button>
-                    </li>
-                </ul>
-                
-                <!-- Conteúdo das Abas -->
-                <div class="tab-content" id="capilaridadeContent">
-                    
-                    <!-- Tab Clientes -->
-                    <div class="tab-pane fade show active" id="clientes-tab" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-gradient-success text-white py-3">
-                                        <h6 class="mb-0 fw-bold">📋 Estatísticas por Cliente</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-hover table-striped" id="tabelaClientes">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Cliente</th>
-                                                        <th class="text-end">NFs</th>
-                                                        <th class="text-end">Valor</th>
-                                                        <th class="text-end">Itens</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="corpoTabelaClientes">
-                                                    <!-- Carregado via JavaScript -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-gradient-info text-white py-3">
-                                        <h6 class="mb-0 fw-bold">📈 Métricas de Diversificação</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row text-center" id="metricasClientes">
-                                            <!-- Carregado via JavaScript -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Tab Vendedores -->
-                    <div class="tab-pane fade" id="vendedores-tab" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-gradient-primary text-white py-3">
-                                        <h6 class="mb-0 fw-bold">👥 Desempenho por Vendedor</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-hover table-striped" id="tabelaVendedores">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Vendedor</th>
-                                                        <th>Equipe</th>
-                                                        <th class="text-end">NFs</th>
-                                                        <th class="text-end">Clientes</th>
-                                                        <th class="text-end">Valor</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="corpoTabelaVendedores">
-                                                    <!-- Carregado via JavaScript -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-gradient-warning text-white py-3">
-                                        <h6 class="mb-0 fw-bold">📊 Eficiência Comercial</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row text-center" id="metricasVendedores">
-                                            <!-- Carregado via JavaScript -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Tab Marcas -->
-                    <div class="tab-pane fade" id="marcas-tab" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-gradient-purple text-white py-3">
-                                        <h6 class="mb-0 fw-bold">🏷️ Performance por Marca</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-hover table-striped" id="tabelaMarcas">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Marca</th>
-                                                        <th class="text-end">NFs</th>
-                                                        <th class="text-end">Clientes</th>
-                                                        <th class="text-end">Valor</th>
-                                                        <th class="text-end">Participação</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="corpoTabelaMarcas">
-                                                    <!-- Carregado via JavaScript -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-0 bg-light h-100">
-                                    <div class="card-header bg-gradient-danger text-white py-3">
-                                        <h6 class="mb-0 fw-bold">📈 Penetração de Mercado</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row text-center" id="metricasMarcas">
-                                            <!-- Carregado via JavaScript -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Marca</th>
+                                <th>NFs</th>
+                                <th>Clientes</th>
+                                <th>Vendedores</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCapilaridadeMarca">
+                            <!-- Dados serão preenchidos via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -397,61 +249,134 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-gradient-dark text-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i>Análise Detalhada por Marca</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-muted">Selecione uma Marca para Análise:</label>
-                        <select class="form-select form-select-sm" id="selecaoMarcaDetalhes">
-                            <option value="">Selecione uma marca...</option>
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">📊 Análise por Marca</h6>
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="selecionarMarca" onchange="carregarAnaliseMarca(this.value)">
+                            <option value="">Selecione uma marca</option>
                             {% for marca in marcas %}
                             <option value="{{ marca }}">{{ marca }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-8">
-                        <div class="alert alert-info alert-powerbi mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Selecione uma marca para ver análise detalhada com top clientes, vendedores e produtos específicos.
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Métricas da Marca Selecionada -->
+                <div class="row mb-4" id="metricasMarca">
+                    <!-- Dados serão preenchidos via JS -->
+                </div>
+                
+                <div class="row">
+                    <!-- Top Itens Vendidos -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">🏆 Top Itens Vendidos</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Produto</th>
+                                                <th>NFs</th>
+                                                <th>Qtd</th>
+                                                <th>Valor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaTopItens">
+                                            <!-- Dados serão preenchidos via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Consultores -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">👥 Top Consultores</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Consultor</th>
+                                                <th>NFs</th>
+                                                <th>Clientes</th>
+                                                <th>Valor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaTopConsultores">
+                                            <!-- Dados serão preenchidos via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div id="analiseMarcaDetalhada" style="display: none;">
-                    <!-- Conteúdo carregado via JavaScript -->
+                <div class="row">
+                    <!-- Top Clientes -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">🏢 Top Clientes</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Cliente</th>
+                                                <th>NFs</th>
+                                                <th>Valor</th>
+                                                <th>Ticket Médio</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaTopClientes">
+                                            <!-- Dados serão preenchidos via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Distribuição por Família -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">📦 Distribuição por Família</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="chartDistribuicaoFamilia" style="height: 250px;"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tabela de Vendas Detalhadas -->
-<div class="row mb-4">
+<!-- Tabela Detalhada de Vendas -->
+<div class="row">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-gradient-dark text-white py-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i>Vendas Detalhadas</h6>
-                        <small class="opacity-75">Todos os itens vendidos com filtros aplicados</small>
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-light me-2" id="btnRefreshVendas">
-                            <i class="fas fa-sync-alt me-1"></i>Atualizar
-                        </button>
-                        <span class="badge bg-light text-dark">
-                            <i class="fas fa-database me-1"></i>
-                            <span id="totalRegistros">0</span> registros
-                        </span>
-                    </div>
-                </div>
+            <div class="card-header bg-dark text-white">
+                <h6 class="mb-0">📋 Vendas Detalhadas</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover table-sm" id="tabelaVendas">
-                        <thead class="table-light">
+                    <table class="table table-hover" id="tabelaVendas">
+                        <thead>
                             <tr>
                                 <th>NF</th>
                                 <th>Data</th>
@@ -461,1057 +386,717 @@
                                 <th>Produto</th>
                                 <th>Marca</th>
                                 <th>Família</th>
-                                <th class="text-end">Valor Total</th>
-                                <th class="text-center">Quantidade</th>
-                                <th class="text-end">Valor Unit.</th>
+                                <th>Qtd</th>
+                                <th>Valor Unit.</th>
+                                <th>Valor Total</th>
                             </tr>
                         </thead>
                         <tbody id="corpoTabelaVendas">
-                            <!-- Carregado via JavaScript -->
+                            <!-- Dados serão preenchidos via JS -->
                         </tbody>
                     </table>
                 </div>
-                
                 <!-- Paginação -->
-                <nav aria-label="Paginação" id="paginacao" class="mt-3">
-                    <!-- Carregado via JavaScript -->
-                </nav>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">Itens por página:</span>
+                            <select class="form-select form-select-sm w-auto" id="itensPorPagina" onchange="carregarVendasFiltradas()">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <nav aria-label="Paginação">
+                            <ul class="pagination justify-content-end" id="paginacao">
+                                <!-- Paginação será gerada via JS -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- JavaScript -->
+<!-- Botão Voltar -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-primary-custom btn-lg">
+            🏠 Voltar para Página Inicial
+        </a>
+    </div>
+</div>
+
+<!-- Modal para Exportação -->
+<div class="modal fade" id="modalExportacao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📤 Exportar Relatório</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Formato de Exportação</label>
+                    <select class="form-select" id="formatoExportacao">
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF Documento</option>
+                        <option value="png">Imagem PNG</option>
+                        <option value="jpg">Imagem JPG</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Qualidade da Imagem</label>
+                    <select class="form-select" id="qualidadeImagem">
+                        <option value="1">Baixa</option>
+                        <option value="2">Média</option>
+                        <option value="3" selected>Alta</option>
+                    </select>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="incluirFiltros">
+                    <label class="form-check-label">Incluir configurações de filtros</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarExportacao()">Exportar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
 // Variáveis globais
+let vendasFiltradas = [];
 let paginaAtual = 1;
-let totalPaginas = 1;
+let itensPorPagina = 50;
+let graficoMarcas = null;
+let graficoCapilaridadeGeral = null;
+let graficoDistribuicaoFamilia = null;
 
-// ========== FUNÇÕES PRINCIPAIS ==========
-
-// Função para carregar todas as métricas
-async function carregarTodasMetricas() {
-    try {
-        // Carregar métricas gerais
-        await carregarMetricasGerais();
-        
-        // Carregar dados de capilaridade
-        await carregarCapilaridade();
-        
-        // Carregar vendas detalhadas
-        await carregarVendas(1);
-        
-    } catch (error) {
-        console.error('Erro ao carregar métricas:', error);
-        mostrarErro('Erro ao carregar dados. Tente novamente.');
-    }
-}
-
-// Função para carregar métricas gerais
-async function carregarMetricasGerais() {
-    try {
-        const response = await fetch('/api/metricas-vendas');
-        const data = await response.json();
-        
-        // Atualizar métricas gerais
-        atualizarKPIs(data);
-        
-        // Atualizar top performers
-        atualizarTopPerformers(data);
-        
-    } catch (error) {
-        console.error('Erro ao carregar métricas gerais:', error);
-        document.getElementById('kpiRow').innerHTML = `
-            <div class="col-12 text-center py-4 text-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar métricas
-            </div>
-        `;
-    }
-}
-
-// Atualizar KPI cards
-function atualizarKPIs(data) {
-    const kpiTemplates = [
-        {
-            bg: 'linear-gradient(135deg, #2c3e50 0%, #4a6491 100%)',
-            icon: 'fas fa-file-invoice',
-            value: data.totais_por_nf.total_nfs.toLocaleString('pt-BR'),
-            label: 'Total de NFs'
-        },
-        {
-            bg: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)',
-            icon: 'fas fa-money-bill-wave',
-            value: 'R$ ' + data.totais_por_nf.total_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2}),
-            label: 'Valor Total'
-        },
-        {
-            bg: 'linear-gradient(135deg, #2980b9 0%, #3498db 100%)',
-            icon: 'fas fa-boxes',
-            value: data.totais_por_nf.total_itens.toLocaleString('pt-BR'),
-            label: 'Itens Vendidos'
-        },
-        {
-            bg: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)',
-            icon: 'fas fa-users',
-            value: data.estatisticas_gerais ? data.estatisticas_gerais.total_clientes.toLocaleString('pt-BR') : '0',
-            label: 'Clientes Únicos'
-        },
-        {
-            bg: 'linear-gradient(135deg, #d35400 0%, #e67e22 100%)',
-            icon: 'fas fa-shopping-cart',
-            value: data.totais_por_nf.media_itens_por_nf.toFixed(1),
-            label: 'Média Itens/NF'
-        },
-        {
-            bg: 'linear-gradient(135deg, #c0392b 0%, #e74c3c 100%)',
-            icon: 'fas fa-chart-line',
-            value: 'R$ ' + data.totais_por_nf.media_valor_por_nf.toLocaleString('pt-BR', {minimumFractionDigits: 2}),
-            label: 'Média Valor/NF'
-        }
-    ];
+// Inicializar dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    carregarMetricasConsolidadas();
+    carregarCapilaridade();
+    carregarVendasFiltradas();
     
-    let kpiHTML = '';
-    kpiTemplates.forEach((kpi, index) => {
-        kpiHTML += `
-            <div class="col-xl-2 col-md-4 col-6">
-                <div class="card kpi-card shadow-sm border-0" style="background: ${kpi.bg}">
-                    <div class="card-body text-center p-3">
-                        <div class="kpi-icon text-white mb-2">
-                            <i class="${kpi.icon} fa-2x"></i>
-                        </div>
-                        <h3 class="kpi-value text-white mb-1">${kpi.value}</h3>
-                        <p class="kpi-label text-white-50 mb-0">${kpi.label}</p>
+    // Atualizar automaticamente a cada 30 segundos
+    setInterval(carregarMetricasConsolidadas, 30000);
+    setInterval(carregarCapilaridade, 30000);
+});
+
+// Função para aplicar filtros
+function aplicarFiltros() {
+    paginaAtual = 1;
+    carregarMetricasConsolidadas();
+    carregarCapilaridade();
+    carregarVendasFiltradas();
+}
+
+// Função para resetar filtros
+function resetarFiltros() {
+    document.getElementById('filtroCliente').value = 'todos';
+    document.getElementById('filtroVendedor').value = 'todos';
+    document.getElementById('filtroMarca').value = 'todos';
+    document.getElementById('filtroEquipe').value = 'todos';
+    document.getElementById('filtroFamilia').value = 'todos';
+    document.getElementById('filtroDataInicio').value = '{{ min_date }}';
+    document.getElementById('filtroDataFim').value = '{{ max_date }}';
+    paginaAtual = 1;
+    aplicarFiltros();
+}
+
+// Carregar métricas consolidadas
+function carregarMetricasConsolidadas() {
+    const filtros = obterFiltros();
+    
+    fetch('/api/metricas-vendas-filtradas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filtros)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Atualizar métricas
+        document.getElementById('totalValorVendas').textContent = 
+            'R$ ' + (data.totais_por_nf?.total_valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        document.getElementById('totalNFs').textContent = data.totais_por_nf?.total_nfs || 0;
+        document.getElementById('totalItens').textContent = data.totais_por_nf?.total_itens || 0;
+        
+        // Top consultor
+        if (data.vendedores?.maior_valor) {
+            document.getElementById('topConsultor').textContent = data.vendedores.maior_valor.nome;
+            document.getElementById('topConsultorValor').textContent = 
+                'R$ ' + data.vendedores.maior_valor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+        
+        // Top revenda
+        if (data.clientes?.maior_valor) {
+            document.getElementById('topRevenda').textContent = data.clientes.maior_valor.nome;
+            document.getElementById('topRevendaValor').textContent = 
+                'R$ ' + data.clientes.maior_valor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+        
+        // Criar gráfico de marcas
+        criarGraficoMarcas(data.marcas_por_nf || []);
+    })
+    .catch(error => {
+        console.error('Erro ao carregar métricas:', error);
+    });
+}
+
+// Carregar capilaridade
+function carregarCapilaridade() {
+    const filtros = obterFiltros();
+    
+    fetch('/api/capilaridade-vendas-filtradas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filtros)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Atualizar métricas de capilaridade
+        document.getElementById('capClientes').textContent = data.estatisticas_gerais?.total_clientes || 0;
+        document.getElementById('capVendedores').textContent = data.estatisticas_gerais?.total_vendedores || 0;
+        document.getElementById('capMarcas').textContent = data.estatisticas_gerais?.total_marcas || 0;
+        document.getElementById('capMediaItensNF').textContent = 
+            (data.estatisticas_gerais?.media_itens_por_nf || 0).toFixed(1);
+        document.getElementById('capMediaValorNF').textContent = 
+            'R$ ' + (data.estatisticas_gerais?.media_valor_por_nf || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        
+        // Atualizar tabela de capilaridade por marca
+        atualizarTabelaCapilaridadeMarca(data.capilaridade_marca || []);
+        
+        // Criar gráfico de capilaridade geral
+        criarGraficoCapilaridadeGeral(data);
+    })
+    .catch(error => {
+        console.error('Erro ao carregar capilaridade:', error);
+    });
+}
+
+// Carregar análise de marca específica
+function carregarAnaliseMarca(marca) {
+    if (!marca) return;
+    
+    fetch(`/api/analise-marca-filtrada/${marca}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(obterFiltros())
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Atualizar métricas da marca
+        const metricasHtml = `
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body text-center py-3">
+                        <h5 class="text-primary mb-1">${data.dados_gerais?.total_nfs || 0}</h5>
+                        <small class="text-muted">NFs da Marca</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body text-center py-3">
+                        <h5 class="text-success mb-1">R$ ${(data.dados_gerais?.total_valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                        <small class="text-muted">Valor Total</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body text-center py-3">
+                        <h5 class="text-warning mb-1">${data.dados_gerais?.total_quantidade || 0}</h5>
+                        <small class="text-muted">Quantidade Total</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body text-center py-3">
+                        <h5 class="text-info mb-1">R$ ${(data.dados_gerais?.valor_medio_unitario || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                        <small class="text-muted">Ticket Médio</small>
                     </div>
                 </div>
             </div>
         `;
-    });
-    
-    document.getElementById('kpiRow').innerHTML = kpiHTML;
-    
-    // Aplicar animações
-    setTimeout(() => {
-        document.querySelectorAll('.kpi-card').forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-            card.classList.add('animate__animated', 'animate__fadeInUp');
-        });
-    }, 100);
-}
-
-// Atualizar top performers
-function atualizarTopPerformers(data) {
-    // Maior NF
-    document.getElementById('maiorNF').innerHTML = data.maior_nf.numero_nf ? `
-        <h5 class="text-success mb-2">NF ${data.maior_nf.numero_nf}</h5>
-        <p class="text-muted small mb-2">${data.maior_nf.cliente || 'Cliente não identificado'}</p>
-        <div class="display-6 text-primary mb-2">R$ ${data.maior_nf.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-        <div class="d-flex justify-content-around">
-            <div>
-                <h6 class="text-info">${data.maior_nf.itens}</h6>
-                <small class="text-muted">Itens</small>
-            </div>
-        </div>
-    ` : '<p class="text-muted">Nenhuma NF encontrada</p>';
-    
-    // Cliente Top
-    document.getElementById('clienteTop').innerHTML = data.clientes.maior_nfs.nome ? `
-        <h5 class="text-primary mb-2">${data.clientes.maior_nfs.nome}</h5>
-        <p class="text-muted small mb-2">Mais NFs emitidas</p>
-        <div class="d-flex justify-content-around mb-2">
-            <div>
-                <h4 class="text-success">${data.clientes.maior_nfs.nfs}</h4>
-                <small class="text-muted">NFs</small>
-            </div>
-            <div>
-                <h4 class="text-warning">R$ ${data.clientes.maior_nfs.valor.toLocaleString('pt-BR', {minimumFractionDigits: 0})}</h4>
-                <small class="text-muted">Valor</small>
-            </div>
-        </div>
-    ` : '<p class="text-muted">Nenhum cliente encontrado</p>';
-    
-    // Vendedor Top
-    document.getElementById('vendedorTop').innerHTML = data.vendedores.maior_nfs.nome ? `
-        <h5 class="text-warning mb-2">${data.vendedores.maior_nfs.nome}</h5>
-        <p class="text-muted small mb-2">Mais NFs emitidas</p>
-        <div class="d-flex justify-content-around mb-2">
-            <div>
-                <h4 class="text-info">${data.vendedores.maior_nfs.nfs}</h4>
-                <small class="text-muted">NFs</small>
-            </div>
-            <div>
-                <h4 class="text-success">${data.vendedores.maior_nfs.clientes}</h4>
-                <small class="text-muted">Clientes</small>
-            </div>
-        </div>
-    ` : '<p class="text-muted">Nenhum vendedor encontrado</p>';
-}
-
-// Função para carregar dados de capilaridade
-async function carregarCapilaridade() {
-    try {
-        const response = await fetch('/api/capilaridade-vendas');
-        const data = await response.json();
+        document.getElementById('metricasMarca').innerHTML = metricasHtml;
         
-        // Atualizar dados de capilaridade
-        atualizarCapilaridadeClientes(data);
-        atualizarCapilaridadeVendedores(data);
-        atualizarCapilaridadeMarcas(data);
+        // Atualizar tabelas
+        atualizarTabelaTopItens(data.top_produtos || []);
+        atualizarTabelaTopConsultores(data.top_vendedores || []);
+        atualizarTabelaTopClientes(data.top_clientes || []);
         
-    } catch (error) {
-        console.error('Erro ao carregar capilaridade:', error);
-    }
-}
-
-// Atualizar capilaridade por cliente
-function atualizarCapilaridadeClientes(data) {
-    const clientes = data.capilaridade_cliente || [];
-    
-    // Tabela de clientes
-    let tabelaHTML = '';
-    clientes.slice(0, 10).forEach(cliente => {
-        tabelaHTML += `
-            <tr>
-                <td>${cliente.cliente}</td>
-                <td class="text-end">${cliente.total_nfs}</td>
-                <td class="text-end">R$ ${cliente.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td class="text-end">${cliente.total_itens}</td>
-            </tr>
-        `;
+        // Criar gráfico de distribuição por família
+        criarGraficoDistribuicaoFamilia(data);
+    })
+    .catch(error => {
+        console.error('Erro ao carregar análise da marca:', error);
     });
-    
-    if (tabelaHTML === '') {
-        tabelaHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Nenhum dado encontrado</td></tr>';
-    }
-    
-    document.getElementById('corpoTabelaClientes').innerHTML = tabelaHTML;
-    
-    // Métricas de clientes
-    if (clientes.length > 0) {
-        document.getElementById('metricasClientes').innerHTML = `
-            <div class="col-6 mb-3">
-                <h5 class="text-primary">${clientes.length}</h5>
-                <small class="text-muted">Clientes Ativos</small>
-            </div>
-            <div class="col-6 mb-3">
-                <h5 class="text-success">${data.estatisticas_gerais ? data.estatisticas_gerais.media_itens_por_nf.toFixed(1) : '0'}</h5>
-                <small class="text-muted">Média Itens/NF</small>
-            </div>
-            <div class="col-6">
-                <h5 class="text-info">${clientes[0] ? clientes[0].marcas_diferentes : '0'}</h5>
-                <small class="text-muted">Marcas/Cliente (Top)</small>
-            </div>
-            <div class="col-6">
-                <h5 class="text-warning">${clientes[0] ? clientes[0].vendedores_diferentes : '0'}</h5>
-                <small class="text-muted">Vendedores/Cliente (Top)</small>
-            </div>
-        `;
-    } else {
-        document.getElementById('metricasClientes').innerHTML = `
-            <div class="col-12 text-center py-4 text-muted">
-                Nenhuma métrica disponível
-            </div>
-        `;
-    }
 }
 
-// Atualizar capilaridade por vendedor
-function atualizarCapilaridadeVendedores(data) {
-    const vendedores = data.capilaridade_vendedor || [];
+// Carregar vendas filtradas
+function carregarVendasFiltradas() {
+    const filtros = obterFiltros();
+    filtros.page = paginaAtual;
+    filtros.per_page = parseInt(document.getElementById('itensPorPagina').value);
     
-    // Tabela de vendedores
-    let tabelaHTML = '';
-    vendedores.slice(0, 10).forEach(vendedor => {
-        tabelaHTML += `
-            <tr>
-                <td>${vendedor.vendedor}</td>
-                <td><span class="badge bg-light text-dark">${vendedor.equipe}</span></td>
-                <td class="text-end">${vendedor.total_nfs}</td>
-                <td class="text-end">${vendedor.clientes_atendidos}</td>
-                <td class="text-end">R$ ${vendedor.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-            </tr>
-        `;
+    fetch('/api/vendas-filtradas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filtros)
+    })
+    .then(response => response.json())
+    .then(data => {
+        vendasFiltradas = data.vendas || [];
+        
+        // Atualizar tabela
+        atualizarTabelaVendas(vendasFiltradas);
+        
+        // Atualizar paginação
+        atualizarPaginacao(data.total_vendas || 0, data.page || 1, data.pages || 1);
+    })
+    .catch(error => {
+        console.error('Erro ao carregar vendas filtradas:', error);
     });
-    
-    if (tabelaHTML === '') {
-        tabelaHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Nenhum dado encontrado</td></tr>';
-    }
-    
-    document.getElementById('corpoTabelaVendedores').innerHTML = tabelaHTML;
-    
-    // Métricas de vendedores
-    if (vendedores.length > 0) {
-        document.getElementById('metricasVendedores').innerHTML = `
-            <div class="col-6 mb-3">
-                <h5 class="text-primary">${vendedores.length}</h5>
-                <small class="text-muted">Vendedores Ativos</small>
-            </div>
-            <div class="col-6 mb-3">
-                <h5 class="text-success">${vendedores[0] ? vendedores[0].marcas_vendidas : '0'}</h5>
-                <small class="text-muted">Marcas/Vendedor (Top)</small>
-            </div>
-            <div class="col-6">
-                <h5 class="text-info">${vendedores[0] ? vendedores[0].media_nfs_por_cliente.toFixed(1) : '0'}</h5>
-                <small class="text-muted">NFs/Cliente (Top)</small>
-            </div>
-            <div class="col-6">
-                <h5 class="text-warning">R$ ${vendedores[0] ? vendedores[0].media_valor_por_nf.toLocaleString('pt-BR', {minimumFractionDigits: 0}) : '0'}</h5>
-                <small class="text-muted">Valor Médio/NF (Top)</small>
-            </div>
-        `;
-    } else {
-        document.getElementById('metricasVendedores').innerHTML = `
-            <div class="col-12 text-center py-4 text-muted">
-                Nenhuma métrica disponível
-            </div>
-        `;
-    }
 }
 
-// Atualizar capilaridade por marca
-function atualizarCapilaridadeMarcas(data) {
-    const marcas = data.capilaridade_marca || [];
-    
-    // Tabela de marcas
-    let tabelaHTML = '';
-    marcas.slice(0, 10).forEach(marca => {
-        const participacao = ((marca.valor_total / data.estatisticas_gerais.total_valor) * 100).toFixed(1);
-        tabelaHTML += `
-            <tr>
-                <td><span class="badge bg-info">${marca.marca}</span></td>
-                <td class="text-end">${marca.total_nfs}</td>
-                <td class="text-end">${marca.clientes_diferentes}</td>
-                <td class="text-end">R$ ${marca.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td class="text-end"><span class="badge bg-success">${participacao}%</span></td>
-            </tr>
-        `;
-    });
-    
-    if (tabelaHTML === '') {
-        tabelaHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Nenhum dado encontrado</td></tr>';
-    }
-    
-    document.getElementById('corpoTabelaMarcas').innerHTML = tabelaHTML;
-    
-    // Métricas de marcas
-    if (marcas.length > 0) {
-        document.getElementById('metricasMarcas').innerHTML = `
-            <div class="col-6 mb-3">
-                <h5 class="text-primary">${marcas.length}</h5>
-                <small class="text-muted">Marcas Vendidas</small>
-            </div>
-            <div class="col-6 mb-3">
-                <h5 class="text-success">${marcas[0] ? marcas[0].clientes_diferentes : '0'}</h5>
-                <small class="text-muted">Clientes/Marca (Top)</small>
-            </div>
-            <div class="col-6">
-                <h5 class="text-info">${marcas[0] ? marcas[0].vendedores_diferentes : '0'}</h5>
-                <small class="text-muted">Vendedores/Marca (Top)</small>
-            </div>
-            <div class="col-6">
-                <h5 class="text-warning">${marcas[0] ? marcas[0].media_itens_por_nf.toFixed(1) : '0'}</h5>
-                <small class="text-muted">Itens/NF (Top)</small>
-            </div>
-        `;
-    } else {
-        document.getElementById('metricasMarcas').innerHTML = `
-            <div class="col-12 text-center py-4 text-muted">
-                Nenhuma métrica disponível
-            </div>
-        `;
-    }
-}
-
-// Função para carregar vendas detalhadas
-async function carregarVendas(pagina = 1) {
-    const filtros = {
+// Obter filtros atuais
+function obterFiltros() {
+    return {
         cliente: document.getElementById('filtroCliente').value,
         vendedor: document.getElementById('filtroVendedor').value,
-        equipe: document.getElementById('filtroEquipe').value,
         marca: document.getElementById('filtroMarca').value,
+        equipe: document.getElementById('filtroEquipe').value,
         familia: document.getElementById('filtroFamilia').value,
         data_inicio: document.getElementById('filtroDataInicio').value,
         data_fim: document.getElementById('filtroDataFim').value,
-        page: pagina,
-        per_page: 50
+        sort_by: 'data_emissao',
+        sort_order: 'desc'
     };
-    
-    // Mostrar loading
-    document.getElementById('corpoTabelaVendas').innerHTML = `
-        <tr>
-            <td colspan="11" class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Carregando...</span>
-                </div>
-                <p class="mt-2">Carregando vendas...</p>
-            </td>
-        </tr>
-    `;
-    
-    try {
-        const response = await fetch('/api/vendas-filtradas', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(filtros)
-        });
-        
-        const data = await response.json();
-        
-        paginaAtual = data.page;
-        totalPaginas = data.pages;
-        
-        // Atualizar contador de registros
-        document.getElementById('totalRegistros').textContent = data.total || 0;
-        
-        // Atualizar tabela
-        let tabelaHTML = '';
-        
-        if (data.vendas.length === 0) {
-            tabelaHTML = `
-                <tr>
-                    <td colspan="11" class="text-center py-4 text-muted">
-                        <i class="fas fa-search me-2"></i>Nenhuma venda encontrada com os filtros aplicados
-                    </td>
-                </tr>
-            `;
-        } else {
-            data.vendas.forEach(venda => {
-                tabelaHTML += `
-                    <tr>
-                        <td><span class="badge bg-secondary">${venda.numero_nf}</span></td>
-                        <td>${venda.data_emissao}</td>
-                        <td>${venda.cliente_nome}</td>
-                        <td>${venda.vendedor}</td>
-                        <td><span class="badge bg-light text-dark">${venda.equipe}</span></td>
-                        <td>${venda.descricao_produto}</td>
-                        <td><span class="badge bg-info">${venda.marca}</span></td>
-                        <td>${venda.familia}</td>
-                        <td class="text-end fw-bold text-success">R$ ${venda.valor_produtos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="text-center">${venda.quantidade.toLocaleString('pt-BR')}</td>
-                        <td class="text-end text-muted">R$ ${venda.valor_unitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    </tr>
-                `;
-            });
-        }
-        
-        document.getElementById('corpoTabelaVendas').innerHTML = tabelaHTML;
-        
-        // Atualizar paginação
-        atualizarPaginacao();
-        
-    } catch (error) {
-        console.error('Erro ao carregar vendas:', error);
-        document.getElementById('corpoTabelaVendas').innerHTML = `
-            <tr>
-                <td colspan="11" class="text-center py-4 text-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar vendas
-                </td>
-            </tr>
-        `;
-    }
 }
 
-// Função para atualizar paginação
-function atualizarPaginacao() {
-    let paginacaoHTML = `
-        <ul class="pagination pagination-sm justify-content-center">
-    `;
+// Criar gráfico de marcas
+function criarGraficoMarcas(dadosMarcas) {
+    const ctx = document.getElementById('chartMarcas').getContext('2d');
+    
+    // Destruir gráfico anterior se existir
+    if (graficoMarcas) {
+        graficoMarcas.destroy();
+    }
+    
+    // Preparar dados
+    const labels = dadosMarcas.map(marca => marca.marca);
+    const valores = dadosMarcas.map(marca => marca.valor);
+    const cores = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#8AC926', '#1982C4', '#6A4C93', '#F15BB5'
+    ];
+    
+    graficoMarcas = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Valor por Marca (R$)',
+                data: valores,
+                backgroundColor: cores,
+                borderColor: cores.map(cor => cor.replace('0.8', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `R$ ${context.raw.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 0});
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Criar gráfico de capilaridade geral
+function criarGraficoCapilaridadeGeral(data) {
+    const ctx = document.getElementById('chartCapilaridadeGeral').getContext('2d');
+    
+    // Destruir gráfico anterior se existir
+    if (graficoCapilaridadeGeral) {
+        graficoCapilaridadeGeral.destroy();
+    }
+    
+    // Preparar dados
+    const labels = ['Clientes', 'Vendedores', 'Marcas', 'NFs'];
+    const valores = [
+        data.estatisticas_gerais?.total_clientes || 0,
+        data.estatisticas_gerais?.total_vendedores || 0,
+        data.estatisticas_gerais?.total_marcas || 0,
+        data.estatisticas_gerais?.total_nfs || 0
+    ];
+    
+    graficoCapilaridadeGeral = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Capilaridade',
+                data: valores,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Criar gráfico de distribuição por família
+function criarGraficoDistribuicaoFamilia(data) {
+    const ctx = document.getElementById('chartDistribuicaoFamilia').getContext('2d');
+    
+    // Destruir gráfico anterior se existir
+    if (graficoDistribuicaoFamilia) {
+        graficoDistribuicaoFamilia.destroy();
+    }
+    
+    // Agrupar por família (simulado - você precisará ajustar isso)
+    const familias = {};
+    data.top_produtos?.forEach(produto => {
+        const familia = produto.familia || 'Sem Família';
+        familias[familia] = (familias[familia] || 0) + produto.valor;
+    });
+    
+    const labels = Object.keys(familias);
+    const valores = Object.values(familias);
+    
+    graficoDistribuicaoFamilia = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: valores,
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#8AC926', '#1982C4', '#6A4C93', '#F15BB5'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+
+// Atualizar tabela de capilaridade por marca
+function atualizarTabelaCapilaridadeMarca(dados) {
+    const tbody = document.getElementById('tabelaCapilaridadeMarca');
+    let html = '';
+    
+    dados.slice(0, 10).forEach(marca => {
+        html += `
+            <tr>
+                <td><strong>${marca.marca}</strong></td>
+                <td>${marca.total_nfs}</td>
+                <td>${marca.clientes_diferentes}</td>
+                <td>${marca.vendedores_diferentes}</td>
+                <td>R$ ${marca.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Atualizar tabela de top itens
+function atualizarTabelaTopItens(dados) {
+    const tbody = document.getElementById('tabelaTopItens');
+    let html = '';
+    
+    dados.slice(0, 10).forEach(item => {
+        html += `
+            <tr>
+                <td>${item.produto}</td>
+                <td>${item.nfs}</td>
+                <td>${item.quantidade}</td>
+                <td>R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Atualizar tabela de top consultores
+function atualizarTabelaTopConsultores(dados) {
+    const tbody = document.getElementById('tabelaTopConsultores');
+    let html = '';
+    
+    dados.slice(0, 10).forEach(consultor => {
+        html += `
+            <tr>
+                <td>${consultor.vendedor}</td>
+                <td>${consultor.nfs}</td>
+                <td>${consultor.clientes_atendidos}</td>
+                <td>R$ ${consultor.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Atualizar tabela de top clientes
+function atualizarTabelaTopClientes(dados) {
+    const tbody = document.getElementById('tabelaTopClientes');
+    let html = '';
+    
+    dados.slice(0, 10).forEach(cliente => {
+        const ticketMedio = cliente.valor / cliente.nfs;
+        html += `
+            <tr>
+                <td>${cliente.cliente}</td>
+                <td>${cliente.nfs}</td>
+                <td>R$ ${cliente.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td>R$ ${ticketMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Atualizar tabela de vendas
+function atualizarTabelaVendas(dados) {
+    const tbody = document.getElementById('corpoTabelaVendas');
+    let html = '';
+    
+    dados.forEach(venda => {
+        html += `
+            <tr>
+                <td>${venda.numero_nf}</td>
+                <td>${venda.data_emissao}</td>
+                <td>${venda.cliente_nome}</td>
+                <td>${venda.vendedor}</td>
+                <td>${venda.equipe}</td>
+                <td>${venda.descricao_produto}</td>
+                <td>${venda.marca}</td>
+                <td>${venda.familia || 'N/A'}</td>
+                <td>${venda.quantidade}</td>
+                <td>R$ ${venda.valor_unitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td><strong>R$ ${venda.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Atualizar paginação
+function atualizarPaginacao(total, pagina, totalPaginas) {
+    const paginacao = document.getElementById('paginacao');
+    let html = '';
     
     // Botão anterior
-    paginacaoHTML += `
-        <li class="page-item ${paginaAtual === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual - 1})">Anterior</a>
+    html += `
+        <li class="page-item ${pagina === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="mudarPagina(${pagina - 1})">Anterior</a>
         </li>
     `;
     
-    // Números de página
-    const inicio = Math.max(1, paginaAtual - 2);
-    const fim = Math.min(totalPaginas, paginaAtual + 2);
+    // Páginas
+    const inicio = Math.max(1, pagina - 2);
+    const fim = Math.min(totalPaginas, pagina + 2);
     
     for (let i = inicio; i <= fim; i++) {
-        paginacaoHTML += `
-            <li class="page-item ${i === paginaAtual ? 'active' : ''}">
+        html += `
+            <li class="page-item ${i === pagina ? 'active' : ''}">
                 <a class="page-link" href="#" onclick="mudarPagina(${i})">${i}</a>
             </li>
         `;
     }
     
     // Botão próximo
-    paginacaoHTML += `
-        <li class="page-item ${paginaAtual === totalPaginas ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="mudarPagina(${paginaAtual + 1})">Próxima</a>
+    html += `
+        <li class="page-item ${pagina === totalPaginas ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="mudarPagina(${pagina + 1})">Próximo</a>
         </li>
     `;
     
-    paginacaoHTML += `</ul>`;
-    
-    document.getElementById('paginacao').innerHTML = paginacaoHTML;
+    paginacao.innerHTML = html;
 }
 
-// Função para mudar página
-function mudarPagina(pagina) {
-    if (pagina >= 1 && pagina <= totalPaginas) {
-        carregarVendas(pagina);
-    }
+// Mudar página
+function mudarPagina(novaPagina) {
+    paginaAtual = novaPagina;
+    carregarVendasFiltradas();
 }
 
-// Função para carregar análise detalhada da marca
-async function carregarAnaliseMarca(marca) {
-    if (!marca) {
-        document.getElementById('analiseMarcaDetalhada').style.display = 'none';
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/analise-marca/${encodeURIComponent(marca)}`);
-        const data = await response.json();
-        
-        document.getElementById('analiseMarcaDetalhada').style.display = 'block';
-        document.getElementById('analiseMarcaDetalhada').innerHTML = `
-            <div class="row mt-4">
-                <!-- Métricas da Marca -->
-                <div class="col-md-12 mb-4">
-                    <div class="card border-0 bg-light shadow-sm">
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-md-3 col-6 mb-3">
-                                    <h5 class="text-primary">${data.dados_gerais.total_nfs}</h5>
-                                    <small class="text-muted">NFs</small>
-                                </div>
-                                <div class="col-md-3 col-6 mb-3">
-                                    <h5 class="text-success">R$ ${data.dados_gerais.total_valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
-                                    <small class="text-muted">Valor Total</small>
-                                </div>
-                                <div class="col-md-3 col-6 mb-3">
-                                    <h5 class="text-info">${data.dados_gerais.total_quantidade}</h5>
-                                    <small class="text-muted">Quantidade</small>
-                                </div>
-                                <div class="col-md-3 col-6 mb-3">
-                                    <h5 class="text-warning">${data.dados_gerais.total_itens}</h5>
-                                    <small class="text-muted">Itens Vendidos</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Top Clientes -->
-                <div class="col-md-6 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-gradient-success text-white py-3">
-                            <h6 class="mb-0 fw-bold">🏆 Top Clientes</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Cliente</th>
-                                            <th class="text-end">NFs</th>
-                                            <th class="text-end">Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${data.top_clientes.map(cliente => `
-                                            <tr>
-                                                <td>${cliente.cliente}</td>
-                                                <td class="text-end">${cliente.nfs}</td>
-                                                <td class="text-end">R$ ${cliente.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Top Vendedores -->
-                <div class="col-md-6 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-gradient-primary text-white py-3">
-                            <h6 class="mb-0 fw-bold">🌟 Top Vendedores</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Vendedor</th>
-                                            <th class="text-end">NFs</th>
-                                            <th class="text-end">Clientes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${data.top_vendedores.map(vendedor => `
-                                            <tr>
-                                                <td>${vendedor.vendedor}</td>
-                                                <td class="text-end">${vendedor.nfs}</td>
-                                                <td class="text-end">${vendedor.clientes_atendidos}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Top Produtos -->
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-gradient-warning text-white py-3">
-                            <h6 class="mb-0 fw-bold">📦 Top Produtos</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Produto</th>
-                                            <th>Família</th>
-                                            <th class="text-end">NFs</th>
-                                            <th class="text-end">Valor</th>
-                                            <th class="text-end">Quantidade</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${data.top_produtos.map(produto => `
-                                            <tr>
-                                                <td>${produto.produto}</td>
-                                                <td><span class="badge bg-secondary">${produto.familia}</span></td>
-                                                <td class="text-end">${produto.nfs}</td>
-                                                <td class="text-end">R$ ${produto.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                                                <td class="text-end">${produto.quantidade}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-    } catch (error) {
-        console.error('Erro ao carregar análise da marca:', error);
-    }
+// Exportar para Excel
+function exportarParaExcel() {
+    const filtros = obterFiltros();
+    const params = new URLSearchParams(filtros).toString();
+    window.location.href = `/exportar-vendas-filtradas?${params}`;
 }
 
-// Função para exportar Excel
-function exportarExcel() {
-    const filtros = {
-        cliente: document.getElementById('filtroCliente').value,
-        vendedor: document.getElementById('filtroVendedor').value,
-        equipe: document.getElementById('filtroEquipe').value,
-        marca: document.getElementById('filtroMarca').value,
-        familia: document.getElementById('filtroFamilia').value,
-        data_inicio: document.getElementById('filtroDataInicio').value,
-        data_fim: document.getElementById('filtroDataFim').value,
-        exportar: true
-    };
-    
-    // Criar formulário dinâmico para POST
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/exportar-vendas-filtradas';
-    
-    for (const [key, value] of Object.entries(filtros)) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-    }
-    
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+// Exportar para PDF/Imagem
+function exportarParaPDF() {
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('modalExportacao'));
+    modal.show();
 }
 
-// Função para mostrar erro
-function mostrarErro(mensagem) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-    alertDiv.innerHTML = `
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        ${mensagem}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    document.querySelector('.container').prepend(alertDiv);
-}
-
-// ========== EVENT LISTENERS ==========
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar Bootstrap tabs
-    const tabEl = document.querySelector('button[data-bs-toggle="tab"]');
-    if (tabEl) {
-        const tab = new bootstrap.Tab(tabEl);
+// Confirmar exportação
+function confirmarExportacao() {
+    const formato = document.getElementById('formatoExportacao').value;
+    
+    if (formato === 'excel') {
+        exportarParaExcel();
+    } else if (formato === 'pdf') {
+        gerarPDF();
+    } else {
+        gerarImagem(formato);
     }
     
-    // Carregar todos os dados inicialmente
-    carregarTodasMetricas();
-    
-    // Aplicar filtros
-    document.getElementById('btnAplicarFiltros').addEventListener('click', function() {
-        carregarTodasMetricas();
-    });
-    
-    // Limpar filtros
-    document.getElementById('btnLimparFiltros').addEventListener('click', function() {
-        document.getElementById('filtroCliente').value = 'todos';
-        document.getElementById('filtroVendedor').value = 'todos';
-        document.getElementById('filtroEquipe').value = 'todos';
-        document.getElementById('filtroMarca').value = 'todos';
-        document.getElementById('filtroFamilia').value = 'todos';
+    // Fechar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalExportacao'));
+    modal.hide();
+}
+
+// Gerar PDF
+function gerarPDF() {
+    // Implementação simplificada - você pode usar html2canvas + jsPDF
+    html2canvas(document.querySelector(".card")).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 210;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
         
-        const minDate = '{{ min_date.strftime("%Y-%m-%d") if min_date else "" }}';
-        const maxDate = '{{ max_date.strftime("%Y-%m-%d") if max_date else "" }}';
-        
-        document.getElementById('filtroDataInicio').value = minDate;
-        document.getElementById('filtroDataFim').value = maxDate;
-        
-        carregarTodasMetricas();
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save('relatorio_vendas.pdf');
     });
-    
-    // Exportar Excel
-    document.getElementById('btnExportarExcel').addEventListener('click', exportarExcel);
-    
-    // Exportar Análise
-    document.getElementById('btnExportarAnalise').addEventListener('click', function(e) {
-        e.preventDefault();
-        exportarExcel();
+}
+
+// Gerar imagem
+function gerarImagem(formato) {
+    html2canvas(document.querySelector(".card")).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `relatorio_vendas.${formato}`;
+        link.href = canvas.toDataURL(`image/${formato}`);
+        link.click();
     });
-    
-    // Resetar Filtros
-    document.getElementById('btnResetarFiltros').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('btnLimparFiltros').click();
-    });
-    
-    // Recarregar Dados
-    document.getElementById('btnRecarregarDados').addEventListener('click', function(e) {
-        e.preventDefault();
-        carregarTodasMetricas();
-        
-        // Feedback visual
-        this.classList.add('btn-success');
-        setTimeout(() => this.classList.remove('btn-success'), 1000);
-    });
-    
-    // Botão de atualizar vendas
-    document.getElementById('btnRefreshVendas').addEventListener('click', function() {
-        carregarVendas(paginaAtual);
-        this.querySelector('i').classList.add('fa-spin');
-        setTimeout(() => {
-            this.querySelector('i').classList.remove('fa-spin');
-        }, 1000);
-    });
-    
-    // Análise por marca
-    document.getElementById('selecaoMarcaDetalhes').addEventListener('change', function() {
-        carregarAnaliseMarca(this.value);
-    });
+}
+
+// Função para atualizar itens por página
+document.getElementById('itensPorPagina').addEventListener('change', function() {
+    itensPorPagina = parseInt(this.value);
+    paginaAtual = 1;
+    carregarVendasFiltradas();
 });
 </script>
 
 <style>
-/* Estilos Power BI */
-.bg-gradient-primary {
+.card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.bg-primary-custom {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 }
 
-.bg-gradient-success {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
-}
-
-.bg-gradient-warning {
-    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%) !important;
-}
-
-.bg-gradient-dark {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-}
-
-.bg-gradient-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #2dc9e8 100%) !important;
-}
-
-.bg-gradient-purple {
-    background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%) !important;
-}
-
-.bg-gradient-danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
-}
-
-.kpi-card {
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    border: none;
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.kpi-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25) !important;
-}
-
-.kpi-value {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-bottom: 0.25rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-}
-
-.kpi-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-.kpi-icon {
-    opacity: 0.9;
-}
-
-.hover-lift {
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0,0,0,0.05);
-}
-
-.hover-lift:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
-}
-
-.nav-tabs-powerbi .nav-link {
-    border: none;
-    font-weight: 600;
-    color: #6c757d;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px 8px 0 0;
-    transition: all 0.3s ease;
-}
-
-.nav-tabs-powerbi .nav-link:hover {
-    color: #3498db;
-    background-color: rgba(52, 152, 219, 0.1);
-}
-
-.nav-tabs-powerbi .nav-link.active {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    color: white;
-    border: none;
-    font-weight: 700;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-}
-
-.menu-card-powerbi {
-    border: none;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    background-color: #ffffff;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    cursor: pointer;
-}
-
-.menu-card-powerbi:hover {
-    transform: translateY(-5px) scale(1.03);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-}
-
-.menu-icon-powerbi {
-    font-size: 2.5rem;
-    transition: transform 0.3s ease;
-}
-
-.menu-card-powerbi:hover .menu-icon-powerbi {
-    transform: scale(1.2) rotate(5deg);
-}
-
-.menu-title-powerbi {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #2c3e50;
-}
-
-.menu-desc-powerbi {
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.table th {
-    font-weight: 700;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #6c757d;
-    background-color: #f8f9fa;
-    border-bottom: 3px solid #dee2e6;
-}
-
-.table td {
-    font-size: 0.85rem;
-    vertical-align: middle;
-    border-color: #f1f3f4;
-    padding: 0.75rem;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0,0,0,0.02);
+.text-purple {
+    color: #6f42c1 !important;
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(52, 152, 219, 0.08);
-    transform: scale(1.001);
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background-color: rgba(0,123,255,.1);
 }
 
-.form-control, .form-select {
-    border-radius: 8px;
-    border: 2px solid #e0e0e0;
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 0.5rem 0.75rem;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.3);
-    transform: scale(1.01);
-}
-
-.form-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-    color: #495057;
-    letter-spacing: 0.3px;
-}
-
-.card-header {
-    border-radius: 12px 12px 0 0 !important;
-}
-
-.pagination .page-item.active .page-link {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    border-color: #2980b9;
-    font-weight: 700;
-    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-}
-
-.pagination .page-link {
-    border-radius: 8px;
-    margin: 0 3px;
-    border: 2px solid #e0e0e0;
-    color: #495057;
+.table th {
     font-weight: 600;
-    padding: 0.5rem 0.9rem;
+    color: #495057;
 }
 
-.pagination .page-link:hover {
-    background-color: rgba(52, 152, 219, 0.1);
-    border-color: #3498db;
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
 }
 
-.badge {
-    border-radius: 20px;
-    font-weight: 600;
-    padding: 0.35em 0.8em;
-    font-size: 0.75em;
+.form-select-sm {
+    padding: .25rem .5rem;
+    font-size: .875rem;
 }
 
-.alert-powerbi {
-    border-radius: 10px;
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.modal-content {
+    border-radius: 12px;
     border: none;
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    color: #1976d2;
-    font-weight: 500;
-}
-
-/* Animações */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate__fadeInUp {
-    animation-name: fadeInUp;
-    animation-duration: 0.6s;
-    animation-fill-mode: both;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.fa-spin {
-    animation: fa-spin 1s linear infinite;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .kpi-value {
-        font-size: 1.4rem;
-    }
-    
-    .kpi-card {
-        min-height: 100px;
-        margin-bottom: 15px;
-    }
-    
-    .table-responsive {
-        font-size: 0.8rem;
-    }
-    
-    .nav-tabs-powerbi .nav-link {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.8rem;
-    }
-    
-    .menu-card-powerbi {
-        margin-bottom: 15px;
-    }
-    
-    .menu-icon-powerbi {
-        font-size: 2rem;
-    }
-}
-
-/* Scroll personalizado */
-.table-responsive::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-}
-
-.table-responsive::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    border-radius: 10px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #2980b9 0%, #1f639b 100%);
 }
 </style>
 {% endblock %}
