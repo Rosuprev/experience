@@ -248,8 +248,7 @@
                         </div>
                     </div>
                 </div>
-                <canvas id="chartCapilaridadeGeral" height="200"></canvas>
-            </div>
+                </div>
         </div>
     </div>
     
@@ -881,52 +880,7 @@ function criarGraficoMarcas(dadosMarcas) {
     });
 }
 
-// Criar gráfico de capilaridade geral
-function criarGraficoCapilaridadeGeral(data) {
-    const ctx = document.getElementById('chartCapilaridadeGeral');
-    if (!ctx) return;
-    
-    // Destruir gráfico anterior se existir
-    if (graficoCapilaridadeGeral) {
-        graficoCapilaridadeGeral.destroy();
-    }
-    
-    // Preparar dados
-    const labels = ['Clientes', 'Vendedores', 'Marcas', 'NFs'];
-    const valores = [
-        data.estatisticas_gerais?.total_clientes || 0,
-        data.estatisticas_gerais?.total_vendedores || 0,
-        data.estatisticas_gerais?.total_marcas || 0,
-        data.estatisticas_gerais?.total_nfs || 0
-    ];
-    
-    graficoCapilaridadeGeral = new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Capilaridade',
-                data: valores,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2,
-                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: Math.max(1, Math.ceil(Math.max(...valores) / 5))
-                    }
-                }
-            }
-        }
-    });
-}
+
 
 // Criar gráfico de distribuição por família
 function criarGraficoDistribuicaoFamilia(dadosFamilia) {
