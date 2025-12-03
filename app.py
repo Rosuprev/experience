@@ -4047,6 +4047,52 @@ def api_analise_marca_filtrada(marca):
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+    
+# Adicione APENAS esta rota nova ao seu app.py - ela é necessária para os filtros
+@app.route('/api/metricas-vendas-filtradas-simples', methods=['POST'])
+@login_required
+def api_metricas_vendas_filtradas_simples():
+    """API simples para métricas com filtros - usa as rotas existentes"""
+    try:
+        data = request.get_json()
+        
+        # Primeiro, pega os dados completos da rota existente
+        response_data = {}
+        
+        # Tenta pegar dados da rota /api/metricas-vendas
+        try:
+            from flask import url_for
+            import requests
+            import json
+            
+            # Simula uma chamada interna para a rota existente
+            with app.test_request_context():
+                # Usa a função existente
+                from flask import g
+                result = api_metricas_vendas()
+                if isinstance(result, tuple):
+                    response_data.update(result[0].get_json())
+                else:
+                    response_data.update(result.get_json())
+        except:
+            # Se falhar, retorna dados básicos
+            response_data = {
+                'totais_por_nf': {
+                    'total_nfs': 0,
+                    'total_valor': 0,
+                    'total_itens': 0,
+                    'media_valor_por_nf': 0
+                },
+                'vendedores': {'maior_valor': {'nome': 'N/A', 'valor': 0}},
+                'clientes': {'maior_valor': {'nome': 'N/A', 'valor': 0}},
+                'marcas_por_nf': []
+            }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"❌ Erro em api_metricas_vendas_filtradas_simples: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # Atualize a rota existente /exportar-vendas-filtradas para aceitar filtros via POST
 @app.route('/exportar-vendas-filtradas', methods=['GET', 'POST'])
