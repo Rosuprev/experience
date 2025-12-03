@@ -3575,8 +3575,6 @@ def api_analise_marca(marca):
         ]
     })
 
-# Adicione estas rotas após a rota /api/analise-marca/<marca>
-
 # Adicione esta rota para métricas com filtros
 @app.route('/api/metricas-vendas-filtradas', methods=['POST'])
 @login_required
