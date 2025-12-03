@@ -549,8 +549,8 @@ function atualizarMetricasIniciais(data) {
 function aplicarFiltros() {
     console.log("🔍 Aplicando filtros...");
     paginaAtual = 1;
-    carregarMetricasFiltradas();
-    carregarCapilaridade();
+    carregarMetricasComFiltros();
+    carregarCapilaridadeComFiltros();
     carregarVendasFiltradas();
     
     // Resetar análise de marca
@@ -562,6 +562,264 @@ function aplicarFiltros() {
             <p class="text-muted">Selecione uma marca para ver a análise detalhada</p>
         </div>
     `;
+}
+
+// Carregar métricas com filtros
+function carregarMetricasComFiltros() {
+    const filtros = obterFiltros();
+    console.log("📊 Carregando métricas com filtros:", filtros);
+    
+    // 1. Primeiro pega os totais básicos da rota /api/vendas-filtradas
+    fetch('/api/vendas-filtradas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            ...filtros,
+            page: 1,
+            per_page: 1  // Apenas para contar
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("📈 Dados básicos filtrados:", data);
+        
+        // Atualizar métricas básicas
+        document.getElementById('totalValorVendas').textContent = 
+            'R$ ' + formatarNumero(data.total_valor || 0);
+        document.getElementById('totalNFs').textContent = data.total_vendas || 0;
+        document.getElementById('totalItens').textContent = data.total_quantidade || 0;
+        
+        // Calcular ticket médio
+        const ticketMedio = data.total_valor / (data.total_vendas || 1);
+        document.getElementById('ticketMedio').textContent = 
+            'R$ ' + formatarNumero(ticketMedio);
+        
+        // 2. Agora busca os tops da rota /api/metricas-vendas-filtradas
+        return fetch('/api/metricas-vendas-filtradas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(filtros)
+        });
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("🏆 Dados tops filtrados:", data);
+        
+        // Top consultor
+        if (data.vendedores?.maior_valor?.nome) {
+            document.getElementById('topConsultor').textContent = 
+                data.vendedores.maior_valor.nome.length > 20 ? 
+                data.vendedores.maior_valor.nome.substring(0, 20) + '...' : 
+                data.vendedores.maior_valor.nome;
+            document.getElementById('topConsultorValor').textContent = 
+                'R$ ' + formatarNumero(data.vendedores.maior_valor.valor || 0);
+        } else {
+            document.getElementById('topConsultor').textContent = 'N/A';
+            document.getElementById('topConsultorValor').textContent = 'R$ 0';
+        }
+        
+        // Top revenda
+        if (data.clientes?.maior_valor?.nome) {
+            document.getElementById('topRevenda').textContent = 
+                data.clientes.maior_valor.nome.length > 20 ? 
+                data.clientes.maior_valor.nome.substring(0, 20) + '...' : 
+                data.clientes.maior_valor.nome;
+            document.getElementById('topRevendaValor').textContent = 
+                'R$ ' + formatarNumero(data.clientes.maior_valor.valor || 0);
+        } else {
+            document.getElementById('topRevenda').textContent = 'N/A';
+            document.getElementById('topRevendaValor').textContent = 'R$ 0';
+        }
+        
+        // Atualizar gráfico de marcas
+        if (data.marcas_por_nf && data.marcas_por_nf.length > 0) {
+            criarGraficoMarcas(data.marcas_por_nf);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar métricas com filtros:', error);
+    });
+}
+
+// Carregar capilaridade com filtros
+function carregarCapilaridadeComFiltros() {
+    const filtros = obterFiltros();
+    
+    fetch('/api/capilaridade-vendas-filtradas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filtros)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("🌐 Dados de capilaridade com filtros:", data);
+        
+        // Atualizar métricas de capilaridade
+        if (data.estatisticas_gerais) {
+            document.getElementById('capClientes').textContent = data.estatisticas_gerais.total_clientes || 0;
+            document.getElementById('capVendedores').textContent = data.estatisticas_gerais.total_vendedores || 0;
+            document.getElementById('capMarcas').textContent = data.estatisticas_gerais.total_marcas || 0;
+            document.getElementById('capMediaItensNF').textContent = 
+                (data.estatisticas_gerais.media_itens_por_nf || 0).toFixed(1);
+            document.getElementById('capMediaValorNF').textContent = 
+                'R$ ' + formatarNumero(data.estatisticas_gerais.media_valor_por_nf || 0);
+        }
+        
+        // Atualizar tabela de capilaridade por marca
+        if (data.capilaridade_marca && data.capilaridade_marca.length > 0) {
+            atualizarTabelaCapilaridadeMarca(data.capilaridade_marca);
+        } else {
+            document.getElementById('tabelaCapilaridadeMarca').innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Nenhuma marca encontrada</td>
+                </tr>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar capilaridade com filtros:', error);
+    });
+}
+
+// Carregar vendas filtradas
+function carregarVendasFiltradas() {
+    const filtros = obterFiltros();
+    filtros.page = paginaAtual;
+    filtros.per_page = parseInt(document.getElementById('itensPorPagina').value);
+    
+    console.log("📋 Carregando vendas com filtros:", filtros);
+    
+    fetch('/api/vendas-filtradas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filtros)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Vendas carregadas:", data.vendas?.length || 0, "itens");
+        vendasFiltradas = data.vendas || [];
+        
+        // Atualizar tabela
+        atualizarTabelaVendas(vendasFiltradas);
+        
+        // Atualizar paginação
+        atualizarPaginacao(data.total_vendas || 0, data.page || 1, data.pages || 1);
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar vendas filtradas:', error);
+        document.getElementById('corpoTabelaVendas').innerHTML = `
+            <tr>
+                <td colspan="11" class="text-center text-danger">
+                    Erro ao carregar dados
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Função inicial - Carregar dados sem filtros
+function carregarDadosIniciais() {
+    console.log("🔧 Inicializando dashboard de análise...");
+    
+    // Carregar métricas iniciais (sem filtros)
+    fetch('/api/metricas-vendas')
+    .then(response => response.json())
+    .then(data => {
+        console.log("📈 Métricas iniciais:", data);
+        
+        // Atualizar métricas básicas
+        if (data.totais_por_nf) {
+            document.getElementById('totalValorVendas').textContent = 
+                'R$ ' + formatarNumero(data.totais_por_nf.total_valor || 0);
+            document.getElementById('totalNFs').textContent = data.totais_por_nf.total_nfs || 0;
+            document.getElementById('totalItens').textContent = data.totais_por_nf.total_itens || 0;
+            document.getElementById('ticketMedio').textContent = 
+                'R$ ' + formatarNumero(data.totais_por_nf.media_valor_por_nf || 0);
+        }
+        
+        // Top consultor
+        if (data.vendedores?.maior_valor?.nome) {
+            document.getElementById('topConsultor').textContent = 
+                data.vendedores.maior_valor.nome.length > 20 ? 
+                data.vendedores.maior_valor.nome.substring(0, 20) + '...' : 
+                data.vendedores.maior_valor.nome;
+            document.getElementById('topConsultorValor').textContent = 
+                'R$ ' + formatarNumero(data.vendedores.maior_valor.valor || 0);
+        }
+        
+        // Top revenda
+        if (data.clientes?.maior_valor?.nome) {
+            document.getElementById('topRevenda').textContent = 
+                data.clientes.maior_valor.nome.length > 20 ? 
+                data.clientes.maior_valor.nome.substring(0, 20) + '...' : 
+                data.clientes.maior_valor.nome;
+            document.getElementById('topRevendaValor').textContent = 
+                'R$ ' + formatarNumero(data.clientes.maior_valor.valor || 0);
+        }
+        
+        // Gráfico de marcas
+        if (data.marcas_por_nf && data.marcas_por_nf.length > 0) {
+            criarGraficoMarcas(data.marcas_por_nf);
+        }
+    })
+    .catch(error => {
+        console.error("❌ Erro ao carregar métricas iniciais:", error);
+    });
+    
+    // Carregar capilaridade inicial
+    fetch('/api/capilaridade-vendas')
+    .then(response => response.json())
+    .then(data => {
+        console.log("🌐 Capilaridade inicial:", data);
+        
+        if (data.estatisticas_gerais) {
+            document.getElementById('capClientes').textContent = data.estatisticas_gerais.total_clientes || 0;
+            document.getElementById('capVendedores').textContent = data.estatisticas_gerais.total_vendedores || 0;
+            document.getElementById('capMarcas').textContent = data.estatisticas_gerais.total_marcas || 0;
+            document.getElementById('capMediaItensNF').textContent = 
+                (data.estatisticas_gerais.media_itens_por_nf || 0).toFixed(1);
+            document.getElementById('capMediaValorNF').textContent = 
+                'R$ ' + formatarNumero(data.estatisticas_gerais.media_valor_por_nf || 0);
+        }
+        
+        if (data.capilaridade_marca && data.capilaridade_marca.length > 0) {
+            atualizarTabelaCapilaridadeMarca(data.capilaridade_marca);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar capilaridade inicial:', error);
+    });
+    
+    // Carregar vendas iniciais
+    carregarVendasFiltradas();
+}
+
+// Inicializar quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    carregarDadosIniciais();
+});
+
+// Obter filtros atuais
+function obterFiltros() {
+    return {
+        cliente: document.getElementById('filtroCliente').value,
+        vendedor: document.getElementById('filtroVendedor').value,
+        marca: document.getElementById('filtroMarca').value,
+        equipe: document.getElementById('filtroEquipe').value,
+        familia: document.getElementById('filtroFamilia').value,
+        data_inicio: document.getElementById('filtroDataInicio').value,
+        data_fim: document.getElementById('filtroDataFim').value,
+        sort_by: 'data_emissao',
+        sort_order: 'desc'
+    };
 }
 
 // Função para resetar filtros
@@ -577,40 +835,12 @@ function resetarFiltros() {
     aplicarFiltros();
 }
 
-// Carregar métricas com filtros
-function carregarMetricasFiltradas() {
-    const filtros = obterFiltros();
-    console.log("📊 Carregando métricas com filtros:", filtros);
-    
-    // Usar a rota existente com parâmetros de filtro
-    fetch('/api/metricas-vendas')
-    .then(response => response.json())
-    .then(data => {
-        // Filtrar dados localmente (simulação - na prática você faria isso no backend)
-        filtrarDadosLocalmente(data, filtros);
-    })
-    .catch(error => {
-        console.error('❌ Erro ao carregar métricas:', error);
+// Funções auxiliares
+function formatarNumero(valor) {
+    return parseFloat(valor || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
-}
-
-// Filtrar dados localmente (temporário)
-function filtrarDadosLocalmente(data, filtros) {
-    // Esta é uma implementação simplificada
-    // Na prática, você deve criar rotas específicas para filtros
-    
-    let dadosFiltrados = { ...data };
-    
-    // Filtrar marcas se necessário
-    if (filtros.marca && filtros.marca !== 'todos') {
-        if (dadosFiltrados.marcas_por_nf) {
-            dadosFiltrados.marcas_por_nf = dadosFiltrados.marcas_por_nf.filter(
-                marca => marca.marca === filtros.marca
-            );
-        }
-    }
-    
-    atualizarMetricasIniciais(dadosFiltrados);
 }
 
 // Carregar capilaridade
