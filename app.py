@@ -101,10 +101,10 @@ class VendaEvento(db.Model):
     equipe = db.Column(db.String(100), nullable=False)
     descricao_produto = db.Column(db.String(300), nullable=False)
     marca = db.Column(db.String(100), nullable=False)
-    valor_produtos = db.Column(db.Float, nullable=False)
+    valor_produtos = db.Column(db.Float, nullable=False)  # AGORA: Valor TOTAL da venda
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     familia = db.Column(db.String(100))
-    valor_total = db.Column(db.Float, nullable=False)
+    valor_total = db.Column(db.Float, nullable=False)  # SERÁ IGUAL A valor_produtos
     data_importacao = db.Column(db.DateTime, default=agora)
     importado_por = db.Column(db.String(100))
     
@@ -116,6 +116,12 @@ class VendaEvento(db.Model):
         db.Index('idx_venda_evento_marca', 'marca'),
         db.Index('idx_venda_evento_familia', 'familia'),
     )
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Garante que valor_total seja igual a valor_produtos
+        if self.valor_total is None:
+            self.valor_total = self.valor_produtos
 
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -2965,7 +2971,7 @@ def importar_vendas_evento():
                         marca = str(row.get('MARCA', '')).strip()
                         familia = str(row.get('FAMILIA', '')).strip() if row.get('FAMILIA') else None
                         
-                        # Converter valores numéricos
+                        # Converter valores numéricos - AGORA valor_produtos é o TOTAL
                         try:
                             valor_produtos = float(str(row.get('VALOR_PRODUTOS', '0')).replace(',', '.'))
                         except:
@@ -2976,25 +2982,23 @@ def importar_vendas_evento():
                         except:
                             quantidade = 1
                         
-                        # Calcular valor total
-                        valor_total = valor_produtos * quantidade
+                        # AGORA: valor_total é igual a valor_produtos (já é o total)
+                        valor_total = valor_produtos  # Não multiplica mais!
                         
                         # Verificar se já existe (para evitar duplicatas)
-                        # Aqui você pode definir sua lógica de verificação de duplicidade
-                        # Por exemplo, combinação de data, cliente e descrição
                         venda_existente = VendaEvento.query.filter_by(
                             data_emissao=data_emissao,
                             cliente_nome=cliente_nome,
                             descricao_produto=descricao,
-                            valor_produtos=valor_produtos
+                            valor_produtos=valor_produtos,
+                            quantidade=quantidade  # Também verifica quantidade
                         ).first()
                         
                         if venda_existente:
                             # Atualizar se existir
-                            venda_existente.quantidade = quantidade
-                            venda_existente.valor_total = valor_total
                             venda_existente.marca = marca
                             venda_existente.familia = familia
+                            venda_existente.valor_total = valor_total  # Atualiza valor_total também
                             vendas_atualizadas += 1
                         else:
                             # Criar nova venda
@@ -3008,7 +3012,7 @@ def importar_vendas_evento():
                                 valor_produtos=valor_produtos,
                                 quantidade=quantidade,
                                 familia=familia,
-                                valor_total=valor_total,
+                                valor_total=valor_total,  # Já é o valor total
                                 importado_por=session.get('nome', 'Sistema')
                             )
                             db.session.add(venda)
@@ -3144,6 +3148,9 @@ def api_vendas_filtradas():
     
     result = []
     for venda in vendas:
+        # Calcular valor unitário (valor_total / quantidade)
+        valor_unitario = venda.valor_total / venda.quantidade if venda.quantidade > 0 else venda.valor_total
+        
         result.append({
             'id': venda.id,
             'data_emissao': venda.data_emissao.strftime('%d/%m/%Y'),
@@ -3152,10 +3159,11 @@ def api_vendas_filtradas():
             'equipe': venda.equipe,
             'descricao_produto': venda.descricao_produto,
             'marca': venda.marca,
-            'valor_produtos': float(venda.valor_produtos),
+            'valor_produtos': float(venda.valor_produtos),  # AGORA: Valor TOTAL
             'quantidade': venda.quantidade,
+            'valor_unitario': float(valor_unitario),  # Calculado
             'familia': venda.familia or 'N/A',
-            'valor_total': float(venda.valor_total)
+            'valor_total': float(venda.valor_total)  # Igual a valor_produtos
         })
     
     return jsonify({
@@ -3173,10 +3181,13 @@ def api_vendas_filtradas():
 def api_metricas_vendas():
     """API para métricas gerais de vendas"""
     
-    # Totais gerais
+    # Totais gerais - AGORA usa valor_total (que é igual a valor_produtos)
     total_vendas = VendaEvento.query.count()
     total_valor = db.session.query(db.func.sum(VendaEvento.valor_total)).scalar() or 0
     total_quantidade = db.session.query(db.func.sum(VendaEvento.quantidade)).scalar() or 0
+    
+    # Calcular valor médio por item
+    valor_medio_item = total_valor / total_quantidade if total_quantidade > 0 else 0
     
     # Maior venda
     maior_venda = VendaEvento.query.order_by(VendaEvento.valor_total.desc()).first()
@@ -3244,13 +3255,15 @@ def api_metricas_vendas():
             'total_vendas': total_vendas,
             'total_valor': float(total_valor),
             'total_quantidade': int(total_quantidade),
-            'ticket_medio': float(total_valor / total_vendas) if total_vendas > 0 else 0
+            'ticket_medio': float(total_valor / total_vendas) if total_vendas > 0 else 0,
+            'valor_medio_item': float(valor_medio_item)
         },
         'maior_venda': {
             'cliente': maior_venda.cliente_nome if maior_venda else None,
             'valor': float(maior_venda.valor_total) if maior_venda else 0,
             'descricao': maior_venda.descricao_produto if maior_venda else None,
-            'data': maior_venda.data_emissao.strftime('%d/%m/%Y') if maior_venda else None
+            'data': maior_venda.data_emissao.strftime('%d/%m/%Y') if maior_venda else None,
+            'quantidade': maior_venda.quantidade if maior_venda else 0
         },
         'clientes': {
             'maior_valor': {
@@ -3319,7 +3332,7 @@ def api_analise_marca(marca):
         db.func.sum(VendaEvento.valor_total).label('total_valor'),
         db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
         db.func.count(VendaEvento.id).label('total_vendas'),
-        db.func.avg(VendaEvento.valor_produtos).label('valor_medio_produto')
+        db.func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_medio_unitario')
     ).filter(VendaEvento.marca == marca).first()
     
     # Top clientes da marca
@@ -3344,7 +3357,8 @@ def api_analise_marca(marca):
         VendaEvento.familia,
         db.func.sum(VendaEvento.valor_total).label('total_valor'),
         db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
-        db.func.count(VendaEvento.id).label('total_vendas')
+        db.func.count(VendaEvento.id).label('total_vendas'),
+        db.func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_unitario_medio')
     ).filter(VendaEvento.marca == marca).group_by(VendaEvento.descricao_produto, VendaEvento.familia).order_by(db.desc('total_valor')).limit(15).all()
     
     # Vendas por dia da marca
@@ -3360,7 +3374,7 @@ def api_analise_marca(marca):
             'total_valor': float(dados_marca[0]) if dados_marca[0] else 0,
             'total_quantidade': int(dados_marca[1]) if dados_marca[1] else 0,
             'total_vendas': int(dados_marca[2]) if dados_marca[2] else 0,
-            'valor_medio_produto': float(dados_marca[3]) if dados_marca[3] else 0,
+            'valor_medio_unitario': float(dados_marca[3]) if dados_marca[3] else 0,
             'ticket_medio': float(dados_marca[0] / dados_marca[2]) if dados_marca[2] and dados_marca[0] else 0
         },
         'top_clientes': [
@@ -3387,9 +3401,10 @@ def api_analise_marca(marca):
                 'familia': familia or 'N/A',
                 'valor': float(valor),
                 'quantidade': int(quantidade),
-                'vendas': int(vendas)
+                'vendas': int(vendas),
+                'valor_unitario_medio': float(valor_unitario_medio) if valor_unitario_medio else 0
             }
-            for produto, familia, valor, quantidade, vendas in top_produtos
+            for produto, familia, valor, quantidade, vendas, valor_unitario_medio in top_produtos
         ],
         'vendas_por_dia': [
             {
@@ -3456,6 +3471,9 @@ def exportar_vendas_filtradas():
     # Preparar dados para exportação
     data = []
     for venda in vendas:
+        # Calcular valor unitário
+        valor_unitario = venda.valor_total / venda.quantidade if venda.quantidade > 0 else venda.valor_total
+        
         data.append({
             'DATA_EMISSAO': venda.data_emissao.strftime('%d/%m/%Y'),
             'CLIENTE_NOME': venda.cliente_nome,
@@ -3464,9 +3482,9 @@ def exportar_vendas_filtradas():
             'DESCRICAO_PRODUTO': venda.descricao_produto,
             'MARCA': venda.marca,
             'FAMILIA': venda.familia or 'N/A',
-            'VALOR_UNITARIO': float(venda.valor_produtos),
+            'VALOR_TOTAL': float(venda.valor_total),
             'QUANTIDADE': venda.quantidade,
-            'VALOR_TOTAL': float(venda.valor_total)
+            'VALOR_UNITARIO': float(valor_unitario)
         })
     
     output = export_to_excel(data, 'vendas_filtradas.xlsx', 'Vendas Filtradas')
@@ -3504,7 +3522,7 @@ def download_template_vendas():
             'EQUIPE': 'Equipe Sul',
             'DESCRICAO_PRODUTO': 'Produto X Premium',
             'MARCA': 'Marca A',
-            'VALOR_PRODUTOS': '1500.00',
+            'VALOR_PRODUTOS': '1500.00',  # AGORA: Valor TOTAL da venda
             'QUANTIDADE': '2',
             'FAMILIA': 'Premium'
         },
@@ -3515,20 +3533,9 @@ def download_template_vendas():
             'EQUIPE': 'Equipe Norte',
             'DESCRICAO_PRODUTO': 'Produto Y Standard',
             'MARCA': 'Marca B',
-            'VALOR_PRODUTOS': '800.50',
+            'VALOR_PRODUTOS': '800.50',  # AGORA: Valor TOTAL da venda
             'QUANTIDADE': '5',
             'FAMILIA': 'Standard'
-        },
-        {
-            'DATA_EMISSAO': '16/10/2025',
-            'CLIENTE_NOME': 'Empresa ABC Ltda',
-            'VENDEDOR': 'João Silva',
-            'EQUIPE': 'Equipe Sul',
-            'DESCRICAO_PRODUTO': 'Produto Z Basic',
-            'MARCA': 'Marca A',
-            'VALOR_PRODUTOS': '300.00',
-            'QUANTIDADE': '10',
-            'FAMILIA': 'Basic'
         }
     ]
     
