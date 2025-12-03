@@ -91,32 +91,34 @@ logger = logging.getLogger(__name__)
 # Modelos
 
 # NOVO MODELO PARA VENDAS DO EVENTO (DADOS HISTÓRICOS)
+# NOVO MODELO COMPLETO - ADICIONE O CAMPO numero_nf
 class VendaEvento(db.Model):
     __tablename__ = 'venda_evento'
+    __table_args__ = {'extend_existing': True}  # ← ADICIONE ESTA LINHA
     
     id = db.Column(db.Integer, primary_key=True)
-    numero_nf = db.Column(db.String(50), nullable=False)  # NOVO: Número da Nota Fiscal
+    numero_nf = db.Column(db.String(50), nullable=True)  # ← OBRIGATÓRIO!
     data_emissao = db.Column(db.Date, nullable=False)
     cliente_nome = db.Column(db.String(200), nullable=False)
     vendedor = db.Column(db.String(100), nullable=False)
     equipe = db.Column(db.String(100), nullable=False)
     descricao_produto = db.Column(db.String(300), nullable=False)
     marca = db.Column(db.String(100), nullable=False)
-    valor_produtos = db.Column(db.Float, nullable=False)  # Valor TOTAL da venda (desse produto)
+    valor_produtos = db.Column(db.Float, nullable=False)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     familia = db.Column(db.String(100))
-    valor_total = db.Column(db.Float, nullable=False)  # Igual a valor_produtos
+    valor_total = db.Column(db.Float, nullable=False)
     data_importacao = db.Column(db.DateTime, default=agora)
     importado_por = db.Column(db.String(100))
     
-    # Índices para melhor performance
+    # Índices
     __table_args__ = (
-        db.Index('idx_venda_evento_nf', 'numero_nf'),
         db.Index('idx_venda_evento_cliente', 'cliente_nome'),
         db.Index('idx_venda_evento_vendedor', 'vendedor'),
         db.Index('idx_venda_evento_data', 'data_emissao'),
         db.Index('idx_venda_evento_marca', 'marca'),
         db.Index('idx_venda_evento_familia', 'familia'),
+        db.Index('idx_venda_evento_nf', 'numero_nf'),
     )
     
     def __init__(self, **kwargs):
