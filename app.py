@@ -2911,7 +2911,7 @@ def criar_banco_se_nao_existir(app):
         if conn:
             conn.close()  
 
-@app.route('/importar-vendas', methods=['GET', 'POST'])
+@app.route('/importar-vendas-evento', methods=['GET', 'POST'])
 @login_required
 @permissao_required('importacao_vendas')
 def importar_vendas_evento():
