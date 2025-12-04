@@ -2795,10 +2795,25 @@ def exportar_pesquisas():
             'Tipo': 'Anônima' if pesquisa.anonima else 'Identificada',
             'CNPJ': pesquisa.cnpj_identificado or 'N/A',
             'Razão Social': pesquisa.razao_social or 'N/A',
-            'Organização (1-10)': pesquisa.organizacao,
-            'Palestras (1-10)': pesquisa.palestras,
-            'Atendimento (1-10)': pesquisa.atendimento,
-            'Futuro (1-10)': pesquisa.futuro,
+            
+            # NOVOS CAMPOS (1-5)
+            'Comunicação (1-5)': pesquisa.comunicacao,
+            'Formato Evento (1-5)': pesquisa.formato_evento,
+            'Alimentação (1-5)': pesquisa.alimentacao,
+            'Palestra Reforma (1-5)': pesquisa.palestra_reforma,
+            'Palestra Estratégia (1-5)': pesquisa.palestra_estrategia,
+            
+            # CAMPOS EXISTENTES ATUALIZADOS (6-14)
+            'Organização (1-5)': pesquisa.organizacao,
+            'Interação Brother (1-5)': pesquisa.interacao_brother,
+            'Interação Canon (1-5)': pesquisa.interacao_canon,
+            'Interação Epson (1-5)': pesquisa.interacao_epson,
+            'Interação HP (1-5)': pesquisa.interacao_hp,
+            'Interação Konica (1-5)': pesquisa.interacao_konica,
+            'Interação Kyocera (1-5)': pesquisa.interacao_kyocera,
+            'Prazo Entrega (1-5)': pesquisa.prazo_entrega,
+            'Frete (1-5)': pesquisa.frete,
+            
             'Comentários': pesquisa.comentarios or 'Nenhum',
             'IP': pesquisa.ip
         })
@@ -2809,10 +2824,12 @@ def exportar_pesquisas():
         'quantidade_pesquisas': len(pesquisas)
     })
     
-    return send_file(output,
-                    download_name='pesquisas_satisfacao_ro_experience.xlsx',
-                    as_attachment=True,
-                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return send_file(
+        output,
+        download_name='pesquisas_satisfacao_ro_experience.xlsx',
+        as_attachment=True,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 # Arquivo: test_postgres.py
 import psycopg2
