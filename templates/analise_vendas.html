@@ -1400,29 +1400,22 @@ function exportarParaImagem() {
         // Adicionar logo
         const logoUrl = '/static/images/logoreis.png'; // Caminho do logo
         
-        header.innerHTML = 
-        // <!-- Header com logo - VERSÃO CORRIGIDA -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #28a745;">
-    <div style="flex: 1;">
-        <h1 style="color: #28a745; margin: 0; font-size: 28px;">📊 Relatório de Análise de Vendas</h1>
-        <p style="color: #666; margin: 5px 0; font-size: 16px;">R.O Experience 2025</p>
-        <p style="color: #888; font-size: 12px; margin: 0;">
-            Filtros aplicados • Gerado em: ${dados.filtros_aplicados.data_geracao}
-        </p>
-    </div>
- 
-    <div style="width: 180px; height: 60px; display: flex; align-items: center; justify-content: flex-end;">
-        <div style="width: 150px; height: 50px; display: flex; align-items: center; justify-content: center; background: white; padding: 5px; border-radius: 4px; border: 1px solid #eee;">
-            <img src="${logoUrl}" 
-                 alt="Logo Reis" 
-                 style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
-                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'color:#666; font-size:12px;\'>Logo Reis</div>';"
-                 id="logoRelatorio"
-                 crossorigin="anonymous">
-        </div>
-    </div>
+        header.innerHTML = `
+            <div style="flex: 1;">
+                <h1 style="color: #28a745; margin: 0; font-size: 28px;">📊 Relatório de Análise de Vendas</h1>
+                <p style="color: #666; margin: 5px 0; font-size: 16px;">R.O Experience 2025</p>
+                <p style="color: #888; font-size: 12px; margin: 0;">
+                    Filtros aplicados • Gerado em: ${dados.filtros_aplicados.data_geracao}
+                </p>
+            </div>
+            <div style="width: 200px; height: 60px; display: flex; align-items: center; justify-content: flex-end;">
+    <img src="${logoUrl}" 
+         alt="Logo Reis" 
+         style="max-width: 100%; max-height: 100%; height: auto; object-fit: contain; display: block;"
+         onerror="this.style.display='none';"
+         id="logoRelatorio">
 </div>
-        
+        `;
         container.appendChild(header);
         
         // Seção de filtros
