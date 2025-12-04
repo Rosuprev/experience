@@ -87,8 +87,8 @@
                             <button class="btn btn-success-custom" onclick="exportarParaExcel()">
                                 📥 Exportar Excel
                             </button>
-                            <button class="btn btn-warning text-white" onclick="exportarParaImagem()">
-                                📊 Exportar Imagem
+                            <button class="btn btn-warning text-white" onclick="exportarParaImagem()" id="btnExportarImagem">
+                                📸 Exportar Imagem do Relatório
                             </button>
                             <button class="btn btn-secondary" onclick="resetarFiltros()">
                                 🗑️ Limpar Filtros
@@ -472,9 +472,13 @@
     </div>
 </div>
 
-<!-- Incluir Chart.js -->
+<!-- CSS local -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sweetalert2.min.css') }}">
+
+<!-- COM CDN (para teste rápido) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 // Variáveis globais
@@ -1335,14 +1339,480 @@ function exportarParaExcel() {
     
     window.location.href = `/exportar-vendas-filtradas?${params.toString()}`;
 }
-
-// Exportar para Imagem
+// Exportar para Imagem com filtros aplicados e logo
 function exportarParaImagem() {
-    html2canvas(document.querySelector(".container-fluid")).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `relatorio_vendas_${new Date().toISOString().split('T')[0]}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+    const filtros = obterFiltros();
+    
+    // Mostrar loading
+    const loadingToast = Swal.fire({
+        title: 'Gerando relatório...',
+        text: 'Processando dados com filtros aplicados',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    // Primeiro, obter os dados filtrados do backend
+    fetch('/exportar-analise-imagem', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filtros: filtros })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            loadingToast.close();
+            Swal.fire('Erro', 'Não foi possível gerar o relatório', 'error');
+            return;
+        }
+        
+        const dados = data.dados;
+        
+        // Criar um container para a imagem
+        const container = document.createElement('div');
+        container.style.cssText = `
+            width: 1200px;
+            padding: 20px;
+            background: white;
+            color: #333;
+            font-family: Arial, sans-serif;
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        `;
+        
+        // Header com logo
+        const header = document.createElement('div');
+        header.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #28a745;
+            position: relative;
+        `;
+        
+        // Adicionar logo
+        const logoUrl = '/static/images/logoreis.png'; // Caminho do logo
+        
+        header.innerHTML = 
+        // <!-- Header com logo - VERSÃO CORRIGIDA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #28a745;">
+    <div style="flex: 1;">
+        <h1 style="color: #28a745; margin: 0; font-size: 28px;">📊 Relatório de Análise de Vendas</h1>
+        <p style="color: #666; margin: 5px 0; font-size: 16px;">R.O Experience 2025</p>
+        <p style="color: #888; font-size: 12px; margin: 0;">
+            Filtros aplicados • Gerado em: ${dados.filtros_aplicados.data_geracao}
+        </p>
+    </div>
+ 
+    <div style="width: 180px; height: 60px; display: flex; align-items: center; justify-content: flex-end;">
+        <div style="width: 150px; height: 50px; display: flex; align-items: center; justify-content: center; background: white; padding: 5px; border-radius: 4px; border: 1px solid #eee;">
+            <img src="${logoUrl}" 
+                 alt="Logo Reis" 
+                 style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'color:#666; font-size:12px;\'>Logo Reis</div>';"
+                 id="logoRelatorio"
+                 crossorigin="anonymous">
+        </div>
+    </div>
+</div>
+        
+        container.appendChild(header);
+        
+        // Seção de filtros
+        const filtrosSection = document.createElement('div');
+        filtrosSection.style.cssText = `
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #20c997;
+        `;
+        
+        let filtrosText = [];
+        if (dados.filtros_aplicados.cliente !== 'todos') filtrosText.push(`Cliente: ${dados.filtros_aplicados.cliente}`);
+        if (dados.filtros_aplicados.vendedor !== 'todos') filtrosText.push(`Vendedor: ${dados.filtros_aplicados.vendedor}`);
+        if (dados.filtros_aplicados.marca !== 'todos') filtrosText.push(`Marca: ${dados.filtros_aplicados.marca}`);
+        if (dados.filtros_aplicados.equipe !== 'todos') filtrosText.push(`Equipe: ${dados.filtros_aplicados.equipe}`);
+        if (dados.filtros_aplicados.familia !== 'todos') filtrosText.push(`Família: ${dados.filtros_aplicados.familia}`);
+        if (dados.filtros_aplicados.data_inicio) filtrosText.push(`Data início: ${dados.filtros_aplicados.data_inicio}`);
+        if (dados.filtros_aplicados.data_fim) filtrosText.push(`Data fim: ${dados.filtros_aplicados.data_fim}`);
+        
+        filtrosSection.innerHTML = `
+            <h3 style="color: #20c997; margin: 0 0 10px 0; font-size: 16px;">🔍 Filtros Aplicados</h3>
+            <p style="margin: 0; color: #495057; font-size: 14px;">
+                ${filtrosText.length > 0 ? filtrosText.join(' • ') : 'Todos os dados'}
+            </p>
+        `;
+        container.appendChild(filtrosSection);
+        
+        // Métricas Consolidadas
+        const metricasSection = document.createElement('div');
+        metricasSection.style.cssText = `
+            margin-bottom: 30px;
+        `;
+        
+        metricasSection.innerHTML = `
+            <h3 style="color: #28a745; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
+                📈 Métricas Consolidadas
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 24px; color: #28a745; font-weight: bold;">
+                        R$ ${formatarNumero(dados.metricas_consolidadas.total_valor)}
+                    </div>
+                    <div style="color: #666; font-size: 12px;">Total Vendas</div>
+                </div>
+                <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 24px; color: #28a745; font-weight: bold;">
+                        ${dados.metricas_consolidadas.total_nfs}
+                    </div>
+                    <div style="color: #666; font-size: 12px;">Total de NFs</div>
+                </div>
+                <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 24px; color: #28a745; font-weight: bold;">
+                        R$ ${formatarNumero(dados.metricas_consolidadas.ticket_medio)}
+                    </div>
+                    <div style="color: #666; font-size: 12px;">Ticket Médio</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                <div style="background: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 3px solid #007bff;">
+                    <div style="font-weight: bold; color: #007bff; font-size: 14px;">🏆 Consultor Top</div>
+                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.consultor_top.nome}</div>
+                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.consultor_top.valor)}</div>
+                </div>
+                <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 3px solid #ffc107;">
+                    <div style="font-weight: bold; color: #856404; font-size: 14px;">🏢 Revenda Top</div>
+                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.cliente_top.nome}</div>
+                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.cliente_top.valor)}</div>
+                </div>
+            </div>
+        `;
+        container.appendChild(metricasSection);
+        
+        // Distribuição por Marca
+        const marcasSection = document.createElement('div');
+        marcasSection.style.cssText = `
+            margin-bottom: 30px;
+        `;
+        
+        let marcasTable = '';
+        if (dados.distribuicao_marca && dados.distribuicao_marca.length > 0) {
+            marcasTable = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Marca</th>
+                            <th style="padding: 10px; text-align: right; border-bottom: 2px solid #dee2e6;">Valor (R$)</th>
+                            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #dee2e6;">NFs</th>
+                            <th style="padding: 10px; text-align: right; border-bottom: 2px solid #dee2e6;">% Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dados.distribuicao_marca.map((marca, index) => {
+                            const percentual = dados.metricas_consolidadas.total_valor > 0 
+                                ? ((marca.valor / dados.metricas_consolidadas.total_valor) * 100).toFixed(1)
+                                : '0.0';
+                            return `
+                                <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${marca.marca}</td>
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold; color: #28a745;">
+                                        R$ ${formatarNumero(marca.valor)}
+                                    </td>
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${marca.nfs}</td>
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${percentual}%</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        } else {
+            marcasTable = '<p style="text-align: center; color: #6c757d; font-size: 14px;">Nenhuma marca encontrada</p>';
+        }
+        
+        marcasSection.innerHTML = `
+            <h3 style="color: #28a745; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
+                💰 Distribuição por Marca
+            </h3>
+            ${marcasTable}
+        `;
+        container.appendChild(marcasSection);
+        
+        // Capilaridade Geral
+        const capilaridadeSection = document.createElement('div');
+        capilaridadeSection.style.cssText = `
+            margin-bottom: 30px;
+        `;
+        
+        capilaridadeSection.innerHTML = `
+            <h3 style="color: #17a2b8; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
+                🌐 Capilaridade Geral
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
+                    <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
+                        ${dados.capilaridade_geral.total_clientes}
+                    </div>
+                    <div style="color: #666; font-size: 12px;">Clientes Únicos</div>
+                </div>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
+                    <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
+                        ${dados.capilaridade_geral.total_vendedores}
+                    </div>
+                    <div style="color: #666; font-size: 12px;">Vendedores</div>
+                </div>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
+                    <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
+                        ${dados.capilaridade_geral.total_marcas}
+                    </div>
+                    <div style="color: #666; font-size: 12px;">Marcas</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; text-align: center;">
+                    <div style="font-weight: bold; color: #6c757d; font-size: 14px;">📦 Média Itens/NF</div>
+                    <div style="font-size: 20px; color: #495057; margin: 5px 0; font-weight: bold;">
+                        ${dados.capilaridade_geral.media_itens_por_nf ? dados.capilaridade_geral.media_itens_por_nf.toFixed(1) : '0.0'}
+                    </div>
+                </div>
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; text-align: center;">
+                    <div style="font-weight: bold; color: #6c757d; font-size: 14px;">💰 Média Valor/NF</div>
+                    <div style="font-size: 20px; color: #495057; margin: 5px 0; font-weight: bold;">
+                        R$ ${formatarNumero(dados.capilaridade_geral.media_valor_por_nf || 0)}
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(capilaridadeSection);
+        
+        // Análise por Marca (se disponível)
+        if (dados.analise_marca) {
+            const analiseMarcaSection = document.createElement('div');
+            analiseMarcaSection.style.cssText = `
+                margin-bottom: 30px;
+            `;
+            
+            let produtosTable = '';
+            if (dados.analise_marca.top_produtos && dados.analise_marca.top_produtos.length > 0) {
+                produtosTable = `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #dee2e6;">Produto</th>
+                                <th style="padding: 8px; text-align: right; border-bottom: 2px solid #dee2e6;">Valor (R$)</th>
+                                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #dee2e6;">Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${dados.analise_marca.top_produtos.map((produto, index) => {
+                                const descricao = produto.descricao || 'Desconhecido';
+                                return `
+                                    <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
+                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">
+                                            ${descricao.length > 40 ? descricao.substring(0, 40) + '...' : descricao}
+                                        </td>
+                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: right; color: #28a745; font-weight: bold;">
+                                            R$ ${formatarNumero(produto.valor || 0)}
+                                        </td>
+                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: center;">
+                                            ${produto.quantidade || 0}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                produtosTable = '<p style="text-align: center; color: #6c757d; font-size: 12px;">Nenhum produto encontrado</p>';
+            }
+            
+            let clientesTable = '';
+            if (dados.analise_marca.top_clientes && dados.analise_marca.top_clientes.length > 0) {
+                clientesTable = `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #dee2e6;">Cliente</th>
+                                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #dee2e6;">NFs</th>
+                                <th style="padding: 8px; text-align: right; border-bottom: 2px solid #dee2e6;">Valor (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${dados.analise_marca.top_clientes.map((cliente, index) => {
+                                const clienteNome = cliente.cliente || 'Desconhecido';
+                                return `
+                                    <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
+                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">
+                                            ${clienteNome.length > 30 ? clienteNome.substring(0, 30) + '...' : clienteNome}
+                                        </td>
+                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: center;">
+                                            ${cliente.nfs || 0}
+                                        </td>
+                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: right; color: #28a745; font-weight: bold;">
+                                            R$ ${formatarNumero(cliente.valor || 0)}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                clientesTable = '<p style="text-align: center; color: #6c757d; font-size: 12px;">Nenhum cliente encontrado</p>';
+            }
+            
+            analiseMarcaSection.innerHTML = `
+                <h3 style="color: #6f42c1; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
+                    📊 Análise da Marca: ${dados.analise_marca.nome}
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #e9ecef; padding: 12px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 20px; color: #6f42c1; font-weight: bold;">
+                            ${dados.analise_marca.dados.total_nfs || 0}
+                        </div>
+                        <div style="color: #666; font-size: 11px;">NFs da Marca</div>
+                    </div>
+                    <div style="background: #e9ecef; padding: 12px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 20px; color: #6f42c1; font-weight: bold;">
+                            R$ ${formatarNumero(dados.analise_marca.dados.total_valor || 0)}
+                        </div>
+                        <div style="color: #666; font-size: 11px;">Valor Total</div>
+                    </div>
+                    <div style="background: #e9ecef; padding: 12px; border-radius: 6px; text-align: center;">
+                        <div style="font-size: 20px; color: #6f42c1; font-weight: bold;">
+                            ${dados.analise_marca.dados.total_quantidade || 0}
+                        </div>
+                        <div style="color: #666; font-size: 11px;">Quantidade</div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div>
+                        <h4 style="color: #495057; font-size: 14px; margin-bottom: 10px;">🏆 Top Produtos</h4>
+                        ${produtosTable}
+                    </div>
+                    <div>
+                        <h4 style="color: #495057; font-size: 14px; margin-bottom: 10px;">🏢 Top Clientes</h4>
+                        ${clientesTable}
+                    </div>
+                </div>
+            `;
+            container.appendChild(analiseMarcaSection);
+        }
+        
+        // Footer
+        const footer = document.createElement('div');
+        footer.style.cssText = `
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 11px;
+        `;
+        footer.innerHTML = `
+            <p style="margin: 0;">R.O Experience 2025 • Sistema de Gestão do Evento</p>
+            <p style="margin: 5px 0 0 0;">Relatório gerado automaticamente • Página 1/1</p>
+        `;
+        container.appendChild(footer);
+        
+        // Adicionar ao body temporariamente
+        document.body.appendChild(container);
+        
+        // Função para garantir que o logo seja carregado
+        const waitForLogo = new Promise((resolve) => {
+            const logoImg = container.querySelector('#logoRelatorio');
+            if (!logoImg || logoImg.complete) {
+                resolve();
+                return;
+            }
+            
+            logoImg.onload = resolve;
+            logoImg.onerror = resolve; // Se der erro, continua mesmo sem logo
+            setTimeout(resolve, 1000); // Timeout de segurança
+        });
+        
+        // Esperar o logo carregar antes de gerar a imagem
+        waitForLogo.then(() => {
+            // Gerar imagem
+            html2canvas(container, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: container.offsetWidth,
+                height: container.scrollHeight
+            }).then(canvas => {
+                // Remover container temporário
+                document.body.removeChild(container);
+                
+                // Criar link para download
+                const link = document.createElement('a');
+                const dataAtual = new Date();
+                const nomeArquivo = `relatorio_vendas_${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}-${String(dataAtual.getDate()).padStart(2, '0')}_${dataAtual.getTime()}.png`;
+                link.download = nomeArquivo;
+                link.href = canvas.toDataURL('image/png');
+                
+                // Fechar loading e mostrar sucesso
+                loadingToast.close();
+                
+                // Mostrar preview e opção de download
+                Swal.fire({
+                    title: 'Relatório Gerado!',
+                    html: `
+                        <div style="text-align: center;">
+                            <p style="margin-bottom: 15px;">Relatório exportado com sucesso!</p>
+                            <div style="margin: 15px 0; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #f8f9fa;">
+                                <img src="${link.href}" style="max-width: 100%; border-radius: 4px;" />
+                            </div>
+                            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                                <strong>Arquivo:</strong> ${nomeArquivo}<br>
+                                Clique no botão abaixo para baixar
+                            </p>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    cancelButtonText: 'Fechar',
+                    confirmButtonText: '📥 Download',
+                    confirmButtonColor: '#28a745',
+                    width: '700px',
+                    customClass: {
+                        popup: 'custom-swal-popup'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        link.click();
+                        // Mostrar confirmação
+                        Swal.fire({
+                            title: 'Download Iniciado!',
+                            text: 'O arquivo está sendo baixado',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                });
+                
+            }).catch(error => {
+                console.error('Erro ao gerar imagem:', error);
+                document.body.removeChild(container);
+                loadingToast.close();
+                Swal.fire('Erro', 'Não foi possível gerar a imagem do relatório', 'error');
+            });
+        });
+        
+    }).catch(error => {
+        console.error('Erro ao obter dados:', error);
+        loadingToast.close();
+        Swal.fire('Erro', 'Não foi possível obter os dados para o relatório', 'error');
     });
 }
 

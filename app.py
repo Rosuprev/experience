@@ -4158,6 +4158,222 @@ def download_template_vendas():
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
 
+@app.route('/exportar-analise-imagem', methods=['POST'])
+@login_required
+def exportar_analise_imagem():
+    """API para exportar análise como imagem com filtros aplicados"""
+    try:
+        data = request.get_json()
+        filtros = data.get('filtros', {})
+        
+        # Construir query com filtros
+        query = VendaEvento.query
+        
+        if filtros.get('cliente') and filtros['cliente'] != 'todos':
+            query = query.filter(VendaEvento.cliente_nome == filtros['cliente'])
+        
+        if filtros.get('vendedor') and filtros['vendedor'] != 'todos':
+            query = query.filter(VendaEvento.vendedor == filtros['vendedor'])
+        
+        if filtros.get('equipe') and filtros['equipe'] != 'todos':
+            query = query.filter(VendaEvento.equipe == filtros['equipe'])
+        
+        if filtros.get('marca') and filtros['marca'] != 'todos':
+            query = query.filter(VendaEvento.marca == filtros['marca'])
+        
+        if filtros.get('familia') and filtros['familia'] != 'todos':
+            query = query.filter(VendaEvento.familia == filtros['familia'])
+        
+        if filtros.get('data_inicio'):
+            try:
+                data_inicio = datetime.strptime(filtros['data_inicio'], '%Y-%m-%d').date()
+                query = query.filter(VendaEvento.data_emissao >= data_inicio)
+            except:
+                pass
+        
+        if filtros.get('data_fim'):
+            try:
+                data_fim = datetime.strptime(filtros['data_fim'], '%Y-%m-%d').date()
+                query = query.filter(VendaEvento.data_emissao <= data_fim)
+            except:
+                pass
+        
+        from sqlalchemy import func
+        
+        # 1. Métricas Consolidadas
+        total_nfs = query.with_entities(func.count(func.distinct(VendaEvento.numero_nf))).scalar() or 0
+        total_valor = query.with_entities(func.sum(VendaEvento.valor_total)).scalar() or 0
+        total_itens = query.with_entities(func.sum(VendaEvento.quantidade)).scalar() or 0
+        media_valor_por_nf = total_valor / total_nfs if total_nfs > 0 else 0
+        
+        # Consultor top - CONVERTER EXPLICITAMENTE
+        consultor_top_result = query.with_entities(
+            VendaEvento.vendedor,
+            func.sum(VendaEvento.valor_total).label('total_valor')
+        ).group_by(VendaEvento.vendedor).order_by(func.sum(VendaEvento.valor_total).desc()).first()
+        
+        consultor_top = {
+            'nome': consultor_top_result[0] if consultor_top_result and consultor_top_result[0] else 'N/A',
+            'valor': float(consultor_top_result[1]) if consultor_top_result and consultor_top_result[1] else 0
+        }
+        
+        # Cliente top - CONVERTER EXPLICITAMENTE
+        cliente_top_result = query.with_entities(
+            VendaEvento.cliente_nome,
+            func.sum(VendaEvento.valor_total).label('total_valor')
+        ).group_by(VendaEvento.cliente_nome).order_by(func.sum(VendaEvento.valor_total).desc()).first()
+        
+        cliente_top = {
+            'nome': cliente_top_result[0] if cliente_top_result and cliente_top_result[0] else 'N/A',
+            'valor': float(cliente_top_result[1]) if cliente_top_result and cliente_top_result[1] else 0
+        }
+        
+        # 2. Distribuição por Marca - CONVERTER EXPLICITAMENTE
+        marcas_result = query.with_entities(
+            VendaEvento.marca,
+            func.sum(VendaEvento.valor_total).label('valor_total'),
+            func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs')
+        ).group_by(VendaEvento.marca).order_by(func.sum(VendaEvento.valor_total).desc()).limit(10).all()
+        
+        marcas = []
+        for marca in marcas_result:
+            marcas.append({
+                'marca': marca[0] if marca[0] else 'Desconhecida',
+                'valor': float(marca[1]) if marca[1] else 0,
+                'nfs': int(marca[2]) if marca[2] else 0
+            })
+        
+        # 3. Capilaridade Geral
+        total_clientes = query.with_entities(func.count(func.distinct(VendaEvento.cliente_nome))).scalar() or 0
+        total_vendedores = query.with_entities(func.count(func.distinct(VendaEvento.vendedor))).scalar() or 0
+        total_marcas = query.with_entities(func.count(func.distinct(VendaEvento.marca))).scalar() or 0
+        
+        # Média de itens por NF
+        if total_nfs > 0:
+            subquery_itens = query.with_entities(
+                VendaEvento.numero_nf,
+                func.count(VendaEvento.id).label('total_itens')
+            ).group_by(VendaEvento.numero_nf).subquery()
+            
+            media_itens_por_nf = db.session.query(
+                func.avg(subquery_itens.c.total_itens)
+            ).scalar() or 0
+        else:
+            media_itens_por_nf = 0
+        
+        # 4. Análise por Marca (primeira marca)
+        marca_analise = None
+        if filtros.get('marca') and filtros['marca'] != 'todos':
+            marca_nome = filtros['marca']
+        elif marcas:
+            marca_nome = marcas[0]['marca']  # Primeira marca do resultado
+        else:
+            marca_nome = None
+        
+        if marca_nome:
+            marca_query = query.filter(VendaEvento.marca == marca_nome)
+            
+            # Dados da marca - CONVERTER EXPLICITAMENTE
+            marca_dados_result = marca_query.with_entities(
+                func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
+                func.sum(VendaEvento.valor_total).label('total_valor'),
+                func.sum(VendaEvento.quantidade).label('total_quantidade')
+            ).first()
+            
+            marca_dados = {
+                'total_nfs': int(marca_dados_result[0]) if marca_dados_result and marca_dados_result[0] else 0,
+                'total_valor': float(marca_dados_result[1]) if marca_dados_result and marca_dados_result[1] else 0,
+                'total_quantidade': int(marca_dados_result[2]) if marca_dados_result and marca_dados_result[2] else 0
+            }
+            
+            # Top produtos da marca - CONVERTER EXPLICITAMENTE
+            top_produtos_result = marca_query.with_entities(
+                VendaEvento.descricao_produto,
+                func.sum(VendaEvento.valor_total).label('total_valor'),
+                func.sum(VendaEvento.quantidade).label('total_quantidade')
+            ).group_by(VendaEvento.descricao_produto).order_by(func.sum(VendaEvento.valor_total).desc()).limit(5).all()
+            
+            top_produtos = []
+            for produto in top_produtos_result:
+                top_produtos.append({
+                    'descricao': produto[0] if produto[0] else 'Desconhecido',
+                    'valor': float(produto[1]) if produto[1] else 0,
+                    'quantidade': int(produto[2]) if produto[2] else 0
+                })
+            
+            # Top clientes da marca - CONVERTER EXPLICITAMENTE
+            top_clientes_result = marca_query.with_entities(
+                VendaEvento.cliente_nome,
+                func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
+                func.sum(VendaEvento.valor_total).label('total_valor')
+            ).group_by(VendaEvento.cliente_nome).order_by(func.sum(VendaEvento.valor_total).desc()).limit(5).all()
+            
+            top_clientes = []
+            for cliente in top_clientes_result:
+                top_clientes.append({
+                    'cliente': cliente[0] if cliente[0] else 'Desconhecido',
+                    'nfs': int(cliente[1]) if cliente[1] else 0,
+                    'valor': float(cliente[2]) if cliente[2] else 0
+                })
+            
+            marca_analise = {
+                'nome': marca_nome,
+                'dados': marca_dados,
+                'top_produtos': top_produtos,
+                'top_clientes': top_clientes
+            }
+        
+        # Preparar dados para retorno
+        dados_exportacao = {
+            'filtros_aplicados': {
+                'cliente': filtros.get('cliente', 'todos'),
+                'vendedor': filtros.get('vendedor', 'todos'),
+                'marca': filtros.get('marca', 'todos'),
+                'equipe': filtros.get('equipe', 'todos'),
+                'familia': filtros.get('familia', 'todos'),
+                'data_inicio': filtros.get('data_inicio', ''),
+                'data_fim': filtros.get('data_fim', ''),
+                'data_geracao': agora().strftime('%d/%m/%Y %H:%M')
+            },
+            'metricas_consolidadas': {
+                'total_nfs': int(total_nfs),
+                'total_valor': float(total_valor),
+                'total_itens': int(total_itens),
+                'ticket_medio': float(media_valor_por_nf),
+                'consultor_top': consultor_top,
+                'cliente_top': cliente_top
+            },
+            'distribuicao_marca': marcas,
+            'capilaridade_geral': {
+                'total_clientes': int(total_clientes),
+                'total_vendedores': int(total_vendedores),
+                'total_marcas': int(total_marcas),
+                'media_itens_por_nf': float(media_itens_por_nf),
+                'media_valor_por_nf': float(media_valor_por_nf)
+            }
+        }
+        
+        # Adicionar análise da marca se disponível
+        if marca_analise:
+            dados_exportacao['analise_marca'] = marca_analise
+        
+        # Registrar log
+        registrar_log('exportacao_analise_imagem', 'analise_vendas', {
+            'filtros': filtros,
+            'metricas_geradas': len(dados_exportacao['distribuicao_marca'])
+        })
+        
+        return jsonify({
+            'success': True,
+            'dados': dados_exportacao
+        })
+        
+    except Exception as e:
+        print(f"❌ Erro ao exportar análise para imagem: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Erro: {str(e)}'})
+        
 if __name__ == '__main__':
     with app.app_context():
         try:
