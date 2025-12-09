@@ -4243,11 +4243,10 @@ def download_template_vendas():
         as_attachment=True,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-
 @app.route('/exportar-analise-imagem', methods=['POST'])
 @login_required
 def exportar_analise_imagem():
-    """API para exportar análise como imagem com filtros aplicados"""
+    """API para exportar análise como imagem com filtros aplicados - ATUALIZADA COM NOVOS DADOS"""
     try:
         data = request.get_json()
         filtros = data.get('filtros', {})
@@ -4286,13 +4285,13 @@ def exportar_analise_imagem():
         
         from sqlalchemy import func
         
-        # 1. Métricas Consolidadas
+        # 1. Métricas Consolidadas (mantido)
         total_nfs = query.with_entities(func.count(func.distinct(VendaEvento.numero_nf))).scalar() or 0
         total_valor = query.with_entities(func.sum(VendaEvento.valor_total)).scalar() or 0
         total_itens = query.with_entities(func.sum(VendaEvento.quantidade)).scalar() or 0
         media_valor_por_nf = total_valor / total_nfs if total_nfs > 0 else 0
         
-        # Consultor top - CONVERTER EXPLICITAMENTE
+        # Consultor top
         consultor_top_result = query.with_entities(
             VendaEvento.vendedor,
             func.sum(VendaEvento.valor_total).label('total_valor')
@@ -4303,7 +4302,7 @@ def exportar_analise_imagem():
             'valor': float(consultor_top_result[1]) if consultor_top_result and consultor_top_result[1] else 0
         }
         
-        # Cliente top - CONVERTER EXPLICITAMENTE
+        # Cliente top
         cliente_top_result = query.with_entities(
             VendaEvento.cliente_nome,
             func.sum(VendaEvento.valor_total).label('total_valor')
@@ -4314,25 +4313,27 @@ def exportar_analise_imagem():
             'valor': float(cliente_top_result[1]) if cliente_top_result and cliente_top_result[1] else 0
         }
         
-        # 2. Distribuição por Marca - CONVERTER EXPLICITAMENTE
+        # 2. Distribuição por Marca COM PORCENTAGENS (ATUALIZADO)
         marcas_result = query.with_entities(
             VendaEvento.marca,
             func.sum(VendaEvento.valor_total).label('valor_total'),
             func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs')
-        ).group_by(VendaEvento.marca).order_by(func.sum(VendaEvento.valor_total).desc()).limit(10).all()
+        ).group_by(VendaEvento.marca).order_by(func.sum(VendaEvento.valor_total).desc()).all()
         
         marcas = []
         for marca in marcas_result:
+            percentual = (marca[1] / total_valor * 100) if total_valor > 0 else 0
             marcas.append({
                 'marca': marca[0] if marca[0] else 'Desconhecida',
                 'valor': float(marca[1]) if marca[1] else 0,
-                'nfs': int(marca[2]) if marca[2] else 0
+                'nfs': int(marca[2]) if marca[2] else 0,
+                'percentual': float(percentual)  # NOVO: porcentagem incluída
             })
         
-        # 3. Capilaridade Geral
+        # 3. Capilaridade Geral (mantido)
         total_clientes = query.with_entities(func.count(func.distinct(VendaEvento.cliente_nome))).scalar() or 0
         total_vendedores = query.with_entities(func.count(func.distinct(VendaEvento.vendedor))).scalar() or 0
-        total_marcas = query.with_entities(func.count(func.distinct(VendaEvento.marca))).scalar() or 0
+        total_marcas_count = query.with_entities(func.count(func.distinct(VendaEvento.marca))).scalar() or 0
         
         # Média de itens por NF
         if total_nfs > 0:
@@ -4347,7 +4348,10 @@ def exportar_analise_imagem():
         else:
             media_itens_por_nf = 0
         
-        # 4. Análise por Marca (primeira marca)
+        # Média de valor por NF (já calculada acima)
+        media_valor_por_nf = media_valor_por_nf
+        
+        # 4. ANÁLISE POR MARCA COM NOVOS DADOS (ATUALIZADO)
         marca_analise = None
         if filtros.get('marca') and filtros['marca'] != 'todos':
             marca_nome = filtros['marca']
@@ -4359,7 +4363,7 @@ def exportar_analise_imagem():
         if marca_nome:
             marca_query = query.filter(VendaEvento.marca == marca_nome)
             
-            # Dados da marca - CONVERTER EXPLICITAMENTE
+            # Dados gerais da marca
             marca_dados_result = marca_query.with_entities(
                 func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
                 func.sum(VendaEvento.valor_total).label('total_valor'),
@@ -4372,27 +4376,88 @@ def exportar_analise_imagem():
                 'total_quantidade': int(marca_dados_result[2]) if marca_dados_result and marca_dados_result[2] else 0
             }
             
-            # Top produtos da marca - CONVERTER EXPLICITAMENTE
+            # 4.1 TICKET MÉDIO POR CLIENTE (NOVO)
+            ticket_query = marca_query.with_entities(
+                VendaEvento.cliente_nome,
+                func.sum(VendaEvento.valor_total).label('valor_total')
+            ).group_by(VendaEvento.cliente_nome).subquery()
+            
+            ticket_medio_cliente = db.session.query(
+                func.avg(ticket_query.c.valor_total)
+            ).scalar() or 0
+            
+            # 4.2 CLIENTES VS COMPRADORES (NOVO)
+            compradores_marca = marca_query.with_entities(
+                func.count(func.distinct(VendaEvento.cliente_nome))
+            ).scalar() or 0
+            
+            percentual_penetracao = (compradores_marca / total_clientes * 100) if total_clientes > 0 else 0
+            
+            # 4.3 VENDAS CROS (NOVO) - NFs com múltiplas marcas
+            # Primeiro, identificar NFs que têm a marca específica
+            nfs_da_marca = marca_query.with_entities(
+                func.distinct(VendaEvento.numero_nf)
+            ).subquery()
+            
+            # Verificar quais dessas NFs têm mais de uma marca
+            nfs_multimarca = db.session.query(
+                VendaEvento.numero_nf,
+                func.count(func.distinct(VendaEvento.marca)).label('qtd_marcas'),
+                func.sum(VendaEvento.valor_total).label('valor_total_nf')
+            ).filter(VendaEvento.numero_nf.in_(
+                db.session.query(nfs_da_marca)
+            )).group_by(VendaEvento.numero_nf).having(
+                func.count(func.distinct(VendaEvento.marca)) > 1
+            ).subquery()
+            
+            # Calcular valor CROS (só o valor da marca específica nessas NFs mistas)
+            vendas_cros_result = db.session.query(
+                func.sum(VendaEvento.valor_total).label('valor_cros'),
+                func.count(func.distinct(VendaEvento.numero_nf)).label('nfs_cros')
+            ).filter(
+                VendaEvento.marca == marca_nome,
+                VendaEvento.numero_nf.in_(
+                    db.session.query(nfs_multimarca.c.numero_nf)
+                )
+            ).first()
+            
+            vendas_cros = {
+                'valor_total': float(vendas_cros_result[0]) if vendas_cros_result and vendas_cros_result[0] else 0,
+                'total_nfs': int(vendas_cros_result[1]) if vendas_cros_result and vendas_cros_result[1] else 0,
+                'percentual_faturamento': float((vendas_cros_result[0] / marca_dados['total_valor'] * 100) 
+                                                if marca_dados['total_valor'] and marca_dados['total_valor'] > 0 else 0)
+            }
+            
+            # 4.4 TOP 10 PRODUTOS POR VALOR (NOVO - ordenado por valor)
             top_produtos_result = marca_query.with_entities(
                 VendaEvento.descricao_produto,
                 func.sum(VendaEvento.valor_total).label('total_valor'),
-                func.sum(VendaEvento.quantidade).label('total_quantidade')
-            ).group_by(VendaEvento.descricao_produto).order_by(func.sum(VendaEvento.valor_total).desc()).limit(5).all()
+                func.sum(VendaEvento.quantidade).label('total_quantidade'),
+                func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs')
+            ).group_by(VendaEvento.descricao_produto).order_by(
+                func.sum(VendaEvento.valor_total).desc()  # Ordenado por VALOR
+            ).limit(10).all()
             
             top_produtos = []
             for produto in top_produtos_result:
+                percentual_produto = (produto[1] / marca_dados['total_valor'] * 100) if marca_dados['total_valor'] > 0 else 0
                 top_produtos.append({
+                    'produto': produto[0] if produto[0] else 'Desconhecido',
                     'descricao': produto[0] if produto[0] else 'Desconhecido',
                     'valor': float(produto[1]) if produto[1] else 0,
-                    'quantidade': int(produto[2]) if produto[2] else 0
+                    'quantidade': int(produto[2]) if produto[2] else 0,
+                    'nfs': int(produto[3]) if produto[3] else 0,
+                    'percentual_marca': float(percentual_produto)
                 })
             
-            # Top clientes da marca - CONVERTER EXPLICITAMENTE
+            # 4.5 TOP CLIENTES DA MARCA (opcional)
             top_clientes_result = marca_query.with_entities(
                 VendaEvento.cliente_nome,
                 func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
                 func.sum(VendaEvento.valor_total).label('total_valor')
-            ).group_by(VendaEvento.cliente_nome).order_by(func.sum(VendaEvento.valor_total).desc()).limit(5).all()
+            ).group_by(VendaEvento.cliente_nome).order_by(
+                func.sum(VendaEvento.valor_total).desc()
+            ).limit(10).all()
             
             top_clientes = []
             for cliente in top_clientes_result:
@@ -4405,11 +4470,16 @@ def exportar_analise_imagem():
             marca_analise = {
                 'nome': marca_nome,
                 'dados': marca_dados,
-                'top_produtos': top_produtos,
+                'ticket_medio_cliente': float(ticket_medio_cliente),  # NOVO
+                'clientes_compradores': int(compradores_marca),      # NOVO
+                'total_clientes_geral': int(total_clientes),         # NOVO
+                'percentual_penetracao': float(percentual_penetracao), # NOVO
+                'vendas_cros': vendas_cros,                          # NOVO
+                'top_produtos': top_produtos,                        # ATUALIZADO
                 'top_clientes': top_clientes
             }
         
-        # Preparar dados para retorno
+        # 5. PREPARAR DADOS PARA RETORNO COM NOVA ESTRUTURA
         dados_exportacao = {
             'filtros_aplicados': {
                 'cliente': filtros.get('cliente', 'todos'),
@@ -4429,24 +4499,25 @@ def exportar_analise_imagem():
                 'consultor_top': consultor_top,
                 'cliente_top': cliente_top
             },
-            'distribuicao_marca': marcas,
+            'distribuicao_marca': marcas,  # AGORA COM PORCENTAGENS
             'capilaridade_geral': {
                 'total_clientes': int(total_clientes),
                 'total_vendedores': int(total_vendedores),
-                'total_marcas': int(total_marcas),
+                'total_marcas': int(total_marcas_count),
                 'media_itens_por_nf': float(media_itens_por_nf),
                 'media_valor_por_nf': float(media_valor_por_nf)
             }
         }
         
-        # Adicionar análise da marca se disponível
+        # Adicionar análise da marca com NOVOS DADOS
         if marca_analise:
             dados_exportacao['analise_marca'] = marca_analise
         
         # Registrar log
         registrar_log('exportacao_analise_imagem', 'analise_vendas', {
             'filtros': filtros,
-            'metricas_geradas': len(dados_exportacao['distribuicao_marca'])
+            'metricas_geradas': len(dados_exportacao['distribuicao_marca']),
+            'inclui_analise_marca': marca_analise is not None
         })
         
         return jsonify({
@@ -4459,7 +4530,7 @@ def exportar_analise_imagem():
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'message': f'Erro: {str(e)}'})
-        
+           
 if __name__ == '__main__':
     with app.app_context():
         try:
