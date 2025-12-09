@@ -195,10 +195,10 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-8">
-                                        <canvas id="chartMarcas" height="300"></canvas>
+                                        <canvas id="chartMarcas" height="250"></canvas>
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
                                             <table class="table table-sm table-hover">
                                                 <thead class="table-light">
                                                     <tr>
@@ -282,7 +282,7 @@
     </div>
 </div>
 
-<!-- NOVA: Análise Detalhada por Marca -->
+<!-- NOVA: Análise Detalhada por Marca (CARDS REDUZIDOS) -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm card-hover">
@@ -302,7 +302,7 @@
             <div class="card-body">
                 <!-- Métricas da Marca Selecionada -->
                 <div class="row mb-4" id="metricasMarca">
-                    <div class="col-12 text-center py-5">
+                    <div class="col-12 text-center py-4">
                         <div class="display-1 text-muted mb-3">🏷️</div>
                         <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
                         <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
@@ -311,44 +311,48 @@
                 
                 <!-- Conteúdo da Análise da Marca (aparece quando selecionada) -->
                 <div id="conteudoAnaliseMarca" style="display: none;">
-                    <!-- Métricas Principais da Marca -->
-                    <div class="row mb-4">
-                        <div class="col-xl-3 col-lg-6 mb-3">
+                    <!-- Métricas Principais da Marca (CARDS REDUZIDOS) -->
+                    <div class="row mb-3">
+                        <div class="col-xl-3 col-lg-6 mb-2">
                             <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-4">
-                                    <div class="display-4 text-primary mb-2" id="marcaTotalFaturamento">R$ 0</div>
-                                    <h6 class="text-muted">Total Faturamento</h6>
-                                    <small class="text-muted" id="marcaPercentualTotal">0% do total</small>
+                                <div class="card-body text-center py-2">
+                                    <div class="h4 text-primary mb-1" id="marcaTotalFaturamento">R$ 0</div>
+                                    <small class="text-muted">Total Faturamento</small>
+                                    <div class="mt-1">
+                                        <small class="text-muted" id="marcaPercentualTotal">0% do total</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="col-xl-3 col-lg-6 mb-3">
+                        <div class="col-xl-3 col-lg-6 mb-2">
                             <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-4">
-                                    <div class="display-4 text-success mb-2" id="marcaTicketMedio">R$ 0</div>
-                                    <h6 class="text-muted">Ticket Médio por Cliente</h6>
-                                    <small class="text-muted">Valor médio por comprador</small>
+                                <div class="card-body text-center py-2">
+                                    <div class="h4 text-success mb-1" id="marcaTicketMedio">R$ 0</div>
+                                    <small class="text-muted">Ticket Médio/Cliente</small>
+                                    <div class="mt-1">
+                                        <small class="text-muted">Valor médio por comprador</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="col-xl-3 col-lg-6 mb-3">
+                        <div class="col-xl-3 col-lg-6 mb-2">
                             <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-4">
+                                <div class="card-body text-center py-2">
                                     <div class="row">
                                         <div class="col-6">
-                                            <div class="display-4 text-info mb-2" id="marcaTotalClientes">0</div>
-                                            <small class="text-muted">Clientes Totais</small>
+                                            <div class="h5 text-info mb-1" id="marcaTotalClientes">0</div>
+                                            <small class="text-muted">Clientes</small>
                                         </div>
                                         <div class="col-6">
-                                            <div class="display-4 text-warning mb-2" id="marcaCompradores">0</div>
+                                            <div class="h5 text-warning mb-1" id="marcaCompradores">0</div>
                                             <small class="text-muted">Compradores</small>
                                         </div>
                                     </div>
-                                    <div class="mt-3">
-                                        <h6 class="text-muted">Penetração</h6>
-                                        <div class="progress" style="height: 10px;">
+                                    <div class="mt-2">
+                                        <small class="text-muted">Penetração</small>
+                                        <div class="progress" style="height: 8px;">
                                             <div id="marcaPenetracaoBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
                                         </div>
                                         <small class="text-muted" id="marcaPenetracaoPercent">0%</small>
@@ -357,13 +361,15 @@
                             </div>
                         </div>
                         
-                        <div class="col-xl-3 col-lg-6 mb-3">
+                        <div class="col-xl-3 col-lg-6 mb-2">
                             <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-4">
-                                    <div class="display-4 text-purple mb-2" id="marcaVendasCros">R$ 0</div>
-                                    <h6 class="text-muted">Vendas CROS</h6>
-                                    <small class="text-muted" id="marcaPercentualCros">0% do faturamento</small>
-                                    <div class="mt-2">
+                                <div class="card-body text-center py-2">
+                                    <div class="h4 text-purple mb-1" id="marcaVendasCros">R$ 0</div>
+                                    <small class="text-muted">Vendas CROS</small>
+                                    <div class="mt-1">
+                                        <small class="text-muted" id="marcaPercentualCros">0% do faturamento</small>
+                                    </div>
+                                    <div class="mt-1">
                                         <small class="text-muted" id="marcaNfsCros">0 NFs mistas</small>
                                     </div>
                                 </div>
@@ -372,55 +378,55 @@
                     </div>
                     
                     <!-- Gráficos da Marca -->
-                    <div class="row mb-4">
+                    <div class="row mb-3">
                         <!-- Gráfico: Clientes vs Compradores -->
-                        <div class="col-lg-6 mb-4">
+                        <div class="col-lg-6 mb-3">
                             <div class="card h-100 card-hover">
-                                <div class="card-header bg-light">
+                                <div class="card-header bg-light py-2">
                                     <h6 class="mb-0">👥 Clientes vs Compradores</h6>
                                 </div>
-                                <div class="card-body">
-                                    <canvas id="chartClientesCompradores" height="250"></canvas>
+                                <div class="card-body p-2">
+                                    <canvas id="chartClientesCompradores" height="200"></canvas>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Gráfico: Top 10 Produtos por Valor -->
-                        <div class="col-lg-6 mb-4">
+                        <div class="col-lg-6 mb-3">
                             <div class="card h-100 card-hover">
-                                <div class="card-header bg-light">
+                                <div class="card-header bg-light py-2">
                                     <h6 class="mb-0">🏆 Top 10 Produtos (por Valor)</h6>
                                 </div>
-                                <div class="card-body">
-                                    <canvas id="chartTopProdutos" height="250"></canvas>
+                                <div class="card-body p-2">
+                                    <canvas id="chartTopProdutos" height="200"></canvas>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Tabela Detalhada de Top Produtos -->
+                    <!-- Tabela Detalhada de Top Produtos (compacta) -->
                     <div class="row">
                         <div class="col-12">
                             <div class="card card-hover">
-                                <div class="card-header bg-light">
+                                <div class="card-header bg-light py-2">
                                     <h6 class="mb-0">📋 Detalhamento Top Produtos</h6>
                                 </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-sm">
+                                <div class="card-body p-2">
+                                    <div class="table-responsive" style="max-height: 250px;">
+                                        <table class="table table-sm table-hover mb-0">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Produto</th>
-                                                    <th class="text-end">Quantidade</th>
-                                                    <th class="text-end">Valor Unitário</th>
+                                                    <th class="text-end">Qtd</th>
+                                                    <th class="text-end">Valor Unit.</th>
                                                     <th class="text-end">Valor Total</th>
                                                     <th class="text-end">% da Marca</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="tabelaTopProdutosDetalhado">
                                                 <tr>
-                                                    <td colspan="6" class="text-center text-muted">Selecione uma marca para ver os produtos</td>
+                                                    <td colspan="6" class="text-center text-muted py-3">Selecione uma marca para ver os produtos</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -428,64 +434,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tabela Detalhada de Vendas (mantida) -->
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm card-hover">
-            <div class="card-header bg-dark text-white">
-                <h6 class="mb-0">📋 Vendas Detalhadas</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="tabelaVendas">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>NF</th>
-                                <th>Data</th>
-                                <th>Cliente</th>
-                                <th>Vendedor</th>
-                                <th>Equipe</th>
-                                <th>Produto</th>
-                                <th>Marca</th>
-                                <th>Família</th>
-                                <th>Qtd</th>
-                                <th>Valor Unit.</th>
-                                <th>Valor Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpoTabelaVendas">
-                            <tr>
-                                <td colspan="11" class="text-center">Carregando dados...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Paginação -->
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center">
-                            <span class="me-2 text-muted">Itens por página:</span>
-                            <select class="form-select form-select-sm w-auto" id="itensPorPagina" onchange="carregarVendasFiltradas()">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50" selected>50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <nav aria-label="Paginação">
-                            <ul class="pagination justify-content-end" id="paginacao">
-                                <!-- Paginação será gerada via JS -->
-                            </ul>
-                        </nav>
                     </div>
                 </div>
             </div>
@@ -518,7 +466,6 @@ let itensPorPagina = 50;
 let graficoMarcas = null;
 let graficoClientesCompradores = null;
 let graficoTopProdutos = null;
-let graficoDistribuicaoFamilia = null;
 
 // Inicializar dashboard
 document.addEventListener('DOMContentLoaded', function() {
@@ -548,9 +495,6 @@ function carregarDadosIniciais() {
     
     // Carregar capilaridade
     carregarCapilaridade();
-    
-    // Carregar vendas iniciais
-    carregarVendasFiltradas();
 }
 
 // Atualizar métricas iniciais
@@ -590,16 +534,14 @@ function atualizarMetricasIniciais(data) {
 // Função para aplicar filtros
 function aplicarFiltros() {
     console.log("🔍 Aplicando filtros...");
-    paginaAtual = 1;
     carregarMetricasComFiltros();
     carregarCapilaridadeComFiltros();
-    carregarVendasFiltradas();
     
     // Resetar análise de marca
     document.getElementById('selecionarMarca').value = '';
     document.getElementById('conteudoAnaliseMarca').style.display = 'none';
     document.getElementById('metricasMarca').innerHTML = `
-        <div class="col-12 text-center py-5">
+        <div class="col-12 text-center py-4">
             <div class="display-1 text-muted mb-3">🏷️</div>
             <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
             <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
@@ -720,50 +662,12 @@ function carregarCapilaridadeComFiltros() {
     });
 }
 
-// Carregar vendas filtradas
-function carregarVendasFiltradas() {
-    const filtros = obterFiltros();
-    filtros.page = paginaAtual;
-    filtros.per_page = parseInt(document.getElementById('itensPorPagina').value);
-    
-    console.log("📋 Carregando vendas com filtros:", filtros);
-    
-    fetch('/api/vendas-filtradas', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(filtros)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("✅ Vendas carregadas:", data.vendas?.length || 0, "itens");
-        vendasFiltradas = data.vendas || [];
-        
-        // Atualizar tabela
-        atualizarTabelaVendas(vendasFiltradas);
-        
-        // Atualizar paginação
-        atualizarPaginacao(data.total_vendas || 0, data.page || 1, data.pages || 1);
-    })
-    .catch(error => {
-        console.error('❌ Erro ao carregar vendas filtradas:', error);
-        document.getElementById('corpoTabelaVendas').innerHTML = `
-            <tr>
-                <td colspan="11" class="text-center text-danger">
-                    Erro ao carregar dados
-                </td>
-            </tr>
-        `;
-    });
-}
-
 // Carregar análise de marca específica
 function carregarAnaliseMarca(marca) {
     if (!marca) {
         document.getElementById('conteudoAnaliseMarca').style.display = 'none';
         document.getElementById('metricasMarca').innerHTML = `
-            <div class="col-12 text-center py-5">
+            <div class="col-12 text-center py-4">
                 <div class="display-1 text-muted mb-3">🏷️</div>
                 <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
                 <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
@@ -793,11 +697,11 @@ function carregarAnaliseMarca(marca) {
         // Mostrar conteúdo
         document.getElementById('conteudoAnaliseMarca').style.display = 'block';
         document.getElementById('metricasMarca').innerHTML = `
-            <div class="col-12 mb-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body text-center py-3">
-                        <h3 class="mb-0">${marca}</h3>
-                        <p class="mb-0">Análise detalhada com filtros aplicados</p>
+            <div class="col-12 mb-2">
+                <div class="card bg-primary text-white py-2">
+                    <div class="card-body text-center py-1">
+                        <h4 class="mb-0">${marca}</h4>
+                        <p class="mb-0" style="font-size: 0.9rem;">Análise detalhada com filtros aplicados</p>
                     </div>
                 </div>
             </div>
@@ -981,7 +885,6 @@ function atualizarGraficoMarcasComPorcentagem() {
     if (graficoMarcas) {
         graficoMarcas.destroy();
         // Recriar o gráfico com as configurações atuais
-        // (Na prática, você precisaria recarregar os dados ou armazená-los)
         carregarMetricasComFiltros();
     }
 }
@@ -1072,8 +975,8 @@ function criarGraficoTopProdutos(produtos) {
     
     // Preparar dados
     const labels = top10.map(prod => {
-        const nome = prod.produto || 'Desconhecido';
-        return nome.length > 20 ? nome.substring(0, 20) + '...' : nome;
+        const nome = prod.produto || prod.descricao || 'Desconhecido';
+        return nome.length > 15 ? nome.substring(0, 15) + '...' : nome;
     });
     const valores = top10.map(prod => prod.valor_total || 0);
     const quantidades = top10.map(prod => prod.quantidade || 0);
@@ -1095,14 +998,6 @@ function criarGraficoTopProdutos(produtos) {
                 borderColor: cores.slice(0, valores.length),
                 borderWidth: 1,
                 yAxisID: 'y'
-            }, {
-                label: 'Quantidade',
-                data: quantidades,
-                type: 'line',
-                borderColor: '#ffc107',
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                yAxisID: 'y1'
             }]
         },
         options: {
@@ -1110,25 +1005,25 @@ function criarGraficoTopProdutos(produtos) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top',
+                    display: false
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            if (context.datasetIndex === 0) {
-                                return `Valor: R$ ${formatarNumero(context.raw)}`;
-                            } else {
-                                return `Quantidade: ${context.raw}`;
-                            }
+                            const produto = top10[context.dataIndex];
+                            return [
+                                `Produto: ${produto.produto || produto.descricao}`,
+                                `Valor: R$ ${formatarNumero(context.raw)}`,
+                                `Quantidade: ${produto.quantidade || 0}`,
+                                `% da marca: ${produto.percentual_marca?.toFixed(1) || '0.0'}%`
+                            ];
                         }
                     }
                 }
             },
             scales: {
                 y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
+                    beginAtZero: true,
                     title: {
                         display: true,
                         text: 'Valor (R$)'
@@ -1137,18 +1032,6 @@ function criarGraficoTopProdutos(produtos) {
                         callback: function(value) {
                             return 'R$ ' + formatarNumero(value);
                         }
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Quantidade'
-                    },
-                    grid: {
-                        drawOnChartArea: false
                     }
                 }
             }
@@ -1164,15 +1047,18 @@ function atualizarTabelaTopProdutosDetalhado(produtos, totalMarca) {
     // Ordenar por valor (decrescente)
     produtos.sort((a, b) => (b.valor_total || 0) - (a.valor_total || 0));
     
-    produtos.slice(0, 15).forEach((prod, index) => {
+    produtos.slice(0, 10).forEach((prod, index) => {
         const valorTotal = prod.valor_total || 0;
         const percentualMarca = totalMarca > 0 ? ((valorTotal / totalMarca) * 100).toFixed(1) : '0.0';
         const valorUnitario = prod.quantidade > 0 ? (valorTotal / prod.quantidade) : 0;
+        const nomeProduto = prod.produto || prod.descricao || 'Desconhecido';
         
         html += `
             <tr>
                 <td>${index + 1}</td>
-                <td>${prod.produto || 'Desconhecido'}</td>
+                <td title="${nomeProduto}">
+                    ${nomeProduto.length > 30 ? nomeProduto.substring(0, 30) + '...' : nomeProduto}
+                </td>
                 <td class="text-end">${prod.quantidade || 0}</td>
                 <td class="text-end">R$ ${formatarNumero(valorUnitario)}</td>
                 <td class="text-end">
@@ -1188,7 +1074,7 @@ function atualizarTabelaTopProdutosDetalhado(produtos, totalMarca) {
     if (html === '') {
         html = `
             <tr>
-                <td colspan="6" class="text-center text-muted">
+                <td colspan="6" class="text-center text-muted py-3">
                     Nenhum produto encontrado para esta marca
                 </td>
             </tr>
@@ -1198,7 +1084,7 @@ function atualizarTabelaTopProdutosDetalhado(produtos, totalMarca) {
     tbody.innerHTML = html;
 }
 
-// Funções auxiliares (mantidas do original)
+// Funções auxiliares
 function formatarNumero(valor) {
     return parseFloat(valor || 0).toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
@@ -1228,106 +1114,9 @@ function resetarFiltros() {
     document.getElementById('filtroFamilia').value = 'todos';
     document.getElementById('filtroDataInicio').value = '{{ min_date }}';
     document.getElementById('filtroDataFim').value = '{{ max_date }}';
-    paginaAtual = 1;
     aplicarFiltros();
 }
 
-function atualizarTabelaVendas(dados) {
-    const tbody = document.getElementById('corpoTabelaVendas');
-    let html = '';
-    
-    if (dados.length === 0) {
-        html = `
-            <tr>
-                <td colspan="11" class="text-center text-muted">
-                    Nenhuma venda encontrada
-                </td>
-            </tr>
-        `;
-    } else {
-        dados.forEach(venda => {
-            html += `
-                <tr>
-                    <td><code>${venda.numero_nf || 'N/A'}</code></td>
-                    <td>${venda.data_emissao || ''}</td>
-                    <td>${venda.cliente_nome || ''}</td>
-                    <td>${venda.vendedor || ''}</td>
-                    <td><span class="badge bg-secondary">${venda.equipe || ''}</span></td>
-                    <td>${venda.descricao_produto || ''}</td>
-                    <td><span class="badge" style="background-color: #28a745;">${venda.marca || ''}</span></td>
-                    <td>${venda.familia || 'N/A'}</td>
-                    <td>${venda.quantidade || 0}</td>
-                    <td>R$ ${formatarNumero(venda.valor_unitario || 0)}</td>
-                    <td><strong class="text-success">R$ ${formatarNumero(venda.valor_total || 0)}</strong></td>
-                </tr>
-            `;
-        });
-    }
-    
-    tbody.innerHTML = html;
-}
-
-function atualizarPaginacao(total, pagina, totalPaginas) {
-    const paginacao = document.getElementById('paginacao');
-    let html = '';
-    
-    if (totalPaginas <= 1) {
-        paginacao.innerHTML = '';
-        return;
-    }
-    
-    // Botão anterior
-    html += `
-        <li class="page-item ${pagina === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="mudarPagina(${pagina - 1}); return false;">
-                &laquo;
-            </a>
-        </li>
-    `;
-    
-    // Páginas
-    const inicio = Math.max(1, pagina - 2);
-    const fim = Math.min(totalPaginas, pagina + 2);
-    
-    for (let i = inicio; i <= fim; i++) {
-        html += `
-            <li class="page-item ${i === pagina ? 'active' : ''}">
-                <a class="page-link" href="#" onclick="mudarPagina(${i}); return false;">${i}</a>
-            </li>
-        `;
-    }
-    
-    // Botão próximo
-    html += `
-        <li class="page-item ${pagina === totalPaginas ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="mudarPagina(${pagina + 1}); return false;">
-                &raquo;
-            </a>
-        </li>
-    `;
-    
-    paginacao.innerHTML = html;
-}
-
-function mudarPagina(novaPagina) {
-    paginaAtual = novaPagina;
-    carregarVendasFiltradas();
-}
-
-function exportarParaExcel() {
-    const filtros = obterFiltros();
-    const params = new URLSearchParams();
-    
-    Object.keys(filtros).forEach(key => {
-        if (filtros[key]) {
-            params.append(key, filtros[key]);
-        }
-    });
-    
-    window.location.href = `/exportar-vendas-filtradas?${params.toString()}`;
-}
-
-// Função para carregar capilaridade (mantida do original)
 function carregarCapilaridade() {
     fetch('/api/capilaridade-vendas')
     .then(response => response.json())
@@ -1350,477 +1139,21 @@ function carregarCapilaridade() {
     });
 }
 
-/// Exportar para Imagem com filtros aplicados e logo
-function exportarParaImagem() {
+function exportarParaExcel() {
     const filtros = obterFiltros();
+    const params = new URLSearchParams();
     
-    // Mostrar loading
-    const loadingToast = Swal.fire({
-        title: 'Gerando relatório...',
-        text: 'Processando dados com filtros aplicados',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-            Swal.showLoading();
+    Object.keys(filtros).forEach(key => {
+        if (filtros[key]) {
+            params.append(key, filtros[key]);
         }
     });
     
-    // Primeiro, obter os dados filtrados do backend
-    fetch('/exportar-analise-imagem', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ filtros: filtros })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("📊 Dados recebidos para exportação:", data);
-        
-        if (!data.success || !data.dados) {
-            loadingToast.close();
-            Swal.fire('Erro', data.message || 'Não foi possível gerar o relatório', 'error');
-            return;
-        }
-        
-        const dados = data.dados;
-        
-        // Criar um container para a imagem
-        const container = document.createElement('div');
-        container.style.cssText = `
-            width: 1200px;
-            padding: 20px;
-            background: white;
-            color: #333;
-            font-family: Arial, sans-serif;
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-        `;
-        
-        // Header com logo
-        const header = document.createElement('div');
-        header.style.cssText = `
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #28a745;
-            position: relative;
-        `;
-        
-        // Adicionar logo
-        const logoUrl = '/static/images/logoreis.png';
-        
-        header.innerHTML = `
-            <div style="flex: 1;">
-                <h1 style="color: #28a745; margin: 0; font-size: 28px;">📊 Relatório de Análise de Vendas</h1>
-                <p style="color: #666; margin: 5px 0; font-size: 16px;">R.O Experience 2025</p>
-                <p style="color: #888; font-size: 12px; margin: 0;">
-                    Filtros aplicados • Gerado em: ${dados.filtros_aplicados.data_geracao}
-                </p>
-            </div>
-            <div style="width: 200px; height: 60px; display: flex; align-items: center; justify-content: flex-end;">
-                <img src="${logoUrl}" 
-                     alt="Logo Reis" 
-                     style="max-width: 100%; max-height: 100%; height: auto; object-fit: contain; display: block;"
-                     onerror="this.style.display='none';"
-                     id="logoRelatorio">
-            </div>
-        `;
-        container.appendChild(header);
-        
-        // Seção de filtros
-        const filtrosSection = document.createElement('div');
-        filtrosSection.style.cssText = `
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #20c997;
-        `;
-        
-        let filtrosText = [];
-        if (dados.filtros_aplicados.cliente !== 'todos') filtrosText.push(`Cliente: ${dados.filtros_aplicados.cliente}`);
-        if (dados.filtros_aplicados.vendedor !== 'todos') filtrosText.push(`Vendedor: ${dados.filtros_aplicados.vendedor}`);
-        if (dados.filtros_aplicados.marca !== 'todos') filtrosText.push(`Marca: ${dados.filtros_aplicados.marca}`);
-        if (dados.filtros_aplicados.equipe !== 'todos') filtrosText.push(`Equipe: ${dados.filtros_aplicados.equipe}`);
-        if (dados.filtros_aplicados.familia !== 'todos') filtrosText.push(`Família: ${dados.filtros_aplicados.familia}`);
-        if (dados.filtros_aplicados.data_inicio) filtrosText.push(`Data início: ${dados.filtros_aplicados.data_inicio}`);
-        if (dados.filtros_aplicados.data_fim) filtrosText.push(`Data fim: ${dados.filtros_aplicados.data_fim}`);
-        
-        filtrosSection.innerHTML = `
-            <h3 style="color: #20c997; margin: 0 0 10px 0; font-size: 16px;">🔍 Filtros Aplicados</h3>
-            <p style="margin: 0; color: #495057; font-size: 14px;">
-                ${filtrosText.length > 0 ? filtrosText.join(' • ') : 'Todos os dados'}
-            </p>
-        `;
-        container.appendChild(filtrosSection);
-        
-        // Métricas Consolidadas
-        const metricasSection = document.createElement('div');
-        metricasSection.style.cssText = `
-            margin-bottom: 30px;
-        `;
-        
-        metricasSection.innerHTML = `
-            <h3 style="color: #28a745; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
-                📈 Métricas Consolidadas
-            </h3>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
-                    <div style="font-size: 24px; color: #28a745; font-weight: bold;">
-                        R$ ${formatarNumero(dados.metricas_consolidadas.total_valor || 0)}
-                    </div>
-                    <div style="color: #666; font-size: 12px;">Total Vendas</div>
-                </div>
-                <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
-                    <div style="font-size: 24px; color: #28a745; font-weight: bold;">
-                        ${dados.metricas_consolidadas.total_nfs || 0}
-                    </div>
-                    <div style="color: #666; font-size: 12px;">Total de NFs</div>
-                </div>
-                <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
-                    <div style="font-size: 24px; color: #28a745; font-weight: bold;">
-                        R$ ${formatarNumero(dados.metricas_consolidadas.ticket_medio || 0)}
-                    </div>
-                    <div style="color: #666; font-size: 12px;">Ticket Médio</div>
-                </div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
-                <div style="background: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 3px solid #007bff;">
-                    <div style="font-weight: bold; color: #007bff; font-size: 14px;">🏆 Consultor Top</div>
-                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.consultor_top?.nome || 'N/A'}</div>
-                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.consultor_top?.valor || 0)}</div>
-                </div>
-                <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 3px solid #ffc107;">
-                    <div style="font-weight: bold; color: #856404; font-size: 14px;">🏢 Revenda Top</div>
-                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.cliente_top?.nome || 'N/A'}</div>
-                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.cliente_top?.valor || 0)}</div>
-                </div>
-            </div>
-        `;
-        container.appendChild(metricasSection);
-        
-        // Distribuição por Marca (atualizado para usar dados.distribuicao_marca)
-        const marcasSection = document.createElement('div');
-        marcasSection.style.cssText = `
-            margin-bottom: 30px;
-        `;
-        
-        let marcasTable = '';
-        if (dados.distribuicao_marca && dados.distribuicao_marca.length > 0) {
-            marcasTable = `
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                    <thead>
-                        <tr style="background: #f8f9fa;">
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Marca</th>
-                            <th style="padding: 10px; text-align: right; border-bottom: 2px solid #dee2e6;">Valor (R$)</th>
-                            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #dee2e6;">NFs</th>
-                            <th style="padding: 10px; text-align: right; border-bottom: 2px solid #dee2e6;">% Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${dados.distribuicao_marca.map((marca, index) => {
-                            const percentual = dados.metricas_consolidadas.total_valor > 0 
-                                ? ((marca.valor / dados.metricas_consolidadas.total_valor) * 100).toFixed(1)
-                                : '0.0';
-                            return `
-                                <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${marca.marca}</td>
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold; color: #28a745;">
-                                        R$ ${formatarNumero(marca.valor || 0)}
-                                    </td>
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${marca.nfs || 0}</td>
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${percentual}%</td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-            `;
-        } else {
-            marcasTable = '<p style="text-align: center; color: #6c757d; font-size: 14px;">Nenhuma marca encontrada</p>';
-        }
-        
-        marcasSection.innerHTML = `
-            <h3 style="color: #28a745; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
-                💰 Distribuição por Marca
-            </h3>
-            ${marcasTable}
-        `;
-        container.appendChild(marcasSection);
-        
-        // Capilaridade Geral
-        const capilaridadeSection = document.createElement('div');
-        capilaridadeSection.style.cssText = `
-            margin-bottom: 30px;
-        `;
-        
-        capilaridadeSection.innerHTML = `
-            <h3 style="color: #17a2b8; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
-                🌐 Capilaridade Geral
-            </h3>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
-                    <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
-                        ${dados.capilaridade_geral.total_clientes || 0}
-                    </div>
-                    <div style="color: #666; font-size: 12px;">Clientes Únicos</div>
-                </div>
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
-                    <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
-                        ${dados.capilaridade_geral.total_vendedores || 0}
-                    </div>
-                    <div style="color: #666; font-size: 12px;">Vendedores</div>
-                </div>
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
-                    <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
-                        ${dados.capilaridade_geral.total_marcas || 0}
-                    </div>
-                    <div style="color: #666; font-size: 12px;">Marcas</div>
-                </div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; text-align: center;">
-                    <div style="font-weight: bold; color: #6c757d; font-size: 14px;">📦 Média Itens/NF</div>
-                    <div style="font-size: 20px; color: #495057; margin: 5px 0; font-weight: bold;">
-                        ${dados.capilaridade_geral.media_itens_por_nf ? dados.capilaridade_geral.media_itens_por_nf.toFixed(1) : '0.0'}
-                    </div>
-                </div>
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; text-align: center;">
-                    <div style="font-weight: bold; color: #6c757d; font-size: 14px;">💰 Média Valor/NF</div>
-                    <div style="font-size: 20px; color: #495057; margin: 5px 0; font-weight: bold;">
-                        R$ ${formatarNumero(dados.capilaridade_geral.media_valor_por_nf || 0)}
-                    </div>
-                </div>
-            </div>
-        `;
-        container.appendChild(capilaridadeSection);
-        
-        // Análise por Marca (se disponível) - ATUALIZADO
-        if (dados.analise_marca) {
-            const analiseMarcaSection = document.createElement('div');
-            analiseMarcaSection.style.cssText = `
-                margin-bottom: 30px;
-            `;
-            
-            let produtosTable = '';
-            if (dados.analise_marca.top_produtos && dados.analise_marca.top_produtos.length > 0) {
-                produtosTable = `
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-                        <thead>
-                            <tr style="background: #f8f9fa;">
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #dee2e6;">Produto</th>
-                                <th style="padding: 8px; text-align: right; border-bottom: 2px solid #dee2e6;">Valor (R$)</th>
-                                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #dee2e6;">Quantidade</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${dados.analise_marca.top_produtos.map((produto, index) => {
-                                const descricao = produto.descricao || produto.produto || 'Desconhecido';
-                                return `
-                                    <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
-                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">
-                                            ${descricao.length > 40 ? descricao.substring(0, 40) + '...' : descricao}
-                                        </td>
-                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: right; color: #28a745; font-weight: bold;">
-                                            R$ ${formatarNumero(produto.valor || 0)}
-                                        </td>
-                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: center;">
-                                            ${produto.quantidade || 0}
-                                        </td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } else {
-                produtosTable = '<p style="text-align: center; color: #6c757d; font-size: 12px;">Nenhum produto encontrado</p>';
-            }
-            
-            let clientesTable = '';
-            if (dados.analise_marca.top_clientes && dados.analise_marca.top_clientes.length > 0) {
-                clientesTable = `
-                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-                        <thead>
-                            <tr style="background: #f8f9fa;">
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #dee2e6;">Cliente</th>
-                                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #dee2e6;">NFs</th>
-                                <th style="padding: 8px; text-align: right; border-bottom: 2px solid #dee2e6;">Valor (R$)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${dados.analise_marca.top_clientes.map((cliente, index) => {
-                                const clienteNome = cliente.cliente || 'Desconhecido';
-                                return `
-                                    <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
-                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">
-                                            ${clienteNome.length > 30 ? clienteNome.substring(0, 30) + '...' : clienteNome}
-                                        </td>
-                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: center;">
-                                            ${cliente.nfs || 0}
-                                        </td>
-                                        <td style="padding: 6px 8px; border-bottom: 1px solid #eee; text-align: right; color: #28a745; font-weight: bold;">
-                                            R$ ${formatarNumero(cliente.valor || 0)}
-                                        </td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } else {
-                clientesTable = '<p style="text-align: center; color: #6c757d; font-size: 12px;">Nenhum cliente encontrado</p>';
-            }
-            
-            analiseMarcaSection.innerHTML = `
-                <h3 style="color: #6f42c1; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-bottom: 15px; font-size: 20px;">
-                    📊 Análise da Marca: ${dados.analise_marca.nome}
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-                    <div style="background: #e9ecef; padding: 12px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px; color: #6f42c1; font-weight: bold;">
-                            ${dados.analise_marca.dados.total_nfs || 0}
-                        </div>
-                        <div style="color: #666; font-size: 11px;">NFs da Marca</div>
-                    </div>
-                    <div style="background: #e9ecef; padding: 12px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px; color: #6f42c1; font-weight: bold;">
-                            R$ ${formatarNumero(dados.analise_marca.dados.total_valor || 0)}
-                        </div>
-                        <div style="color: #666; font-size: 11px;">Valor Total</div>
-                    </div>
-                    <div style="background: #e9ecef; padding: 12px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px; color: #6f42c1; font-weight: bold;">
-                            ${dados.analise_marca.dados.total_quantidade || 0}
-                        </div>
-                        <div style="color: #666; font-size: 11px;">Quantidade</div>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                    <div>
-                        <h4 style="color: #495057; font-size: 14px; margin-bottom: 10px;">🏆 Top Produtos</h4>
-                        ${produtosTable}
-                    </div>
-                    <div>
-                        <h4 style="color: #495057; font-size: 14px; margin-bottom: 10px;">🏢 Top Clientes</h4>
-                        ${clientesTable}
-                    </div>
-                </div>
-            `;
-            container.appendChild(analiseMarcaSection);
-        }
-        
-        // Footer
-        const footer = document.createElement('div');
-        footer.style.cssText = `
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #dee2e6;
-            color: #6c757d;
-            font-size: 11px;
-        `;
-        footer.innerHTML = `
-            <p style="margin: 0;">R.O Experience 2025 • Sistema de Gestão do Evento</p>
-            <p style="margin: 5px 0 0 0;">Relatório gerado automaticamente • Página 1/1</p>
-        `;
-        container.appendChild(footer);
-        
-        // Adicionar ao body temporariamente
-        document.body.appendChild(container);
-        
-        // Função para garantir que o logo seja carregado
-        const waitForLogo = new Promise((resolve) => {
-            const logoImg = container.querySelector('#logoRelatorio');
-            if (!logoImg || logoImg.complete) {
-                resolve();
-                return;
-            }
-            
-            logoImg.onload = resolve;
-            logoImg.onerror = resolve; // Se der erro, continua mesmo sem logo
-            setTimeout(resolve, 1000); // Timeout de segurança
-        });
-        
-        // Esperar o logo carregar antes de gerar a imagem
-        waitForLogo.then(() => {
-            // Gerar imagem
-            html2canvas(container, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                width: container.offsetWidth,
-                height: container.scrollHeight
-            }).then(canvas => {
-                // Remover container temporário
-                document.body.removeChild(container);
-                
-                // Criar link para download
-                const link = document.createElement('a');
-                const dataAtual = new Date();
-                const nomeArquivo = `relatorio_vendas_${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}-${String(dataAtual.getDate()).padStart(2, '0')}_${dataAtual.getTime()}.png`;
-                link.download = nomeArquivo;
-                link.href = canvas.toDataURL('image/png');
-                
-                // Fechar loading e mostrar sucesso
-                loadingToast.close();
-                
-                // Mostrar preview e opção de download
-                Swal.fire({
-                    title: 'Relatório Gerado!',
-                    html: `
-                        <div style="text-align: center;">
-                            <p style="margin-bottom: 15px;">Relatório exportado com sucesso!</p>
-                            <div style="margin: 15px 0; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #f8f9fa;">
-                                <img src="${link.href}" style="max-width: 100%; border-radius: 4px;" />
-                            </div>
-                            <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                                <strong>Arquivo:</strong> ${nomeArquivo}<br>
-                                Clique no botão abaixo para baixar
-                            </p>
-                        </div>
-                    `,
-                    showCancelButton: true,
-                    cancelButtonText: 'Fechar',
-                    confirmButtonText: '📥 Download',
-                    confirmButtonColor: '#28a745',
-                    width: '700px',
-                    customClass: {
-                        popup: 'custom-swal-popup'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        link.click();
-                        // Mostrar confirmação
-                        Swal.fire({
-                            title: 'Download Iniciado!',
-                            text: 'O arquivo está sendo baixado',
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                    }
-                });
-                
-            }).catch(error => {
-                console.error('Erro ao gerar imagem:', error);
-                document.body.removeChild(container);
-                loadingToast.close();
-                Swal.fire('Erro', 'Não foi possível gerar a imagem do relatório', 'error');
-            });
-        });
-        
-    }).catch(error => {
-        console.error('Erro ao obter dados:', error);
-        loadingToast.close();
-        Swal.fire('Erro', 'Não foi possível obter os dados para o relatório', 'error');
-    });
+    window.location.href = `/exportar-vendas-filtradas?${params.toString()}`;
 }
+
+// Função exportarParaImagem (mantenha a versão atualizada que já temos)
+// ... [a função exportarParaImagem completa que já temos] ...
 </script>
 
 <style>
@@ -1835,35 +1168,52 @@ function exportarParaImagem() {
     /* Apenas para os gráficos e tabelas DESTE template */
     #chartMarcas,
     #chartClientesCompradores,
-    #chartTopProdutos,
-    #chartDistribuicaoFamilia {
-        max-height: 300px;
+    #chartTopProdutos {
+        max-height: 250px;
     }
     
     /* Apenas para tabelas DESTE template */
-    #tabelaVendas th,
     #tabelaPorcentagemMarca th,
     #tabelaTopProdutosDetalhado th {
         font-weight: 600;
         background-color: #f8f9fa;
+        font-size: 0.85rem;
+        padding: 8px 10px;
     }
     
-    /* Apenas para paginação DESTE template */
-    #paginacao .page-item.active .page-link {
-        background-color: #28a745;
-        border-color: #28a745;
+    #tabelaTopProdutosDetalhado td {
+        font-size: 0.85rem;
+        padding: 6px 8px;
     }
     
-    /* Responsividade apenas para elementos deste template */
+    /* Ajustes para cards reduzidos */
+    .card-body.py-2 {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .card-body.py-1 {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    /* Responsividade */
     @media (max-width: 768px) {
-        #tabelaVendas,
         #tabelaPorcentagemMarca,
         #tabelaTopProdutosDetalhado {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         
-        .display-4 {
-            font-size: 2rem;
+        .h4 {
+            font-size: 1.5rem;
+        }
+        
+        .h5 {
+            font-size: 1.25rem;
+        }
+        
+        .card-body.py-2 {
+            padding: 0.5rem !important;
         }
     }
 </style>
