@@ -177,15 +177,45 @@
                     </div>
                 </div>
                 
-                <!-- Distribuição por Marca -->
+                <!-- Distribuição por Marca COM PORCENTAGENS -->
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="card border-0 shadow-sm">
                             <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0">💰 Distribuição por Marca (Valor)</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">💰 Distribuição por Marca (Valor)</h6>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="togglePorcentagem" checked>
+                                        <label class="form-check-label text-white" for="togglePorcentagem">
+                                            Mostrar %
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-body">
-                                <canvas id="chartMarcas" height="300"></canvas>
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <canvas id="chartMarcas" height="300"></canvas>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                            <table class="table table-sm table-hover">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Marca</th>
+                                                        <th class="text-end">Valor</th>
+                                                        <th class="text-end">%</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tabelaPorcentagemMarca">
+                                                    <tr>
+                                                        <td colspan="3" class="text-center text-muted">Carregando dados...</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -195,19 +225,18 @@
     </div>
 </div>
 
-<!-- Análise de Capilaridade -->
+<!-- Capilaridade Geral (mantida) -->
 <div class="row mb-4">
-    <!-- Capilaridade Geral -->
-    <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm h-100 card-hover">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm card-hover">
             <div class="card-header bg-info text-white">
                 <h6 class="mb-0">🌐 Capilaridade Geral</h6>
             </div>
             <div class="card-body">
-                <div class="row text-center mb-3">
+                <div class="row text-center">
                     <div class="col-4">
                         <div class="card bg-light border-0">
-                            <div class="card-body py-2">
+                            <div class="card-body py-3">
                                 <h5 class="text-info mb-1" id="capClientes">0</h5>
                                 <small class="text-muted">Clientes</small>
                             </div>
@@ -215,7 +244,7 @@
                     </div>
                     <div class="col-4">
                         <div class="card bg-light border-0">
-                            <div class="card-body py-2">
+                            <div class="card-body py-3">
                                 <h5 class="text-success mb-1" id="capVendedores">0</h5>
                                 <small class="text-muted">Vendedores</small>
                             </div>
@@ -223,17 +252,17 @@
                     </div>
                     <div class="col-4">
                         <div class="card bg-light border-0">
-                            <div class="card-body py-2">
+                            <div class="card-body py-3">
                                 <h5 class="text-warning mb-1" id="capMarcas">0</h5>
                                 <small class="text-muted">Marcas</small>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row text-center mb-3">
+                <div class="row text-center mt-3">
                     <div class="col-6">
                         <div class="card bg-light border-0">
-                            <div class="card-body py-2">
+                            <div class="card-body py-3">
                                 <h5 class="text-secondary mb-1" id="capMediaItensNF">0.0</h5>
                                 <small class="text-muted">Média Itens/NF</small>
                             </div>
@@ -241,54 +270,25 @@
                     </div>
                     <div class="col-6">
                         <div class="card bg-light border-0">
-                            <div class="card-body py-2">
+                            <div class="card-body py-3">
                                 <h5 class="text-secondary mb-1" id="capMediaValorNF">R$ 0</h5>
                                 <small class="text-muted">Média Valor/NF</small>
                             </div>
                         </div>
                     </div>
                 </div>
-                </div>
-        </div>
-    </div>
-    
-    <!-- Capilaridade por Marca -->
-    <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm h-100 card-hover">
-            <div class="card-header bg-warning text-dark">
-                <h6 class="mb-0">🏷️ Top 10 Marcas</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-sm table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Marca</th>
-                                <th>NFs</th>
-                                <th>Clientes</th>
-                                <th>Vendedores</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaCapilaridadeMarca">
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">Carregando dados...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Análise Detalhada por Marca -->
+<!-- NOVA: Análise Detalhada por Marca -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm card-hover">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">📊 Análise por Marca</h6>
+                    <h6 class="mb-0">📊 Análise Detalhada por Marca</h6>
                     <div class="col-md-4">
                         <select class="form-select" id="selecionarMarca" onchange="carregarAnaliseMarca(this.value)">
                             <option value="">Selecione uma marca</option>
@@ -302,100 +302,130 @@
             <div class="card-body">
                 <!-- Métricas da Marca Selecionada -->
                 <div class="row mb-4" id="metricasMarca">
-                    <div class="col-12 text-center py-4">
-                        <p class="text-muted">Selecione uma marca para ver a análise detalhada</p>
+                    <div class="col-12 text-center py-5">
+                        <div class="display-1 text-muted mb-3">🏷️</div>
+                        <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
+                        <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
                     </div>
                 </div>
                 
-                <div class="row" id="conteudoMarca" style="display: none;">
-                    <!-- Top Itens Vendidos -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100 card-hover">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">🏆 Top Itens</h6>
+                <!-- Conteúdo da Análise da Marca (aparece quando selecionada) -->
+                <div id="conteudoAnaliseMarca" style="display: none;">
+                    <!-- Métricas Principais da Marca -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-lg-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body text-center py-4">
+                                    <div class="display-4 text-primary mb-2" id="marcaTotalFaturamento">R$ 0</div>
+                                    <h6 class="text-muted">Total Faturamento</h6>
+                                    <small class="text-muted" id="marcaPercentualTotal">0% do total</small>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                                    <table class="table table-sm">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Produto</th>
-                                                <th>NFs</th>
-                                                <th>Qtd</th>
-                                                <th>Valor</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabelaTopItens">
-                                            <!-- Dados serão preenchidos via JS -->
-                                        </tbody>
-                                    </table>
+                        </div>
+                        
+                        <div class="col-xl-3 col-lg-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body text-center py-4">
+                                    <div class="display-4 text-success mb-2" id="marcaTicketMedio">R$ 0</div>
+                                    <h6 class="text-muted">Ticket Médio por Cliente</h6>
+                                    <small class="text-muted">Valor médio por comprador</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-lg-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body text-center py-4">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="display-4 text-info mb-2" id="marcaTotalClientes">0</div>
+                                            <small class="text-muted">Clientes Totais</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="display-4 text-warning mb-2" id="marcaCompradores">0</div>
+                                            <small class="text-muted">Compradores</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <h6 class="text-muted">Penetração</h6>
+                                        <div class="progress" style="height: 10px;">
+                                            <div id="marcaPenetracaoBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="marcaPenetracaoPercent">0%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-lg-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body text-center py-4">
+                                    <div class="display-4 text-purple mb-2" id="marcaVendasCros">R$ 0</div>
+                                    <h6 class="text-muted">Vendas CROS</h6>
+                                    <small class="text-muted" id="marcaPercentualCros">0% do faturamento</small>
+                                    <div class="mt-2">
+                                        <small class="text-muted" id="marcaNfsCros">0 NFs mistas</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Top Consultores -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100 card-hover">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">👥 Top Consultores</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                                    <table class="table table-sm">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Consultor</th>
-                                                <th>NFs</th>
-                                                <th>Clientes</th>
-                                                <th>Valor</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabelaTopConsultores">
-                                            <!-- Dados serão preenchidos via JS -->
-                                        </tbody>
-                                    </table>
+                    <!-- Gráficos da Marca -->
+                    <div class="row mb-4">
+                        <!-- Gráfico: Clientes vs Compradores -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100 card-hover">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">👥 Clientes vs Compradores</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartClientesCompradores" height="250"></canvas>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="row" id="conteudoMarca2" style="display: none;">
-                    <!-- Top Clientes -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100 card-hover">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">🏢 Top Clientes</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                                    <table class="table table-sm">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Cliente</th>
-                                                <th>NFs</th>
-                                                <th>Valor</th>
-                                                <th>Ticket Médio</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabelaTopClientes">
-                                            <!-- Dados serão preenchidos via JS -->
-                                        </tbody>
-                                    </table>
+                        
+                        <!-- Gráfico: Top 10 Produtos por Valor -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card h-100 card-hover">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">🏆 Top 10 Produtos (por Valor)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartTopProdutos" height="250"></canvas>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Distribuição por Família -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100 card-hover">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">📦 Famílias</h6>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="chartDistribuicaoFamilia" height="250"></canvas>
+                    <!-- Tabela Detalhada de Top Produtos -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card card-hover">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">📋 Detalhamento Top Produtos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Produto</th>
+                                                    <th class="text-end">Quantidade</th>
+                                                    <th class="text-end">Valor Unitário</th>
+                                                    <th class="text-end">Valor Total</th>
+                                                    <th class="text-end">% da Marca</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabelaTopProdutosDetalhado">
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">Selecione uma marca para ver os produtos</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -405,7 +435,7 @@
     </div>
 </div>
 
-<!-- Tabela Detalhada de Vendas -->
+<!-- Tabela Detalhada de Vendas (mantida) -->
 <div class="row">
     <div class="col-12">
         <div class="card border-0 shadow-sm card-hover">
@@ -486,13 +516,21 @@ let vendasFiltradas = [];
 let paginaAtual = 1;
 let itensPorPagina = 50;
 let graficoMarcas = null;
-let graficoCapilaridadeGeral = null;
+let graficoClientesCompradores = null;
+let graficoTopProdutos = null;
 let graficoDistribuicaoFamilia = null;
 
 // Inicializar dashboard
 document.addEventListener('DOMContentLoaded', function() {
     console.log("🔧 Inicializando dashboard de análise...");
     carregarDadosIniciais();
+    
+    // Evento para toggle de porcentagem
+    document.getElementById('togglePorcentagem').addEventListener('change', function() {
+        if (graficoMarcas) {
+            atualizarGraficoMarcasComPorcentagem();
+        }
+    });
 });
 
 // Carregar dados iniciais
@@ -543,9 +581,9 @@ function atualizarMetricasIniciais(data) {
             'R$ ' + formatarNumero(data.clientes.maior_valor.valor || 0);
     }
     
-    // Criar gráfico de marcas
+    // Criar gráfico de marcas COM PORCENTAGENS
     if (data.marcas_por_nf && data.marcas_por_nf.length > 0) {
-        criarGraficoMarcas(data.marcas_por_nf);
+        criarGraficoMarcasComPorcentagem(data.marcas_por_nf, data.totais_por_nf?.total_valor || 0);
     }
 }
 
@@ -559,11 +597,12 @@ function aplicarFiltros() {
     
     // Resetar análise de marca
     document.getElementById('selecionarMarca').value = '';
-    document.getElementById('conteudoMarca').style.display = 'none';
-    document.getElementById('conteudoMarca2').style.display = 'none';
+    document.getElementById('conteudoAnaliseMarca').style.display = 'none';
     document.getElementById('metricasMarca').innerHTML = `
-        <div class="col-12 text-center py-4">
-            <p class="text-muted">Selecione uma marca para ver a análise detalhada</p>
+        <div class="col-12 text-center py-5">
+            <div class="display-1 text-muted mb-3">🏷️</div>
+            <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
+            <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
         </div>
     `;
 }
@@ -582,7 +621,7 @@ function carregarMetricasComFiltros() {
         body: JSON.stringify({
             ...filtros,
             page: 1,
-            per_page: 1  // Apenas para contar
+            per_page: 1
         })
     })
     .then(response => response.json())
@@ -600,7 +639,7 @@ function carregarMetricasComFiltros() {
         document.getElementById('ticketMedio').textContent = 
             'R$ ' + formatarNumero(ticketMedio);
         
-        // 2. Agora busca os tops da rota /api/metricas-vendas-filtradas
+        // 2. Agora busca os tops e distribuição por marca
         return fetch('/api/metricas-vendas-filtradas', {
             method: 'POST',
             headers: {
@@ -639,9 +678,10 @@ function carregarMetricasComFiltros() {
             document.getElementById('topRevendaValor').textContent = 'R$ 0';
         }
         
-        // Atualizar gráfico de marcas
+        // Atualizar gráfico de marcas COM PORCENTAGENS
+        const totalVendas = parseFloat(document.getElementById('totalValorVendas').textContent.replace('R$ ', '').replace('.', '').replace(',', '.'));
         if (data.marcas_por_nf && data.marcas_por_nf.length > 0) {
-            criarGraficoMarcas(data.marcas_por_nf);
+            criarGraficoMarcasComPorcentagem(data.marcas_por_nf, totalVendas || 0);
         }
     })
     .catch(error => {
@@ -673,17 +713,6 @@ function carregarCapilaridadeComFiltros() {
                 (data.estatisticas_gerais.media_itens_por_nf || 0).toFixed(1);
             document.getElementById('capMediaValorNF').textContent = 
                 'R$ ' + formatarNumero(data.estatisticas_gerais.media_valor_por_nf || 0);
-        }
-        
-        // Atualizar tabela de capilaridade por marca
-        if (data.capilaridade_marca && data.capilaridade_marca.length > 0) {
-            atualizarTabelaCapilaridadeMarca(data.capilaridade_marca);
-        } else {
-            document.getElementById('tabelaCapilaridadeMarca').innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center text-muted">Nenhuma marca encontrada</td>
-                </tr>
-            `;
         }
     })
     .catch(error => {
@@ -729,169 +758,15 @@ function carregarVendasFiltradas() {
     });
 }
 
-// Função inicial - Carregar dados sem filtros
-function carregarDadosIniciais() {
-    console.log("🔧 Inicializando dashboard de análise...");
-    
-    // Carregar métricas iniciais (sem filtros)
-    fetch('/api/metricas-vendas')
-    .then(response => response.json())
-    .then(data => {
-        console.log("📈 Métricas iniciais:", data);
-        
-        // Atualizar métricas básicas
-        if (data.totais_por_nf) {
-            document.getElementById('totalValorVendas').textContent = 
-                'R$ ' + formatarNumero(data.totais_por_nf.total_valor || 0);
-            document.getElementById('totalNFs').textContent = data.totais_por_nf.total_nfs || 0;
-            document.getElementById('totalItens').textContent = data.totais_por_nf.total_itens || 0;
-            document.getElementById('ticketMedio').textContent = 
-                'R$ ' + formatarNumero(data.totais_por_nf.media_valor_por_nf || 0);
-        }
-        
-        // Top consultor
-        if (data.vendedores?.maior_valor?.nome) {
-            document.getElementById('topConsultor').textContent = 
-                data.vendedores.maior_valor.nome.length > 20 ? 
-                data.vendedores.maior_valor.nome.substring(0, 20) + '...' : 
-                data.vendedores.maior_valor.nome;
-            document.getElementById('topConsultorValor').textContent = 
-                'R$ ' + formatarNumero(data.vendedores.maior_valor.valor || 0);
-        }
-        
-        // Top revenda
-        if (data.clientes?.maior_valor?.nome) {
-            document.getElementById('topRevenda').textContent = 
-                data.clientes.maior_valor.nome.length > 20 ? 
-                data.clientes.maior_valor.nome.substring(0, 20) + '...' : 
-                data.clientes.maior_valor.nome;
-            document.getElementById('topRevendaValor').textContent = 
-                'R$ ' + formatarNumero(data.clientes.maior_valor.valor || 0);
-        }
-        
-        // Gráfico de marcas
-        if (data.marcas_por_nf && data.marcas_por_nf.length > 0) {
-            criarGraficoMarcas(data.marcas_por_nf);
-        }
-    })
-    .catch(error => {
-        console.error("❌ Erro ao carregar métricas iniciais:", error);
-    });
-    
-    // Carregar capilaridade inicial
-    fetch('/api/capilaridade-vendas')
-    .then(response => response.json())
-    .then(data => {
-        console.log("🌐 Capilaridade inicial:", data);
-        
-        if (data.estatisticas_gerais) {
-            document.getElementById('capClientes').textContent = data.estatisticas_gerais.total_clientes || 0;
-            document.getElementById('capVendedores').textContent = data.estatisticas_gerais.total_vendedores || 0;
-            document.getElementById('capMarcas').textContent = data.estatisticas_gerais.total_marcas || 0;
-            document.getElementById('capMediaItensNF').textContent = 
-                (data.estatisticas_gerais.media_itens_por_nf || 0).toFixed(1);
-            document.getElementById('capMediaValorNF').textContent = 
-                'R$ ' + formatarNumero(data.estatisticas_gerais.media_valor_por_nf || 0);
-        }
-        
-        if (data.capilaridade_marca && data.capilaridade_marca.length > 0) {
-            atualizarTabelaCapilaridadeMarca(data.capilaridade_marca);
-        }
-    })
-    .catch(error => {
-        console.error('❌ Erro ao carregar capilaridade inicial:', error);
-    });
-    
-    // Carregar vendas iniciais
-    carregarVendasFiltradas();
-}
-
-// Inicializar quando a página carregar
-document.addEventListener('DOMContentLoaded', function() {
-    carregarDadosIniciais();
-});
-
-// Obter filtros atuais
-function obterFiltros() {
-    return {
-        cliente: document.getElementById('filtroCliente').value,
-        vendedor: document.getElementById('filtroVendedor').value,
-        marca: document.getElementById('filtroMarca').value,
-        equipe: document.getElementById('filtroEquipe').value,
-        familia: document.getElementById('filtroFamilia').value,
-        data_inicio: document.getElementById('filtroDataInicio').value,
-        data_fim: document.getElementById('filtroDataFim').value,
-        sort_by: 'data_emissao',
-        sort_order: 'desc'
-    };
-}
-
-// Função para resetar filtros
-function resetarFiltros() {
-    document.getElementById('filtroCliente').value = 'todos';
-    document.getElementById('filtroVendedor').value = 'todos';
-    document.getElementById('filtroMarca').value = 'todos';
-    document.getElementById('filtroEquipe').value = 'todos';
-    document.getElementById('filtroFamilia').value = 'todos';
-    document.getElementById('filtroDataInicio').value = '{{ min_date }}';
-    document.getElementById('filtroDataFim').value = '{{ max_date }}';
-    paginaAtual = 1;
-    aplicarFiltros();
-}
-
-// Funções auxiliares
-function formatarNumero(valor) {
-    return parseFloat(valor || 0).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
-
-// Carregar capilaridade
-function carregarCapilaridade() {
-    fetch('/api/capilaridade-vendas')
-    .then(response => response.json())
-    .then(data => {
-        console.log("🌐 Dados de capilaridade:", data);
-        
-        // Atualizar métricas de capilaridade
-        if (data.estatisticas_gerais) {
-            document.getElementById('capClientes').textContent = data.estatisticas_gerais.total_clientes || 0;
-            document.getElementById('capVendedores').textContent = data.estatisticas_gerais.total_vendedores || 0;
-            document.getElementById('capMarcas').textContent = data.estatisticas_gerais.total_marcas || 0;
-            document.getElementById('capMediaItensNF').textContent = 
-                (data.estatisticas_gerais.media_itens_por_nf || 0).toFixed(1);
-            document.getElementById('capMediaValorNF').textContent = 
-                'R$ ' + formatarNumero(data.estatisticas_gerais.media_valor_por_nf || 0);
-        }
-        
-        // Atualizar tabela de capilaridade por marca
-        if (data.capilaridade_marca && data.capilaridade_marca.length > 0) {
-            atualizarTabelaCapilaridadeMarca(data.capilaridade_marca);
-        } else {
-            document.getElementById('tabelaCapilaridadeMarca').innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center text-muted">Nenhum dado encontrado</td>
-                </tr>
-            `;
-        }
-        
-        // Criar gráfico de capilaridade geral
-        criarGraficoCapilaridadeGeral(data);
-    })
-    .catch(error => {
-        console.error('❌ Erro ao carregar capilaridade:', error);
-    });
-}
-
 // Carregar análise de marca específica
 function carregarAnaliseMarca(marca) {
     if (!marca) {
-        document.getElementById('conteudoMarca').style.display = 'none';
-        document.getElementById('conteudoMarca2').style.display = 'none';
+        document.getElementById('conteudoAnaliseMarca').style.display = 'none';
         document.getElementById('metricasMarca').innerHTML = `
-            <div class="col-12 text-center py-4">
-                <p class="text-muted">Selecione uma marca para ver a análise detalhada</p>
+            <div class="col-12 text-center py-5">
+                <div class="display-1 text-muted mb-3">🏷️</div>
+                <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
+                <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
             </div>
         `;
         return;
@@ -899,111 +774,12 @@ function carregarAnaliseMarca(marca) {
     
     console.log(`📊 Carregando análise da marca: ${marca}`);
     
-    // Usar a rota existente
-    fetch(`/api/analise-marca/${encodeURIComponent(marca)}`)
-    .then(response => response.json())
-    .then(data => {
-        console.log(`✅ Dados da marca ${marca}:`, data);
-        
-        // Mostrar conteúdo
-        document.getElementById('conteudoMarca').style.display = 'flex';
-        document.getElementById('conteudoMarca2').style.display = 'flex';
-        
-        // Atualizar métricas da marca
-        if (data.dados_gerais) {
-            const metricasHtml = `
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-light border-0 h-100 card-hover">
-                        <div class="card-body text-center py-3">
-                            <h4 class="text-primary mb-1">${data.dados_gerais.total_nfs || 0}</h4>
-                            <small class="text-muted">NFs da Marca</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-light border-0 h-100 card-hover">
-                        <div class="card-body text-center py-3">
-                            <h4 class="text-success mb-1">R$ ${formatarNumero(data.dados_gerais.total_valor || 0)}</h4>
-                            <small class="text-muted">Valor Total</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-light border-0 h-100 card-hover">
-                        <div class="card-body text-center py-3">
-                            <h4 class="text-warning mb-1">${data.dados_gerais.total_quantidade || 0}</h4>
-                            <small class="text-muted">Itens Vendidos</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-light border-0 h-100 card-hover">
-                        <div class="card-body text-center py-3">
-                            <h4 class="text-info mb-1">R$ ${formatarNumero(data.dados_gerais.valor_medio_unitario || 0)}</h4>
-                            <small class="text-muted">Ticket Médio</small>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('metricasMarca').innerHTML = metricasHtml;
-        }
-        
-        // Atualizar tabelas
-        if (data.top_produtos && data.top_produtos.length > 0) {
-            atualizarTabelaTopItens(data.top_produtos);
-        } else {
-            document.getElementById('tabelaTopItens').innerHTML = `
-                <tr>
-                    <td colspan="4" class="text-center text-muted">Nenhum produto encontrado</td>
-                </tr>
-            `;
-        }
-        
-        if (data.top_vendedores && data.top_vendedores.length > 0) {
-            atualizarTabelaTopConsultores(data.top_vendedores);
-        } else {
-            document.getElementById('tabelaTopConsultores').innerHTML = `
-                <tr>
-                    <td colspan="4" class="text-center text-muted">Nenhum consultor encontrado</td>
-                </tr>
-            `;
-        }
-        
-        if (data.top_clientes && data.top_clientes.length > 0) {
-            atualizarTabelaTopClientes(data.top_clientes);
-        } else {
-            document.getElementById('tabelaTopClientes').innerHTML = `
-                <tr>
-                    <td colspan="4" class="text-center text-muted">Nenhum cliente encontrado</td>
-                </tr>
-            `;
-        }
-        
-        // Criar gráfico de distribuição por família
-        if (data.distribuicao_familia && data.distribuicao_familia.length > 0) {
-            criarGraficoDistribuicaoFamilia(data.distribuicao_familia);
-        }
-    })
-    .catch(error => {
-        console.error(`❌ Erro ao carregar análise da marca ${marca}:`, error);
-        document.getElementById('metricasMarca').innerHTML = `
-            <div class="col-12 text-center py-4">
-                <p class="text-danger">Erro ao carregar dados da marca</p>
-            </div>
-        `;
-    });
-}
-
-// Carregar vendas filtradas
-function carregarVendasFiltradas() {
+    // Obter filtros atuais
     const filtros = obterFiltros();
-    filtros.page = paginaAtual;
-    filtros.per_page = parseInt(document.getElementById('itensPorPagina').value);
+    filtros.marca_especifica = marca;
     
-    console.log("📋 Carregando vendas com filtros:", filtros);
-    
-    // Usar a rota existente
-    fetch('/api/vendas-filtradas', {
+    // Usar nova rota para análise detalhada da marca
+    fetch('/api/analise-detalhada-marca', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1012,46 +788,84 @@ function carregarVendasFiltradas() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log("✅ Vendas carregadas:", data.vendas?.length || 0, "itens");
-        vendasFiltradas = data.vendas || [];
+        console.log(`✅ Dados detalhados da marca ${marca}:`, data);
         
-        // Atualizar tabela
-        atualizarTabelaVendas(vendasFiltradas);
+        // Mostrar conteúdo
+        document.getElementById('conteudoAnaliseMarca').style.display = 'block';
+        document.getElementById('metricasMarca').innerHTML = `
+            <div class="col-12 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center py-3">
+                        <h3 class="mb-0">${marca}</h3>
+                        <p class="mb-0">Análise detalhada com filtros aplicados</p>
+                    </div>
+                </div>
+            </div>
+        `;
         
-        // Atualizar paginação
-        if (data.total_vendas) {
-            atualizarPaginacao(data.total_vendas, data.page || 1, data.pages || 1);
+        // Atualizar métricas da marca
+        if (data.dados_gerais) {
+            atualizarMetricasMarca(data.dados_gerais, data);
         }
+        
+        // Criar gráficos
+        if (data.clientes_compradores) {
+            criarGraficoClientesCompradores(data.clientes_compradores);
+        }
+        
+        if (data.top_produtos && data.top_produtos.length > 0) {
+            criarGraficoTopProdutos(data.top_produtos);
+            atualizarTabelaTopProdutosDetalhado(data.top_produtos, data.dados_gerais?.total_valor || 0);
+        }
+        
     })
     .catch(error => {
-        console.error('❌ Erro ao carregar vendas filtradas:', error);
-        document.getElementById('corpoTabelaVendas').innerHTML = `
-            <tr>
-                <td colspan="11" class="text-center text-danger">
-                    Erro ao carregar dados
-                </td>
-            </tr>
+        console.error(`❌ Erro ao carregar análise da marca ${marca}:`, error);
+        document.getElementById('metricasMarca').innerHTML = `
+            <div class="col-12 text-center py-4">
+                <p class="text-danger">Erro ao carregar dados da marca</p>
+                <p class="text-muted">${error.message}</p>
+            </div>
         `;
     });
 }
 
-// Obter filtros atuais
-function obterFiltros() {
-    return {
-        cliente: document.getElementById('filtroCliente').value,
-        vendedor: document.getElementById('filtroVendedor').value,
-        marca: document.getElementById('filtroMarca').value,
-        equipe: document.getElementById('filtroEquipe').value,
-        familia: document.getElementById('filtroFamilia').value,
-        data_inicio: document.getElementById('filtroDataInicio').value,
-        data_fim: document.getElementById('filtroDataFim').value,
-        sort_by: 'data_emissao',
-        sort_order: 'desc'
-    };
+// Atualizar métricas da marca
+function atualizarMetricasMarca(dados, dataCompleta) {
+    // Total faturamento
+    const totalFaturamento = dados.total_valor || 0;
+    const totalGeral = parseFloat(document.getElementById('totalValorVendas').textContent.replace('R$ ', '').replace('.', '').replace(',', '.'));
+    const percentualTotal = totalGeral > 0 ? (totalFaturamento / totalGeral * 100).toFixed(1) : 0;
+    
+    document.getElementById('marcaTotalFaturamento').textContent = 'R$ ' + formatarNumero(totalFaturamento);
+    document.getElementById('marcaPercentualTotal').textContent = percentualTotal + '% do total';
+    
+    // Ticket médio
+    const ticketMedio = dados.ticket_medio_cliente || 0;
+    document.getElementById('marcaTicketMedio').textContent = 'R$ ' + formatarNumero(ticketMedio);
+    
+    // Clientes vs Compradores
+    const totalClientes = dataCompleta.estatisticas_clientes?.total_clientes || 0;
+    const compradoresMarca = dados.clientes_compradores || 0;
+    const penetracao = totalClientes > 0 ? (compradoresMarca / totalClientes * 100).toFixed(1) : 0;
+    
+    document.getElementById('marcaTotalClientes').textContent = totalClientes;
+    document.getElementById('marcaCompradores').textContent = compradoresMarca;
+    document.getElementById('marcaPenetracaoBar').style.width = penetracao + '%';
+    document.getElementById('marcaPenetracaoPercent').textContent = penetracao + '%';
+    
+    // Vendas CROS
+    const vendasCros = dados.vendas_cros?.valor_total || 0;
+    const nfsCros = dados.vendas_cros?.total_nfs || 0;
+    const percentualCros = totalFaturamento > 0 ? (vendasCros / totalFaturamento * 100).toFixed(1) : 0;
+    
+    document.getElementById('marcaVendasCros').textContent = 'R$ ' + formatarNumero(vendasCros);
+    document.getElementById('marcaPercentualCros').textContent = percentualCros + '% do faturamento';
+    document.getElementById('marcaNfsCros').textContent = nfsCros + ' NFs mistas';
 }
 
-// Criar gráfico de marcas
-function criarGraficoMarcas(dadosMarcas) {
+// Criar gráfico de marcas COM PORCENTAGENS
+function criarGraficoMarcasComPorcentagem(dadosMarcas, totalVendas) {
     const ctx = document.getElementById('chartMarcas');
     if (!ctx) {
         console.error("❌ Elemento chartMarcas não encontrado!");
@@ -1063,15 +877,27 @@ function criarGraficoMarcas(dadosMarcas) {
         graficoMarcas.destroy();
     }
     
+    // Ordenar por valor (decrescente)
+    dadosMarcas.sort((a, b) => (b.valor || 0) - (a.valor || 0));
+    
     // Preparar dados
     const labels = dadosMarcas.map(marca => marca.marca || 'Desconhecida');
     const valores = dadosMarcas.map(marca => marca.valor || 0);
+    const porcentagens = totalVendas > 0 ? 
+        valores.map(valor => ((valor / totalVendas) * 100).toFixed(1)) : 
+        valores.map(() => '0.0');
+    
+    // Atualizar tabela de porcentagens
+    atualizarTabelaPorcentagemMarca(dadosMarcas, totalVendas);
     
     // Cores do dashboard original
     const cores = [
         '#28a745', '#20c997', '#17a2b8', '#007bff', '#6f42c1',
         '#e83e8c', '#fd7e14', '#ffc107', '#dc3545', '#343a40'
     ];
+    
+    // Configurar tooltip com ou sem porcentagem
+    const showPercentage = document.getElementById('togglePorcentagem').checked;
     
     graficoMarcas = new Chart(ctx, {
         type: 'bar',
@@ -1095,7 +921,10 @@ function criarGraficoMarcas(dadosMarcas) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `R$ ${formatarNumero(context.raw)}`;
+                            const valor = context.raw;
+                            const porcentagem = showPercentage ? 
+                                ` (${((valor / totalVendas) * 100).toFixed(1)}%)` : '';
+                            return `R$ ${formatarNumero(valor)}${porcentagem}`;
                         }
                     }
                 }
@@ -1114,48 +943,112 @@ function criarGraficoMarcas(dadosMarcas) {
     });
 }
 
+// Atualizar tabela de porcentagem de marcas
+function atualizarTabelaPorcentagemMarca(dadosMarcas, totalVendas) {
+    const tbody = document.getElementById('tabelaPorcentagemMarca');
+    let html = '';
+    
+    // Ordenar por valor (decrescente)
+    dadosMarcas.sort((a, b) => (b.valor || 0) - (a.valor || 0));
+    
+    dadosMarcas.slice(0, 10).forEach((marca, index) => {
+        const valor = marca.valor || 0;
+        const porcentagem = totalVendas > 0 ? ((valor / totalVendas) * 100).toFixed(1) : '0.0';
+        
+        html += `
+            <tr>
+                <td>
+                    <span class="badge" style="background-color: #28a745; color: white; padding: 3px 8px; margin-right: 8px;">
+                        ${index + 1}
+                    </span>
+                    ${marca.marca || 'Desconhecida'}
+                </td>
+                <td class="text-end">
+                    <strong class="text-success">R$ ${formatarNumero(valor)}</strong>
+                </td>
+                <td class="text-end">
+                    <span class="badge bg-info">${porcentagem}%</span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
 
+// Atualizar gráfico de marcas com toggle de porcentagem
+function atualizarGraficoMarcasComPorcentagem() {
+    if (graficoMarcas) {
+        graficoMarcas.destroy();
+        // Recriar o gráfico com as configurações atuais
+        // (Na prática, você precisaria recarregar os dados ou armazená-los)
+        carregarMetricasComFiltros();
+    }
+}
 
-// Criar gráfico de distribuição por família
-function criarGraficoDistribuicaoFamilia(dadosFamilia) {
-    const ctx = document.getElementById('chartDistribuicaoFamilia');
+// Criar gráfico de clientes vs compradores
+function criarGraficoClientesCompradores(dados) {
+    const ctx = document.getElementById('chartClientesCompradores');
     if (!ctx) return;
     
     // Destruir gráfico anterior se existir
-    if (graficoDistribuicaoFamilia) {
-        graficoDistribuicaoFamilia.destroy();
+    if (graficoClientesCompradores) {
+        graficoClientesCompradores.destroy();
     }
     
-    // Preparar dados
-    const labels = dadosFamilia.map(item => item.familia || 'Sem Família');
-    const valores = dadosFamilia.map(item => item.valor || 0);
+    const totalClientes = dados.total_clientes || 0;
+    const compradores = dados.compradores_marca || 0;
+    const naoCompradores = totalClientes - compradores;
     
-    // Cores
-    const cores = [
-        '#28a745', '#20c997', '#17a2b8', '#007bff', '#6f42c1',
-        '#e83e8c', '#fd7e14', '#ffc107', '#dc3545', '#343a40'
-    ];
-    
-    graficoDistribuicaoFamilia = new Chart(ctx, {
-        type: 'doughnut',
+    graficoClientesCompradores = new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: labels,
-            datasets: [{
-                data: valores,
-                backgroundColor: cores.slice(0, valores.length),
-                borderWidth: 1
-            }]
+            labels: ['Comparativo'],
+            datasets: [
+                {
+                    label: 'Total de Clientes',
+                    data: [totalClientes],
+                    backgroundColor: '#17a2b8',
+                    borderColor: '#117a8b',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Compradores da Marca',
+                    data: [compradores],
+                    backgroundColor: '#28a745',
+                    borderColor: '#1e7e34',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Não Compradores',
+                    data: [naoCompradores],
+                    backgroundColor: '#6c757d',
+                    borderColor: '#545b62',
+                    borderWidth: 1
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'right',
-                    labels: {
-                        font: {
-                            size: 11
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}`;
                         }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade de Clientes'
                     }
                 }
             }
@@ -1163,85 +1056,182 @@ function criarGraficoDistribuicaoFamilia(dadosFamilia) {
     });
 }
 
-// Atualizar tabela de capilaridade por marca
-function atualizarTabelaCapilaridadeMarca(dados) {
-    const tbody = document.getElementById('tabelaCapilaridadeMarca');
+// Criar gráfico de top 10 produtos por valor
+function criarGraficoTopProdutos(produtos) {
+    const ctx = document.getElementById('chartTopProdutos');
+    if (!ctx) return;
+    
+    // Destruir gráfico anterior se existir
+    if (graficoTopProdutos) {
+        graficoTopProdutos.destroy();
+    }
+    
+    // Ordenar por valor (decrescente) e pegar top 10
+    produtos.sort((a, b) => (b.valor_total || 0) - (a.valor_total || 0));
+    const top10 = produtos.slice(0, 10);
+    
+    // Preparar dados
+    const labels = top10.map(prod => {
+        const nome = prod.produto || 'Desconhecido';
+        return nome.length > 20 ? nome.substring(0, 20) + '...' : nome;
+    });
+    const valores = top10.map(prod => prod.valor_total || 0);
+    const quantidades = top10.map(prod => prod.quantidade || 0);
+    
+    // Cores
+    const cores = [
+        '#28a745', '#20c997', '#17a2b8', '#007bff', '#6f42c1',
+        '#e83e8c', '#fd7e14', '#ffc107', '#dc3545', '#343a40'
+    ];
+    
+    graficoTopProdutos = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Valor Total (R$)',
+                data: valores,
+                backgroundColor: cores.slice(0, valores.length),
+                borderColor: cores.slice(0, valores.length),
+                borderWidth: 1,
+                yAxisID: 'y'
+            }, {
+                label: 'Quantidade',
+                data: quantidades,
+                type: 'line',
+                borderColor: '#ffc107',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex === 0) {
+                                return `Valor: R$ ${formatarNumero(context.raw)}`;
+                            } else {
+                                return `Quantidade: ${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Valor (R$)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + formatarNumero(value);
+                        }
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Quantidade'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Atualizar tabela detalhada de top produtos
+function atualizarTabelaTopProdutosDetalhado(produtos, totalMarca) {
+    const tbody = document.getElementById('tabelaTopProdutosDetalhado');
     let html = '';
     
-    dados.slice(0, 10).forEach((marca, index) => {
+    // Ordenar por valor (decrescente)
+    produtos.sort((a, b) => (b.valor_total || 0) - (a.valor_total || 0));
+    
+    produtos.slice(0, 15).forEach((prod, index) => {
+        const valorTotal = prod.valor_total || 0;
+        const percentualMarca = totalMarca > 0 ? ((valorTotal / totalMarca) * 100).toFixed(1) : '0.0';
+        const valorUnitario = prod.quantidade > 0 ? (valorTotal / prod.quantidade) : 0;
+        
         html += `
             <tr>
-                <td><strong>${marca.marca || 'Desconhecida'}</strong></td>
-                <td><span class="badge bg-primary">${marca.total_nfs || 0}</span></td>
-                <td>${marca.clientes_diferentes || 0}</td>
-                <td>${marca.vendedores_diferentes || 0}</td>
-                <td><strong class="text-success">R$ ${formatarNumero(marca.valor_total || 0)}</strong></td>
+                <td>${index + 1}</td>
+                <td>${prod.produto || 'Desconhecido'}</td>
+                <td class="text-end">${prod.quantidade || 0}</td>
+                <td class="text-end">R$ ${formatarNumero(valorUnitario)}</td>
+                <td class="text-end">
+                    <strong class="text-success">R$ ${formatarNumero(valorTotal)}</strong>
+                </td>
+                <td class="text-end">
+                    <span class="badge bg-info">${percentualMarca}%</span>
+                </td>
             </tr>
         `;
     });
     
-    tbody.innerHTML = html;
-}
-
-// Atualizar tabela de top itens
-function atualizarTabelaTopItens(dados) {
-    const tbody = document.getElementById('tabelaTopItens');
-    let html = '';
-    
-    dados.slice(0, 10).forEach(item => {
-        html += `
+    if (html === '') {
+        html = `
             <tr>
-                <td>${item.produto || 'Desconhecido'}</td>
-                <td><span class="badge bg-info">${item.nfs || 0}</span></td>
-                <td>${item.quantidade || 0}</td>
-                <td><strong class="text-success">R$ ${formatarNumero(item.valor || 0)}</strong></td>
+                <td colspan="6" class="text-center text-muted">
+                    Nenhum produto encontrado para esta marca
+                </td>
             </tr>
         `;
-    });
+    }
     
     tbody.innerHTML = html;
 }
 
-// Atualizar tabela de top consultores
-function atualizarTabelaTopConsultores(dados) {
-    const tbody = document.getElementById('tabelaTopConsultores');
-    let html = '';
-    
-    dados.slice(0, 10).forEach(consultor => {
-        html += `
-            <tr>
-                <td>${consultor.vendedor || 'Desconhecido'}</td>
-                <td><span class="badge bg-success">${consultor.nfs || 0}</span></td>
-                <td>${consultor.clientes_atendidos || 0}</td>
-                <td><strong class="text-success">R$ ${formatarNumero(consultor.valor || 0)}</strong></td>
-            </tr>
-        `;
+// Funções auxiliares (mantidas do original)
+function formatarNumero(valor) {
+    return parseFloat(valor || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
-    
-    tbody.innerHTML = html;
 }
 
-// Atualizar tabela de top clientes
-function atualizarTabelaTopClientes(dados) {
-    const tbody = document.getElementById('tabelaTopClientes');
-    let html = '';
-    
-    dados.slice(0, 10).forEach(cliente => {
-        const ticketMedio = cliente.valor / (cliente.nfs || 1);
-        html += `
-            <tr>
-                <td>${cliente.cliente || 'Desconhecido'}</td>
-                <td><span class="badge bg-warning">${cliente.nfs || 0}</span></td>
-                <td><strong class="text-success">R$ ${formatarNumero(cliente.valor || 0)}</strong></td>
-                <td>R$ ${formatarNumero(ticketMedio)}</td>
-            </tr>
-        `;
-    });
-    
-    tbody.innerHTML = html;
+function obterFiltros() {
+    return {
+        cliente: document.getElementById('filtroCliente').value,
+        vendedor: document.getElementById('filtroVendedor').value,
+        marca: document.getElementById('filtroMarca').value,
+        equipe: document.getElementById('filtroEquipe').value,
+        familia: document.getElementById('filtroFamilia').value,
+        data_inicio: document.getElementById('filtroDataInicio').value,
+        data_fim: document.getElementById('filtroDataFim').value,
+        sort_by: 'data_emissao',
+        sort_order: 'desc'
+    };
 }
 
-// Atualizar tabela de vendas
+function resetarFiltros() {
+    document.getElementById('filtroCliente').value = 'todos';
+    document.getElementById('filtroVendedor').value = 'todos';
+    document.getElementById('filtroMarca').value = 'todos';
+    document.getElementById('filtroEquipe').value = 'todos';
+    document.getElementById('filtroFamilia').value = 'todos';
+    document.getElementById('filtroDataInicio').value = '{{ min_date }}';
+    document.getElementById('filtroDataFim').value = '{{ max_date }}';
+    paginaAtual = 1;
+    aplicarFiltros();
+}
+
 function atualizarTabelaVendas(dados) {
     const tbody = document.getElementById('corpoTabelaVendas');
     let html = '';
@@ -1277,7 +1267,6 @@ function atualizarTabelaVendas(dados) {
     tbody.innerHTML = html;
 }
 
-// Atualizar paginação
 function atualizarPaginacao(total, pagina, totalPaginas) {
     const paginacao = document.getElementById('paginacao');
     let html = '';
@@ -1320,13 +1309,11 @@ function atualizarPaginacao(total, pagina, totalPaginas) {
     paginacao.innerHTML = html;
 }
 
-// Mudar página
 function mudarPagina(novaPagina) {
     paginaAtual = novaPagina;
     carregarVendasFiltradas();
 }
 
-// Exportar para Excel
 function exportarParaExcel() {
     const filtros = obterFiltros();
     const params = new URLSearchParams();
@@ -1339,7 +1326,31 @@ function exportarParaExcel() {
     
     window.location.href = `/exportar-vendas-filtradas?${params.toString()}`;
 }
-// Exportar para Imagem com filtros aplicados e logo
+
+// Função para carregar capilaridade (mantida do original)
+function carregarCapilaridade() {
+    fetch('/api/capilaridade-vendas')
+    .then(response => response.json())
+    .then(data => {
+        console.log("🌐 Dados de capilaridade:", data);
+        
+        // Atualizar métricas de capilaridade
+        if (data.estatisticas_gerais) {
+            document.getElementById('capClientes').textContent = data.estatisticas_gerais.total_clientes || 0;
+            document.getElementById('capVendedores').textContent = data.estatisticas_gerais.total_vendedores || 0;
+            document.getElementById('capMarcas').textContent = data.estatisticas_gerais.total_marcas || 0;
+            document.getElementById('capMediaItensNF').textContent = 
+                (data.estatisticas_gerais.media_itens_por_nf || 0).toFixed(1);
+            document.getElementById('capMediaValorNF').textContent = 
+                'R$ ' + formatarNumero(data.estatisticas_gerais.media_valor_por_nf || 0);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar capilaridade:', error);
+    });
+}
+
+/// Exportar para Imagem com filtros aplicados e logo
 function exportarParaImagem() {
     const filtros = obterFiltros();
     
@@ -1364,9 +1375,11 @@ function exportarParaImagem() {
     })
     .then(response => response.json())
     .then(data => {
-        if (!data.success) {
+        console.log("📊 Dados recebidos para exportação:", data);
+        
+        if (!data.success || !data.dados) {
             loadingToast.close();
-            Swal.fire('Erro', 'Não foi possível gerar o relatório', 'error');
+            Swal.fire('Erro', data.message || 'Não foi possível gerar o relatório', 'error');
             return;
         }
         
@@ -1398,7 +1411,7 @@ function exportarParaImagem() {
         `;
         
         // Adicionar logo
-        const logoUrl = '/static/images/logoreis.png'; // Caminho do logo
+        const logoUrl = '/static/images/logoreis.png';
         
         header.innerHTML = `
             <div style="flex: 1;">
@@ -1409,12 +1422,12 @@ function exportarParaImagem() {
                 </p>
             </div>
             <div style="width: 200px; height: 60px; display: flex; align-items: center; justify-content: flex-end;">
-    <img src="${logoUrl}" 
-         alt="Logo Reis" 
-         style="max-width: 100%; max-height: 100%; height: auto; object-fit: contain; display: block;"
-         onerror="this.style.display='none';"
-         id="logoRelatorio">
-</div>
+                <img src="${logoUrl}" 
+                     alt="Logo Reis" 
+                     style="max-width: 100%; max-height: 100%; height: auto; object-fit: contain; display: block;"
+                     onerror="this.style.display='none';"
+                     id="logoRelatorio">
+            </div>
         `;
         container.appendChild(header);
         
@@ -1458,19 +1471,19 @@ function exportarParaImagem() {
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
                 <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 24px; color: #28a745; font-weight: bold;">
-                        R$ ${formatarNumero(dados.metricas_consolidadas.total_valor)}
+                        R$ ${formatarNumero(dados.metricas_consolidadas.total_valor || 0)}
                     </div>
                     <div style="color: #666; font-size: 12px;">Total Vendas</div>
                 </div>
                 <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 24px; color: #28a745; font-weight: bold;">
-                        ${dados.metricas_consolidadas.total_nfs}
+                        ${dados.metricas_consolidadas.total_nfs || 0}
                     </div>
                     <div style="color: #666; font-size: 12px;">Total de NFs</div>
                 </div>
                 <div style="background: #e9f7ef; padding: 15px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 24px; color: #28a745; font-weight: bold;">
-                        R$ ${formatarNumero(dados.metricas_consolidadas.ticket_medio)}
+                        R$ ${formatarNumero(dados.metricas_consolidadas.ticket_medio || 0)}
                     </div>
                     <div style="color: #666; font-size: 12px;">Ticket Médio</div>
                 </div>
@@ -1478,19 +1491,19 @@ function exportarParaImagem() {
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
                 <div style="background: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 3px solid #007bff;">
                     <div style="font-weight: bold; color: #007bff; font-size: 14px;">🏆 Consultor Top</div>
-                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.consultor_top.nome}</div>
-                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.consultor_top.valor)}</div>
+                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.consultor_top?.nome || 'N/A'}</div>
+                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.consultor_top?.valor || 0)}</div>
                 </div>
                 <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 3px solid #ffc107;">
                     <div style="font-weight: bold; color: #856404; font-size: 14px;">🏢 Revenda Top</div>
-                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.cliente_top.nome}</div>
-                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.cliente_top.valor)}</div>
+                    <div style="font-size: 18px; margin: 5px 0; font-weight: bold;">${dados.metricas_consolidadas.cliente_top?.nome || 'N/A'}</div>
+                    <div style="color: #666; font-size: 14px;">R$ ${formatarNumero(dados.metricas_consolidadas.cliente_top?.valor || 0)}</div>
                 </div>
             </div>
         `;
         container.appendChild(metricasSection);
         
-        // Distribuição por Marca
+        // Distribuição por Marca (atualizado para usar dados.distribuicao_marca)
         const marcasSection = document.createElement('div');
         marcasSection.style.cssText = `
             margin-bottom: 30px;
@@ -1517,9 +1530,9 @@ function exportarParaImagem() {
                                 <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #eee;">${marca.marca}</td>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold; color: #28a745;">
-                                        R$ ${formatarNumero(marca.valor)}
+                                        R$ ${formatarNumero(marca.valor || 0)}
                                     </td>
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${marca.nfs}</td>
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: center;">${marca.nfs || 0}</td>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #eee; text-align: right;">${percentual}%</td>
                                 </tr>
                             `;
@@ -1552,19 +1565,19 @@ function exportarParaImagem() {
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
                 <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
                     <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
-                        ${dados.capilaridade_geral.total_clientes}
+                        ${dados.capilaridade_geral.total_clientes || 0}
                     </div>
                     <div style="color: #666; font-size: 12px;">Clientes Únicos</div>
                 </div>
                 <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
                     <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
-                        ${dados.capilaridade_geral.total_vendedores}
+                        ${dados.capilaridade_geral.total_vendedores || 0}
                     </div>
                     <div style="color: #666; font-size: 12px;">Vendedores</div>
                 </div>
                 <div style="background: #e3f2fd; padding: 15px; border-radius: 6px;">
                     <div style="font-size: 28px; color: #17a2b8; font-weight: bold;">
-                        ${dados.capilaridade_geral.total_marcas}
+                        ${dados.capilaridade_geral.total_marcas || 0}
                     </div>
                     <div style="color: #666; font-size: 12px;">Marcas</div>
                 </div>
@@ -1586,7 +1599,7 @@ function exportarParaImagem() {
         `;
         container.appendChild(capilaridadeSection);
         
-        // Análise por Marca (se disponível)
+        // Análise por Marca (se disponível) - ATUALIZADO
         if (dados.analise_marca) {
             const analiseMarcaSection = document.createElement('div');
             analiseMarcaSection.style.cssText = `
@@ -1606,7 +1619,7 @@ function exportarParaImagem() {
                         </thead>
                         <tbody>
                             ${dados.analise_marca.top_produtos.map((produto, index) => {
-                                const descricao = produto.descricao || 'Desconhecido';
+                                const descricao = produto.descricao || produto.produto || 'Desconhecido';
                                 return `
                                     <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : ''}">
                                         <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">
@@ -1808,14 +1821,6 @@ function exportarParaImagem() {
         Swal.fire('Erro', 'Não foi possível obter os dados para o relatório', 'error');
     });
 }
-
-// Funções auxiliares
-function formatarNumero(valor) {
-    return parseFloat(valor || 0).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
 </script>
 
 <style>
@@ -1829,16 +1834,16 @@ function formatarNumero(valor) {
     
     /* Apenas para os gráficos e tabelas DESTE template */
     #chartMarcas,
+    #chartClientesCompradores,
+    #chartTopProdutos,
     #chartDistribuicaoFamilia {
         max-height: 300px;
     }
     
     /* Apenas para tabelas DESTE template */
     #tabelaVendas th,
-    #tabelaCapilaridadeMarca th,
-    #tabelaTopItens th,
-    #tabelaTopConsultores th,
-    #tabelaTopClientes th {
+    #tabelaPorcentagemMarca th,
+    #tabelaTopProdutosDetalhado th {
         font-weight: 600;
         background-color: #f8f9fa;
     }
@@ -1852,12 +1857,14 @@ function formatarNumero(valor) {
     /* Responsividade apenas para elementos deste template */
     @media (max-width: 768px) {
         #tabelaVendas,
-        #tabelaCapilaridadeMarca,
-        #tabelaTopItens,
-        #tabelaTopConsultores,
-        #tabelaTopClientes {
+        #tabelaPorcentagemMarca,
+        #tabelaTopProdutosDetalhado {
             font-size: 0.9rem;
         }
+        
+        .display-4 {
+            font-size: 2rem;
+        }
     }
-    </style>
+</style>
 {% endblock %}

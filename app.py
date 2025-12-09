@@ -3494,104 +3494,181 @@ def api_capilaridade_vendas():
         ]
     })
 
-@app.route('/api/analise-marca/<marca>')
+@app.route('/api/analise-detalhada-marca', methods=['POST'])
 @login_required
-def api_analise_marca(marca):
-    """Análise detalhada por marca específica - CONSIDERANDO NF"""
+def api_analise_detalhada_marca():
+    """Análise detalhada por marca específica COM FILTROS e cálculo CROS"""
+    data = request.get_json()
     
-    # Dados da marca
-    dados_marca = db.session.query(
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor'),
-        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
-        db.func.count(VendaEvento.id).label('total_itens'),
-        db.func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_medio_unitario')
-    ).filter(VendaEvento.marca == marca).first()
+    if not data.get('marca_especifica'):
+        return jsonify({'error': 'Marca não especificada'}), 400
     
-    # Top clientes da marca (por VALOR)
-    top_clientes = db.session.query(
+    marca = data['marca_especifica']
+    
+    # Construir query base para a marca específica
+    query_marca = VendaEvento.query.filter(VendaEvento.marca == marca)
+    
+    # Construir query base para totais (com filtros, exceto marca)
+    query_totais = VendaEvento.query
+    
+    # Aplicar filtros às duas queries
+    filtros_comuns = ['cliente', 'vendedor', 'equipe', 'familia', 'data_inicio', 'data_fim']
+    
+    for filtro in filtros_comuns:
+        if data.get(filtro) and data[filtro] != 'todos':
+            if filtro == 'data_inicio':
+                try:
+                    data_inicio = datetime.strptime(data['data_inicio'], '%Y-%m-%d').date()
+                    query_marca = query_marca.filter(VendaEvento.data_emissao >= data_inicio)
+                    query_totais = query_totais.filter(VendaEvento.data_emissao >= data_inicio)
+                except:
+                    pass
+            elif filtro == 'data_fim':
+                try:
+                    data_fim = datetime.strptime(data['data_fim'], '%Y-%m-%d').date()
+                    query_marca = query_marca.filter(VendaEvento.data_emissao <= data_fim)
+                    query_totais = query_totais.filter(VendaEvento.data_emissao <= data_fim)
+                except:
+                    pass
+            else:
+                campo = getattr(VendaEvento, {
+                    'cliente': 'cliente_nome',
+                    'vendedor': 'vendedor',
+                    'equipe': 'equipe',
+                    'familia': 'familia'
+                }[filtro])
+                
+                query_marca = query_marca.filter(campo == data[filtro])
+                query_totais = query_totais.filter(campo == data[filtro])
+    
+    from sqlalchemy import func
+    
+    # 1. DADOS GERAIS DA MARCA
+    dados_marca = query_marca.with_entities(
+        func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
+        func.sum(VendaEvento.valor_total).label('total_valor'),
+        func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        func.count(VendaEvento.id).label('total_itens')
+    ).first()
+    
+    # 2. TICKET MÉDIO POR CLIENTE
+    ticket_medio_query = query_marca.with_entities(
         VendaEvento.cliente_nome,
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor'),
-        db.func.sum(VendaEvento.quantidade).label('total_quantidade')
-    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.cliente_nome).order_by(db.desc(db.func.sum(VendaEvento.valor_total))).limit(10).all()  # Ordenado por VALOR
+        func.sum(VendaEvento.valor_total).label('valor_total')
+    ).group_by(VendaEvento.cliente_nome).subquery()
     
-    # Top vendedores da marca (por VALOR)
-    top_vendedores = db.session.query(
-        VendaEvento.vendedor,
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor'),
-        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
-        db.func.count(db.distinct(VendaEvento.cliente_nome)).label('clientes_atendidos')
-    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.vendedor).order_by(db.desc(db.func.sum(VendaEvento.valor_total))).limit(10).all()  # Ordenado por VALOR
+    ticket_medio_cliente = db.session.query(
+        func.avg(ticket_medio_query.c.valor_total)
+    ).scalar() or 0
     
-    # Top produtos da marca (por VALOR)
-    top_produtos = db.session.query(
+    # 3. CLIENTES COMPRADORES DA MARCA
+    clientes_compradores_marca = query_marca.with_entities(
+        func.count(func.distinct(VendaEvento.cliente_nome))
+    ).scalar() or 0
+    
+    # 4. TOTAL DE CLIENTES (todas marcas, com filtros aplicados)
+    total_clientes_geral = query_totais.with_entities(
+        func.count(func.distinct(VendaEvento.cliente_nome))
+    ).scalar() or 0
+    
+    # 5. CÁLCULO VENDAS CROS (NFs com múltiplas marcas)
+    # Primeiro, identificar NFs que têm a marca específica
+    nfs_da_marca = query_marca.with_entities(
+        func.distinct(VendaEvento.numero_nf)
+    ).subquery()
+    
+    # Agora verificar quais dessas NFs têm mais de uma marca
+    nfs_multimarca = db.session.query(
+        VendaEvento.numero_nf,
+        func.count(func.distinct(VendaEvento.marca)).label('qtd_marcas'),
+        func.sum(VendaEvento.valor_total).label('valor_total_nf')
+    ).filter(VendaEvento.numero_nf.in_(
+        db.session.query(nfs_da_marca)
+    )).group_by(VendaEvento.numero_nf).having(
+        func.count(func.distinct(VendaEvento.marca)) > 1
+    ).subquery()
+    
+    # Calcular valor CROS (só o valor da marca específica nessas NFs mistas)
+    vendas_cros = db.session.query(
+        func.sum(VendaEvento.valor_total).label('valor_cros'),
+        func.count(func.distinct(VendaEvento.numero_nf)).label('nfs_cros')
+    ).filter(
+        VendaEvento.marca == marca,
+        VendaEvento.numero_nf.in_(
+            db.session.query(nfs_multimarca.c.numero_nf)
+        )
+    ).first()
+    
+    # 6. TOP PRODUTOS DA MARCA (por VALOR)
+    top_produtos = query_marca.with_entities(
         VendaEvento.descricao_produto,
         VendaEvento.familia,
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor'),
-        db.func.sum(VendaEvento.quantidade).label('total_quantidade'),
-        db.func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_unitario_medio')
-    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.descricao_produto, VendaEvento.familia).order_by(db.desc(db.func.sum(VendaEvento.valor_total))).limit(15).all()  # Ordenado por VALOR
+        func.sum(VendaEvento.valor_total).label('total_valor'),
+        func.sum(VendaEvento.quantidade).label('total_quantidade'),
+        func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
+        func.avg(VendaEvento.valor_total / VendaEvento.quantidade).label('valor_unitario_medio')
+    ).group_by(VendaEvento.descricao_produto, VendaEvento.familia).order_by(
+        func.sum(VendaEvento.valor_total).desc()
+    ).limit(15).all()
     
-    # NFs por dia da marca
-    nfs_por_dia = db.session.query(
-        VendaEvento.data_emissao,
-        db.func.count(db.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        db.func.sum(VendaEvento.valor_total).label('total_valor')
-    ).filter(VendaEvento.marca == marca).group_by(VendaEvento.data_emissao).order_by(VendaEvento.data_emissao).all()
+    # 7. TOTAL GERAL (para cálculo de porcentagem)
+    total_geral = query_totais.with_entities(
+        func.sum(VendaEvento.valor_total)
+    ).scalar() or 0
+    
+    # 8. TOP CLIENTES DA MARCA (opcional - se quiser mostrar na tabela)
+    top_clientes = query_marca.with_entities(
+        VendaEvento.cliente_nome,
+        func.sum(VendaEvento.valor_total).label('total_valor'),
+        func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs')
+    ).group_by(VendaEvento.cliente_nome).order_by(
+        func.sum(VendaEvento.valor_total).desc()
+    ).limit(10).all()
     
     return jsonify({
-        'marca': marca,
         'dados_gerais': {
             'total_nfs': int(dados_marca[0]) if dados_marca[0] else 0,
             'total_valor': float(dados_marca[1]) if dados_marca[1] else 0,
             'total_quantidade': int(dados_marca[2]) if dados_marca[2] else 0,
             'total_itens': int(dados_marca[3]) if dados_marca[3] else 0,
-            'valor_medio_unitario': float(dados_marca[4]) if dados_marca[4] else 0,
-            'media_valor_por_nf': float(dados_marca[1] / dados_marca[0]) if dados_marca[0] and dados_marca[1] else 0,
-            'media_itens_por_nf': float(dados_marca[3] / dados_marca[0]) if dados_marca[0] and dados_marca[3] else 0
+            'ticket_medio_cliente': float(ticket_medio_cliente),
+            'clientes_compradores': int(clientes_compradores_marca),
+            'vendas_cros': {
+                'valor_total': float(vendas_cros[0]) if vendas_cros[0] else 0,
+                'total_nfs': int(vendas_cros[1]) if vendas_cros[1] else 0,
+                'percentual_faturamento': float((vendas_cros[0] / dados_marca[1] * 100) if dados_marca[1] and dados_marca[1] > 0 else 0)
+            },
+            'percentual_total': float((dados_marca[1] / total_geral * 100) if total_geral > 0 else 0)
         },
+        'estatisticas_clientes': {
+            'total_clientes': int(total_clientes_geral)
+        },
+        'clientes_compradores': {
+            'total_clientes': int(total_clientes_geral),
+            'compradores_marca': int(clientes_compradores_marca),
+            'percentual_penetracao': float((clientes_compradores_marca / total_clientes_geral * 100) if total_clientes_geral > 0 else 0)
+        },
+        'top_produtos': [
+            {
+                'produto': produto or 'Desconhecido',
+                'descricao': produto or 'Desconhecido',  # Mantido para compatibilidade
+                'familia': familia or 'N/A',
+                'valor_total': float(valor),
+                'quantidade': int(quantidade),
+                'nfs': int(nfs),
+                'valor_unitario_medio': float(valor_unitario) if valor_unitario else 0,
+                'percentual_marca': float((valor / dados_marca[1] * 100) if dados_marca[1] and dados_marca[1] > 0 else 0)
+            }
+            for produto, familia, valor, quantidade, nfs, valor_unitario in top_produtos
+        ],
         'top_clientes': [
             {
                 'cliente': cliente,
-                'nfs': int(total_nfs),
                 'valor': float(valor),
-                'quantidade': int(quantidade),
-                'media_valor_por_nf': float(valor / total_nfs) if total_nfs > 0 else 0
+                'nfs': int(nfs),
+                'ticket_medio': float(valor / nfs if nfs > 0 else 0)
             }
-            for cliente, total_nfs, valor, quantidade in top_clientes
-        ],
-        'top_vendedores': [
-            {
-                'vendedor': vendedor,
-                'nfs': int(total_nfs),
-                'valor': float(valor),
-                'quantidade': int(quantidade),
-                'clientes_atendidos': int(clientes_atendidos),
-                'media_nfs_por_cliente': float(total_nfs / clientes_atendidos) if clientes_atendidos > 0 else 0
-            }
-            for vendedor, total_nfs, valor, quantidade, clientes_atendidos in top_vendedores
-        ],
-        'top_produtos': [
-            {
-                'produto': produto,
-                'familia': familia or 'N/A',
-                'nfs': int(total_nfs),
-                'valor': float(valor),
-                'quantidade': int(quantidade),
-                'valor_unitario_medio': float(valor_unitario_medio) if valor_unitario_medio else 0
-            }
-            for produto, familia, total_nfs, valor, quantidade, valor_unitario_medio in top_produtos
-        ],
-        'nfs_por_dia': [
-            {
-                'data': data.strftime('%d/%m/%Y'),
-                'nfs': int(total_nfs),
-                'valor': float(valor)
-            }
-            for data, total_nfs, valor in nfs_por_dia
+            for cliente, valor, nfs in top_clientes
         ]
     })
 
@@ -3599,7 +3676,7 @@ def api_analise_marca(marca):
 @app.route('/api/metricas-vendas-filtradas', methods=['POST'])
 @login_required
 def api_metricas_vendas_filtradas():
-    """API para métricas consolidadas com filtros - ATUALIZADA"""
+    """API para métricas consolidadas com filtros - ATUALIZADA COM PORCENTAGENS"""
     data = request.get_json()
     
     # Construir query base
@@ -3637,34 +3714,43 @@ def api_metricas_vendas_filtradas():
     
     from sqlalchemy import func
     
-    # TOTAIS
+    # TOTAIS GERAIS
     total_nfs = query.with_entities(func.count(func.distinct(VendaEvento.numero_nf))).scalar() or 0
     total_vendas_itens = query.count()
     total_valor = query.with_entities(func.sum(VendaEvento.valor_total)).scalar() or 0
     total_quantidade = query.with_entities(func.sum(VendaEvento.quantidade)).scalar() or 0
     
+    # TOTAL DE CLIENTES ÚNICOS (para cálculo de penetração)
+    total_clientes = query.with_entities(func.count(func.distinct(VendaEvento.cliente_nome))).scalar() or 0
+    
     # Calcular valores médios
     valor_medio_item = total_valor / total_quantidade if total_quantidade > 0 else 0
     
     # Média de itens por NF
-    subquery_itens = query.with_entities(
-        VendaEvento.numero_nf,
-        func.count(VendaEvento.id).label('total_itens')
-    ).group_by(VendaEvento.numero_nf).subquery()
-    
-    media_itens_por_nf = db.session.query(
-        func.avg(subquery_itens.c.total_itens)
-    ).scalar() or 0
+    if total_nfs > 0:
+        subquery_itens = query.with_entities(
+            VendaEvento.numero_nf,
+            func.count(VendaEvento.id).label('total_itens')
+        ).group_by(VendaEvento.numero_nf).subquery()
+        
+        media_itens_por_nf = db.session.query(
+            func.avg(subquery_itens.c.total_itens)
+        ).scalar() or 0
+    else:
+        media_itens_por_nf = 0
     
     # Média de valor por NF
-    subquery_valor = query.with_entities(
-        VendaEvento.numero_nf,
-        func.sum(VendaEvento.valor_total).label('valor_total')
-    ).group_by(VendaEvento.numero_nf).subquery()
-    
-    media_valor_por_nf = db.session.query(
-        func.avg(subquery_valor.c.valor_total)
-    ).scalar() or 0
+    if total_nfs > 0:
+        subquery_valor = query.with_entities(
+            VendaEvento.numero_nf,
+            func.sum(VendaEvento.valor_total).label('valor_total')
+        ).group_by(VendaEvento.numero_nf).subquery()
+        
+        media_valor_por_nf = db.session.query(
+            func.avg(subquery_valor.c.valor_total)
+        ).scalar() or 0
+    else:
+        media_valor_por_nf = 0
     
     # Cliente que mais comprou (por valor) COM FILTROS
     cliente_maior_valor = query.with_entities(
@@ -3680,13 +3766,25 @@ def api_metricas_vendas_filtradas():
         func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs')
     ).group_by(VendaEvento.vendedor).order_by(func.sum(VendaEvento.valor_total).desc()).first()
     
-    # Marcas por quantidade de NFs COM FILTROS
+    # Marcas por quantidade de NFs COM FILTROS E PORCENTAGENS
     marcas_por_nf = query.with_entities(
         VendaEvento.marca,
         func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
         func.sum(VendaEvento.valor_total).label('total_valor'),
         func.sum(VendaEvento.quantidade).label('total_quantidade')
     ).group_by(VendaEvento.marca).order_by(func.sum(VendaEvento.valor_total).desc()).limit(10).all()
+    
+    # Calcular porcentagens para cada marca
+    marcas_com_porcentagem = []
+    for marca, total_nfs_marca, valor_marca, quantidade_marca in marcas_por_nf:
+        percentual_valor = (valor_marca / total_valor * 100) if total_valor > 0 else 0
+        marcas_com_porcentagem.append({
+            'marca': marca or 'Desconhecida',
+            'nfs': int(total_nfs_marca),
+            'valor': float(valor_marca),
+            'quantidade': int(quantidade_marca),
+            'percentual_valor': float(percentual_valor)
+        })
     
     return jsonify({
         'totais_por_nf': {
@@ -3697,6 +3795,9 @@ def api_metricas_vendas_filtradas():
             'media_itens_por_nf': float(media_itens_por_nf),
             'media_valor_por_nf': float(media_valor_por_nf),
             'media_valor_por_item': float(valor_medio_item)
+        },
+        'estatisticas_clientes': {
+            'total_clientes': int(total_clientes)
         },
         'clientes': {
             'maior_valor': {
@@ -3712,23 +3813,13 @@ def api_metricas_vendas_filtradas():
                 'nfs': vendedor_maior_valor[2] if vendedor_maior_valor else 0
             }
         },
-        'marcas_por_nf': [
-            {
-                'marca': marca or 'Desconhecida',
-                'nfs': int(total_nfs),
-                'valor': float(valor),
-                'quantidade': int(quantidade),
-                'percentual_valor': float(valor / total_valor * 100) if total_valor > 0 else 0
-            }
-            for marca, total_nfs, valor, quantidade in marcas_por_nf
-        ]
-    })
-        
+        'marcas_por_nf': marcas_com_porcentagem
+    })       
     
 @app.route('/api/capilaridade-vendas-filtradas', methods=['POST'])
 @login_required
 def api_capilaridade_vendas_filtradas():
-    """API para análise de capilaridade com filtros - ATUALIZADA"""
+    """API para análise de capilaridade com filtros - SIMPLIFICADA (sem top 10 marcas)"""
     data = request.get_json()
     
     # Construir query base
@@ -3798,17 +3889,6 @@ def api_capilaridade_vendas_filtradas():
     else:
         media_valor_por_nf = 0
     
-    # CAPILARIDADE POR MARCA COM FILTROS
-    capilaridade_marca = query.with_entities(
-        VendaEvento.marca,
-        func.count(func.distinct(VendaEvento.numero_nf)).label('total_nfs'),
-        func.count(func.distinct(VendaEvento.cliente_nome)).label('clientes_diferentes'),
-        func.count(func.distinct(VendaEvento.vendedor)).label('vendedores_diferentes'),
-        func.sum(VendaEvento.valor_total).label('valor_total'),
-        func.sum(VendaEvento.quantidade).label('quantidade_total'),
-        func.count(VendaEvento.id).label('total_itens')
-    ).group_by(VendaEvento.marca).order_by(func.sum(VendaEvento.valor_total).desc()).limit(20).all()
-    
     return jsonify({
         'estatisticas_gerais': {
             'total_nfs': int(total_nfs),
@@ -3817,19 +3897,8 @@ def api_capilaridade_vendas_filtradas():
             'total_marcas': int(total_marcas),
             'media_itens_por_nf': float(media_itens_por_nf),
             'media_valor_por_nf': float(media_valor_por_nf)
-        },
-        'capilaridade_marca': [
-            {
-                'marca': marca or 'Desconhecida',
-                'total_nfs': int(total_nfs) if total_nfs else 0,
-                'clientes_diferentes': int(clientes_diferentes) if clientes_diferentes else 0,
-                'vendedores_diferentes': int(vendedores_diferentes) if vendedores_diferentes else 0,
-                'valor_total': float(valor_total) if valor_total else 0,
-                'quantidade_total': int(quantidade_total) if quantidade_total else 0,
-                'total_itens': int(total_itens) if total_itens else 0
-            }
-            for marca, total_nfs, clientes_diferentes, vendedores_diferentes, valor_total, quantidade_total, total_itens in capilaridade_marca
-        ]
+        }
+        # REMOVIDO: capilaridade_marca (não é mais necessário)
     })
 
 @app.route('/api/analise-marca-filtrada/<path:marca>', methods=['POST'])
