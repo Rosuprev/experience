@@ -458,6 +458,9 @@
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+
+
+
 <script>
 // Variáveis globais
 let vendasFiltradas = [];
@@ -1152,8 +1155,112 @@ function exportarParaExcel() {
     window.location.href = `/exportar-vendas-filtradas?${params.toString()}`;
 }
 
-// Função exportarParaImagem (mantenha a versão atualizada que já temos)
-// ... [a função exportarParaImagem completa que já temos] ...
+// Exportar para Imagem - CAPTURAR APENAS O DASHBOARD
+function exportarParaImagem() {
+    console.log("📸 Capturando área do dashboard...");
+    
+    Swal.fire({
+        title: 'Capturar Dashboard',
+        html: `
+            <div style="text-align: center; padding: 10px;">
+                <p>Selecione o que deseja capturar:</p>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <button id="btnFullDashboard" class="btn btn-primary" style="width: 100%; padding: 10px;">
+                        📊 Dashboard Completo
+                    </button>
+                    <button id="btnMetricsOnly" class="btn btn-success" style="width: 100%; padding: 10px;">
+                        📈 Apenas Métricas
+                    </button>
+                    <button id="btnBrandAnalysis" class="btn btn-info" style="width: 100%; padding: 10px;">
+                        🏷️ Apenas Análise por Marca
+                    </button>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        confirmButtonText: false,
+        showConfirmButton: false,
+        width: '500px'
+    });
+    
+    // Configurar eventos dos botões
+    setTimeout(() => {
+        document.getElementById('btnFullDashboard').addEventListener('click', () => captureArea('full'));
+        document.getElementById('btnMetricsOnly').addEventListener('click', () => captureArea('metrics'));
+        document.getElementById('btnBrandAnalysis').addEventListener('click', () => captureArea('brand'));
+    }, 100);
+    
+    function captureArea(areaType) {
+        Swal.close();
+        
+        const loadingToast = Swal.fire({
+            title: 'Capturando...',
+            text: 'Gerando imagem',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => Swal.showLoading()
+        });
+        
+        // Identificar elemento baseado no tipo
+        let targetElement;
+        
+        switch(areaType) {
+            case 'metrics':
+                // Apenas métricas consolidadas e capilaridade
+                targetElement = document.querySelector('.stat-card') || 
+                               document.querySelector('.card.border-0.shadow-sm');
+                break;
+            case 'brand':
+                // Apenas análise por marca
+                targetElement = document.querySelector('#conteudoAnaliseMarca') || 
+                               document.querySelector('[id*="analise"]') ||
+                               document.querySelector('.card-header.bg-primary');
+                break;
+            case 'full':
+            default:
+                // Dashboard completo
+                targetElement = document.querySelector('.container-fluid') || 
+                               document.querySelector('.container') ||
+                               document.querySelector('main');
+                break;
+        }
+        
+        if (!targetElement) {
+            loadingToast.close();
+            Swal.fire('Erro', 'Não foi possível encontrar a área para capturar', 'error');
+            return;
+        }
+        
+        // Capturar screenshot
+        html2canvas(targetElement, {
+            scale: 1.8,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false
+        }).then(canvas => {
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.download = `dashboard_${areaType}_${timestamp}.png`;
+            link.href = canvas.toDataURL('image/png');
+            
+            loadingToast.close();
+            link.click();
+            
+            Swal.fire({
+                title: 'Baixado!',
+                text: 'Imagem salva com sucesso',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }).catch(error => {
+            console.error('Erro:', error);
+            loadingToast.close();
+            Swal.fire('Erro', 'Falha ao capturar: ' + error.message, 'error');
+        });
+    }
+}
 </script>
 
 <style>
