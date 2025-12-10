@@ -202,31 +202,30 @@
                     </div>
                     
                     <!-- Distribuição por Marca COM PORCENTAGENS -->
-                    <div class="row mt-4">
+                    <div class="row mt-2">
                         <div class="col-12">
                             <div class="card border-0 shadow-sm">
                                 <div class="card-header" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%); color: white;">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h6 class="mb-0">💰 Distribuição por Marca (Valor)</h6>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="togglePorcentagem" checked>
+                                            <label id="togglePorcentagem" checked>
                                             <label class="form-check-label text-white" for="togglePorcentagem">
-                                                Mostrar %
-                                            </label>
+                                                </label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-7">
                                             <canvas id="chartMarcas" height="250"></canvas>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                        <div class="col-lg-5">
+                                            <div class="table-responsive" style="max-height: 230px; overflow-y: auto;">
                                                 <table class="table table-sm table-hover">
                                                     <thead class="table-light">
                                                         <tr>
-                                                            <th>Marca</th>
+                                                            <th style="width: 50%;">Marca</th>Marca</th>
                                                             <th class="text-end">Valor</th>
                                                             <th class="text-end">%</th>
                                                         </tr>
@@ -792,37 +791,79 @@ function carregarAnaliseMarca(marca) {
 }
 
 // Atualizar métricas da marca
+// Atualizar métricas da marca
 function atualizarMetricasMarca(dados, dataCompleta) {
+    // Função auxiliar para formatar porcentagem
+    function formatarPorcentagem(valor, total, casasDecimais = 1) {
+        // Converter para números, tratando strings e valores nulos
+        const numValor = parseFloat(valor) || 0;
+        const numTotal = parseFloat(total) || 0;
+        
+        // Validar parâmetros básicos
+        if (numTotal <= 0 || numValor <= 0) {
+            return `0.${'0'.repeat(casasDecimais)}`;
+        }
+        
+        // Calcular porcentagem
+        const porcentagem = (numValor / numTotal) * 100;
+        
+        // Verificar se é um número válido
+        if (isNaN(porcentagem) || !isFinite(porcentagem)) {
+            return `0.${'0'.repeat(casasDecimais)}`;
+        }
+        
+        // Limitar entre 0% e 100% (com margem para arredondamento)
+        const porcentagemLimitada = Math.max(0, Math.min(100, porcentagem));
+        
+        // Formatar com o número de casas decimais especificado
+        return porcentagemLimitada.toFixed(casasDecimais);
+    }
+    
     // Total faturamento
-    const totalFaturamento = dados.total_valor || 0;
-    const totalGeral = parseFloat(document.getElementById('totalValorVendas').textContent.replace('R$ ', '').replace('.', '').replace(',', '.'));
-    const percentualTotal = totalGeral > 0 ? (totalFaturamento / totalGeral * 100).toFixed(1) : 0;
+    const totalFaturamento = parseFloat(dados.total_valor || 0);
+    const totalGeralTexto = document.getElementById('totalValorVendas').textContent;
+    const totalGeral = parseFloat(totalGeralTexto.replace('R$', '').replace('.', '').replace(',', '.'));
+    
+    const percentualTotal = formatarPorcentagem(totalFaturamento, totalGeral, 1);
     
     document.getElementById('marcaTotalFaturamento').textContent = 'R$ ' + formatarNumero(totalFaturamento);
     document.getElementById('marcaPercentualTotal').textContent = percentualTotal + '% do total';
     
     // Ticket médio
-    const ticketMedio = dados.ticket_medio_cliente || 0;
+    const ticketMedio = parseFloat(dados.ticket_medio_cliente || 0);
     document.getElementById('marcaTicketMedio').textContent = 'R$ ' + formatarNumero(ticketMedio);
     
     // Clientes vs Compradores
-    const totalClientes = dataCompleta.estatisticas_clientes?.total_clientes || 0;
-    const compradoresMarca = dados.clientes_compradores || 0;
-    const penetracao = totalClientes > 0 ? (compradoresMarca / totalClientes * 100).toFixed(1) : 0;
+    const totalClientes = parseFloat(dataCompleta.estatisticas_clientes?.total_clientes || 0);
+    const compradoresMarca = parseFloat(dados.clientes_compradores || 0);
+    const penetracao = formatarPorcentagem(compradoresMarca, totalClientes, 1);
     
-    document.getElementById('marcaTotalClientes').textContent = totalClientes;
-    document.getElementById('marcaCompradores').textContent = compradoresMarca;
+    document.getElementById('marcaTotalClientes').textContent = totalClientes.toLocaleString('pt-BR');
+    document.getElementById('marcaCompradores').textContent = compradoresMarca.toLocaleString('pt-BR');
     document.getElementById('marcaPenetracaoBar').style.width = penetracao + '%';
     document.getElementById('marcaPenetracaoPercent').textContent = penetracao + '%';
     
     // Vendas CROS
-    const vendasCros = dados.vendas_cros?.valor_total || 0;
-    const nfsCros = dados.vendas_cros?.total_nfs || 0;
-    const percentualCros = totalFaturamento > 0 ? (vendasCros / totalFaturamento * 100).toFixed(1) : 0;
+    const vendasCros = parseFloat(dados.vendas_cros?.valor_total || 0);
+    const nfsCros = parseInt(dados.vendas_cros?.total_nfs || 0);
+    const percentualCros = formatarPorcentagem(vendasCros, totalFaturamento, 1);
     
     document.getElementById('marcaVendasCros').textContent = 'R$ ' + formatarNumero(vendasCros);
     document.getElementById('marcaPercentualCros').textContent = percentualCros + '% do faturamento';
-    document.getElementById('marcaNfsCros').textContent = nfsCros + ' NFs mistas';
+    document.getElementById('marcaNfsCros').textContent = nfsCros + (nfsCros === 1 ? ' NF mista' : ' NFs mistas');
+    
+    // Log para debug (opcional)
+    console.log('Métricas da marca calculadas:', {
+        totalFaturamento,
+        totalGeral,
+        percentualTotal,
+        ticketMedio,
+        totalClientes,
+        compradoresMarca,
+        penetracao,
+        vendasCros,
+        percentualCros
+    });
 }
 
 // Criar gráfico de marcas COM PORCENTAGENS
@@ -844,9 +885,13 @@ function criarGraficoMarcasComPorcentagem(dadosMarcas, totalVendas) {
     // Preparar dados
     const labels = dadosMarcas.map(marca => marca.marca || 'Desconhecida');
     const valores = dadosMarcas.map(marca => marca.valor || 0);
-    const porcentagens = totalVendas > 0 ? 
-        valores.map(valor => ((valor / totalVendas) * 100).toFixed(1)) : 
-        valores.map(() => '0.0');
+    const porcentagens = valores.map(valor => {
+    if (totalVendas > 0 && valor > 0) {
+        const percent = (valor / totalVendas) * 100;
+        return !isNaN(percent) ? Math.min(100, percent).toFixed(1) : '0.0';
+    }
+    return '0.0';
+});
     
     // Atualizar tabela de porcentagens
     atualizarTabelaPorcentagemMarca(dadosMarcas, totalVendas);
@@ -913,8 +958,15 @@ function atualizarTabelaPorcentagemMarca(dadosMarcas, totalVendas) {
     dadosMarcas.sort((a, b) => (b.valor || 0) - (a.valor || 0));
     
     dadosMarcas.slice(0, 10).forEach((marca, index) => {
-        const valor = marca.valor || 0;
-        const porcentagem = totalVendas > 0 ? ((valor / totalVendas) * 100).toFixed(1) : '0.0';
+        const valor = parseFloat(marca.valor || 0);
+        
+        // CALCULAR PORCENTAGEM COM VALIDAÇÃO
+        let porcentagem = '0.0';
+        if (totalVendas > 0 && valor > 0) {
+            const percent = (valor / totalVendas) * 100;
+            // Limitar a 100% e evitar NaN
+            porcentagem = Math.min(100, isNaN(percent) ? 0 : percent).toFixed(1);
+        }
         
         html += `
             <tr>
@@ -935,6 +987,26 @@ function atualizarTabelaPorcentagemMarca(dadosMarcas, totalVendas) {
     });
     
     tbody.innerHTML = html;
+}
+
+// Adicione esta função junto com as outras funções auxiliares
+function formatarPorcentagem(valor, total) {
+    if (!total || total <= 0 || !valor || valor <= 0) {
+        return '0.0';
+    }
+    
+    const percent = (valor / total) * 100;
+    
+    // Verificar se é um número válido
+    if (isNaN(percent) || !isFinite(percent)) {
+        return '0.0';
+    }
+    
+    // Limitar entre 0% e 100%
+    const percentLimitado = Math.max(0, Math.min(100, percent));
+    
+    // Formatar com 1 casa decimal
+    return percentLimitado.toFixed(1);
 }
 
 // Atualizar gráfico de marcas com toggle de porcentagem
@@ -1105,18 +1177,32 @@ function atualizarTabelaTopProdutosDetalhado(produtos, totalMarca) {
     produtos.sort((a, b) => (b.valor_total || 0) - (a.valor_total || 0));
     
     produtos.slice(0, 10).forEach((prod, index) => {
-        const valorTotal = prod.valor_total || 0;
-        const percentualMarca = totalMarca > 0 ? ((valorTotal / totalMarca) * 100).toFixed(1) : '0.0';
-        const valorUnitario = prod.quantidade > 0 ? (valorTotal / prod.quantidade) : 0;
+        const valorTotal = parseFloat(prod.valor_total || 0);
+        const quantidade = parseFloat(prod.quantidade || 0);
+        
+        // CALCULAR PORCENTAGEM COM VALIDAÇÃO
+        let percentualMarca = '0.0';
+        if (totalMarca > 0 && valorTotal > 0) {
+            const percentual = (valorTotal / totalMarca) * 100;
+            // Limitar a 100% e garantir que não seja NaN
+            percentualMarca = Math.min(100, isNaN(percentual) ? 0 : percentual).toFixed(1);
+        }
+        
+        // CALCULAR VALOR UNITÁRIO COM VALIDAÇÃO
+        let valorUnitario = 0;
+        if (quantidade > 0 && valorTotal > 0) {
+            valorUnitario = valorTotal / quantidade;
+        }
+        
         const nomeProduto = prod.produto || prod.descricao || 'Desconhecido';
         
         html += `
             <tr>
                 <td>${index + 1}</td>
-                <td title="${nomeProduto}">
-                    ${nomeProduto.length > 30 ? nomeProduto.substring(0, 80) : nomeProduto}
+                <td style="max-width: 300px; word-wrap: break-word;">
+                    ${nomeProduto}
                 </td>
-                <td class="text-end">${prod.quantidade || 0}</td>
+                <td class="text-end">${quantidade.toLocaleString('pt-BR')}</td>
                 <td class="text-end">R$ ${formatarNumero(valorUnitario)}</td>
                 <td class="text-end">
                     <strong class="text-success">R$ ${formatarNumero(valorTotal)}</strong>
