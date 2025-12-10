@@ -405,36 +405,40 @@
                     </div>
                     
                     <!-- Tabela Detalhada de Top Produtos (compacta) -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card card-hover">
-                                <div class="card-header bg-light py-2">
-                                    <h6 class="mb-0">📋 Detalhamento Top Produtos</h6>
-                                </div>
-                                <div class="card-body p-2">
-                                    <div class="table-responsive" style="max-height: 250px;">
-                                        <table class="table table-sm table-hover mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Produto</th>
-                                                    <th class="text-end">Qtd</th>
-                                                    <th class="text-end">Valor Unit.</th>
-                                                    <th class="text-end">Valor Total</th>
-                                                    <th class="text-end">% da Marca</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tabelaTopProdutosDetalhado">
-                                                <tr>
-                                                    <td colspan="6" class="text-center text-muted py-3">Selecione uma marca para ver os produtos</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Tabela Detalhada de Top Produtos SEM SCROLL -->
+<div class="row">
+    <div class="col-12">
+        <div class="card card-hover">
+            <div class="card-header bg-light py-2">
+                <h6 class="mb-0">📋 Detalhamento Top Produtos</h6>
+            </div>
+            <div class="card-body p-2">
+                <!-- REMOVIDO: max-height e overflow-y -->
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Produto</th>
+                                <th class="text-end">Qtd</th>
+                                <th class="text-end">Valor Unit.</th>
+                                <th class="text-end">Valor Total</th>
+                                <th class="text-end">% da Marca</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaTopProdutosDetalhado">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    Selecione uma marca para ver os produtos
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
         </div>
@@ -1156,111 +1160,204 @@ function exportarParaExcel() {
 }
 
 // Exportar para Imagem - CAPTURAR APENAS O DASHBOARD
+// Exportar para Imagem - VERSÃO SIMPLES E DIRETA (apenas análise por marca)
+// Exportar para Imagem - VERSÃO CORRIGIDA (largura correta)
 function exportarParaImagem() {
-    console.log("📸 Capturando área do dashboard...");
+    console.log("📸 Exportando análise da marca...");
     
+    // Verificar se tem marca selecionada
+    const marcaSelecionada = document.querySelector('#selecionarMarca').value;
+    if (!marcaSelecionada) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Selecione uma marca',
+            text: 'Escolha uma marca no dropdown acima para ver a análise'
+        });
+        return;
+    }
+    
+    // Verificar se a análise está visível
+    const analiseSection = document.querySelector('#conteudoAnaliseMarca');
+    if (!analiseSection || analiseSection.style.display === 'none') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Análise não visível',
+            text: 'Clique em "Aplicar Filtros" ou selecione outra marca'
+        });
+        return;
+    }
+    
+    // Loading
     Swal.fire({
-        title: 'Capturar Dashboard',
-        html: `
-            <div style="text-align: center; padding: 10px;">
-                <p>Selecione o que deseja capturar:</p>
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <button id="btnFullDashboard" class="btn btn-primary" style="width: 100%; padding: 10px;">
-                        📊 Dashboard Completo
-                    </button>
-                    <button id="btnMetricsOnly" class="btn btn-success" style="width: 100%; padding: 10px;">
-                        📈 Apenas Métricas
-                    </button>
-                    <button id="btnBrandAnalysis" class="btn btn-info" style="width: 100%; padding: 10px;">
-                        🏷️ Apenas Análise por Marca
-                    </button>
-                </div>
-            </div>
-        `,
-        showCancelButton: true,
-        cancelButtonText: 'Cancelar',
-        confirmButtonText: false,
+        title: 'Gerando imagem...',
+        allowOutsideClick: false,
         showConfirmButton: false,
-        width: '500px'
+        didOpen: () => Swal.showLoading()
     });
     
-    // Configurar eventos dos botões
-    setTimeout(() => {
-        document.getElementById('btnFullDashboard').addEventListener('click', () => captureArea('full'));
-        document.getElementById('btnMetricsOnly').addEventListener('click', () => captureArea('metrics'));
-        document.getElementById('btnBrandAnalysis').addEventListener('click', () => captureArea('brand'));
-    }, 100);
+    // 1. PEGAR O CARD COMPLETO
+    const cardAnalise = analiseSection.closest('.card');
     
-    function captureArea(areaType) {
-        Swal.close();
-        
-        const loadingToast = Swal.fire({
-            title: 'Capturando...',
-            text: 'Gerando imagem',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            willOpen: () => Swal.showLoading()
+    // 2. SALVAR DIMENSÕES ORIGINAIS
+    const originalWidth = cardAnalise.offsetWidth;
+    const originalHeight = cardAnalise.scrollHeight;
+    const originalDisplay = cardAnalise.style.display;
+    const originalPosition = cardAnalise.style.position;
+    const originalLeft = cardAnalise.style.left;
+    const originalTop = cardAnalise.style.top;
+    const originalZIndex = cardAnalise.style.zIndex;
+    
+    // 3. TEMPORARIAMENTE POSICIONAR PARA CAPTURA
+    cardAnalise.style.display = 'block';
+    cardAnalise.style.position = 'fixed';
+    cardAnalise.style.left = '0';
+    cardAnalise.style.top = '0';
+    cardAnalise.style.zIndex = '9999';
+    cardAnalise.style.width = originalWidth + 'px';
+    cardAnalise.style.maxWidth = 'none';
+    cardAnalise.style.margin = '0';
+    
+    // 4. ESCONDER ELEMENTOS INTERATIVOS
+    const elementosInterativos = cardAnalise.querySelectorAll('button, select, .dropdown-toggle, .form-select');
+    const estilosOriginais = [];
+    
+    elementosInterativos.forEach(el => {
+        estilosOriginais.push({ 
+            element: el, 
+            display: el.style.display,
+            visibility: el.style.visibility 
         });
-        
-        // Identificar elemento baseado no tipo
-        let targetElement;
-        
-        switch(areaType) {
-            case 'metrics':
-                // Apenas métricas consolidadas e capilaridade
-                targetElement = document.querySelector('.stat-card') || 
-                               document.querySelector('.card.border-0.shadow-sm');
-                break;
-            case 'brand':
-                // Apenas análise por marca
-                targetElement = document.querySelector('#conteudoAnaliseMarca') || 
-                               document.querySelector('[id*="analise"]') ||
-                               document.querySelector('.card-header.bg-primary');
-                break;
-            case 'full':
-            default:
-                // Dashboard completo
-                targetElement = document.querySelector('.container-fluid') || 
-                               document.querySelector('.container') ||
-                               document.querySelector('main');
-                break;
+        el.style.display = 'none';
+        el.style.visibility = 'hidden';
+    });
+    
+    // 5. FORÇAR REDIMENSIONAMENTO DE GRÁFICOS
+    const graficos = cardAnalise.querySelectorAll('canvas');
+    graficos.forEach(canvas => {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
         }
-        
-        if (!targetElement) {
-            loadingToast.close();
-            Swal.fire('Erro', 'Não foi possível encontrar a área para capturar', 'error');
-            return;
-        }
-        
-        // Capturar screenshot
-        html2canvas(targetElement, {
-            scale: 1.8,
+    });
+    
+    // 6. ESPERAR UM FRAME PARA ATUALIZAÇÃO
+    setTimeout(() => {
+        // 7. CAPTURAR COM DIMENSÕES CORRETAS
+        html2canvas(cardAnalise, {
+            scale: 2, // Aumentar escala para melhor qualidade
             useCORS: true,
             backgroundColor: '#ffffff',
-            logging: false
+            logging: false,
+            width: originalWidth,
+            height: originalHeight,
+            windowWidth: originalWidth,
+            windowHeight: originalHeight,
+            onclone: function(clonedDoc, element) {
+                // Garantir que o clone tenha as mesmas dimensões
+                element.style.width = originalWidth + 'px';
+                element.style.height = originalHeight + 'px';
+                element.style.maxWidth = 'none';
+                
+                // Remover qualquer overflow no clone
+                const tables = element.querySelectorAll('.table-responsive');
+                tables.forEach(table => {
+                    table.style.overflow = 'visible';
+                    table.style.maxHeight = 'none';
+                });
+                
+                // Ajustar gráficos no clone
+                const clonedCanvases = element.querySelectorAll('canvas');
+                clonedCanvases.forEach(canvas => {
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100%';
+                });
+            }
         }).then(canvas => {
+            console.log("✅ Captura realizada com largura:", canvas.width, "px");
+            
+            // 8. RESTAURAR ESTILOS ORIGINAIS
+            cardAnalise.style.display = originalDisplay;
+            cardAnalise.style.position = originalPosition;
+            cardAnalise.style.left = originalLeft;
+            cardAnalise.style.top = originalTop;
+            cardAnalise.style.zIndex = originalZIndex;
+            cardAnalise.style.width = '';
+            cardAnalise.style.maxWidth = '';
+            cardAnalise.style.margin = '';
+            cardAnalise.style.height = '';
+            
+            // Restaurar elementos interativos
+            estilosOriginais.forEach(estilo => {
+                if (estilo.element) {
+                    estilo.element.style.display = estilo.display;
+                    estilo.element.style.visibility = estilo.visibility;
+                }
+            });
+            
+            // Restaurar gráficos
+            graficos.forEach(canvas => {
+                canvas.style.width = '';
+                canvas.style.height = '';
+            });
+            
+            // 9. CRIAR E BAIXAR IMAGEM
             const link = document.createElement('a');
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            link.download = `dashboard_${areaType}_${timestamp}.png`;
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+            const nomeMarca = marcaSelecionada.replace(/[^a-zA-Z0-9]/g, '_');
+            link.download = `analise_${nomeMarca}_${timestamp}.png`;
             link.href = canvas.toDataURL('image/png');
             
-            loadingToast.close();
+            // 10. FECHAR LOADING E BAIXAR
+            Swal.close();
             link.click();
             
+            // Confirmação
             Swal.fire({
-                title: 'Baixado!',
-                text: 'Imagem salva com sucesso',
                 icon: 'success',
-                timer: 1500,
+                title: '✅ Imagem salva!',
+                html: `
+                    <div style="text-align: center;">
+                        <p>Análise da <strong>${marcaSelecionada}</strong> exportada</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                            Dimensões: ${canvas.width} × ${canvas.height} pixels
+                        </p>
+                    </div>
+                `,
+                timer: 2500,
                 showConfirmButton: false
             });
+            
         }).catch(error => {
-            console.error('Erro:', error);
-            loadingToast.close();
-            Swal.fire('Erro', 'Falha ao capturar: ' + error.message, 'error');
+            console.error('❌ Erro na captura:', error);
+            
+            // RESTAURAR TUDO EM CASO DE ERRO
+            cardAnalise.style.display = originalDisplay;
+            cardAnalise.style.position = originalPosition;
+            cardAnalise.style.left = originalLeft;
+            cardAnalise.style.top = originalTop;
+            cardAnalise.style.zIndex = originalZIndex;
+            cardAnalise.style.width = '';
+            cardAnalise.style.maxWidth = '';
+            cardAnalise.style.margin = '';
+            cardAnalise.style.height = '';
+            
+            estilosOriginais.forEach(estilo => {
+                if (estilo.element) {
+                    estilo.element.style.display = estilo.display;
+                    estilo.element.style.visibility = estilo.visibility;
+                }
+            });
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Não foi possível gerar a imagem'
+            });
         });
-    }
+    }, 100); // Pequeno delay para garantir renderização
 }
+
 </script>
 
 <style>
