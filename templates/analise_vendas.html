@@ -1114,7 +1114,7 @@ function atualizarTabelaTopProdutosDetalhado(produtos, totalMarca) {
             <tr>
                 <td>${index + 1}</td>
                 <td title="${nomeProduto}">
-                    ${nomeProduto.length > 30 ? nomeProduto.substring(0, 30) + '...' : nomeProduto}
+                    ${nomeProduto.length > 30 ? nomeProduto.substring(0, 80) : nomeProduto}
                 </td>
                 <td class="text-end">${prod.quantidade || 0}</td>
                 <td class="text-end">R$ ${formatarNumero(valorUnitario)}</td>
