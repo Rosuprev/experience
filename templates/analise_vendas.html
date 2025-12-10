@@ -1,411 +1,435 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Header do Dashboard de Análise -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-primary-custom text-white">
-            <div class="card-body text-center py-4">
-                <h1 class="display-5 mb-2">📊 Análise de Vendas - Evento 2025</h1>
-                <p class="lead mb-0">Dashboard completo com métricas de vendas, capilaridade e análise por marca</p>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+    /* ADICIONAR ESTE CONTAINER PARA ESCALA 90% */
+    .analise-container {
+        transform: scale(0.9);
+        transform-origin: top center;
+        width: 111.11%;
+        margin-left: -5.56%;
+        margin-top: -20px;
+    }
+</style>
 
-<!-- Painel de Filtros -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm card-hover">
-            <div class="card-header bg-success-custom text-white">
-                <h6 class="mb-0">🔍 Filtros de Análise</h6>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label text-white"><strong>Cliente</strong></label>
-                        <select class="form-select" id="filtroCliente">
-                            <option value="todos">Todos os Clientes</option>
-                            {% for cliente in clientes %}
-                            <option value="{{ cliente }}">{{ cliente }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label text-white"><strong>Vendedor</strong></label>
-                        <select class="form-select" id="filtroVendedor">
-                            <option value="todos">Todos os Vendedores</option>
-                            {% for vendedor in vendedores %}
-                            <option value="{{ vendedor }}">{{ vendedor }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label text-white"><strong>Marca</strong></label>
-                        <select class="form-select" id="filtroMarca">
-                            <option value="todos">Todas as Marcas</option>
-                            {% for marca in marcas %}
-                            <option value="{{ marca }}">{{ marca }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label text-white"><strong>Equipe</strong></label>
-                        <select class="form-select" id="filtroEquipe">
-                            <option value="todos">Todas as Equipes</option>
-                            {% for equipe in equipes %}
-                            <option value="{{ equipe }}">{{ equipe }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label text-white"><strong>Família</strong></label>
-                        <select class="form-select" id="filtroFamilia">
-                            <option value="todos">Todas as Famílias</option>
-                            {% for familia in familias %}
-                            <option value="{{ familia }}">{{ familia }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label text-white"><strong>Data Início</strong></label>
-                        <input type="date" class="form-control" id="filtroDataInicio" value="{{ min_date }}">
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label text-white"><strong>Data Fim</strong></label>
-                        <input type="date" class="form-control" id="filtroDataFim" value="{{ max_date }}">
-                    </div>
-                    <div class="col-lg-3 col-md-6 d-flex align-items-end">
-                        <button class="btn btn-primary-custom w-100" onclick="aplicarFiltros()">
-                            🔄 Aplicar Filtros
-                        </button>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-success-custom" onclick="exportarParaExcel()">
-                                📥 Exportar Excel
-                            </button>
-                            <button class="btn btn-warning text-white" onclick="exportarParaImagem()" id="btnExportarImagem">
-                                📸 Exportar Imagem do Relatório
-                            </button>
-                            <button class="btn btn-secondary" onclick="resetarFiltros()">
-                                🗑️ Limpar Filtros
-                            </button>
-                        </div>
-                    </div>
+<div class="analise-container">
+    <!-- Header do Dashboard de Análise -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary-custom text-white">
+                <div class="card-body text-center py-4">
+                    <h1 class="display-5 mb-2">📊 Análise de Vendas - Evento 2025</h1>
+                    <p class="lead mb-0">Dashboard completo com métricas de vendas, capilaridade e análise por marca</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Métricas Consolidadas -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm stat-card card-hover">
-            <div class="card-header bg-success-custom text-white">
-                <h6 class="mb-0">📈 Métricas Consolidadas</h6>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <!-- Total de Vendas (Valor) -->
-                    <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100 card-hover">
-                            <div class="card-body py-3">
-                                <h4 class="text-primary mb-1" id="totalValorVendas">R$ 0</h4>
-                                <small class="text-muted">Total Vendas (Valor)</small>
-                            </div>
+    <!-- Painel de Filtros - AJUSTAR CORES -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm card-hover">
+                <div class="card-header" style="background: linear-gradient(135deg, var(--accent-olive) 0%, var(--accent-green) 100%); color: white;">
+                    <h6 class="mb-0">🔍 Filtros de Análise</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label" style="color: var(--primary-dark); font-weight: 600;">Cliente</label>
+                            <select class="form-select" id="filtroCliente" style="border: 2px solid var(--primary-light);">
+                                <option value="todos">Todos os Clientes</option>
+                                {% for cliente in clientes %}
+                                <option value="{{ cliente }}">{{ cliente }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label" style="color: var(--primary-dark); font-weight: 600;">Vendedor</label>
+                            <select class="form-select" id="filtroVendedor" style="border: 2px solid var(--primary-light);">
+                                <option value="todos">Todos os Vendedores</option>
+                                {% for vendedor in vendedores %}
+                                <option value="{{ vendedor }}">{{ vendedor }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label" style="color: var(--primary-dark); font-weight: 600;">Marca</label>
+                            <select class="form-select" id="filtroMarca" style="border: 2px solid var(--primary-light);">
+                                <option value="todos">Todas as Marcas</option>
+                                {% for marca in marcas %}
+                                <option value="{{ marca }}">{{ marca }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label" style="color: var(--primary-dark); font-weight: 600;">Equipe</label>
+                            <select class="form-select" id="filtroEquipe" style="border: 2px solid var(--primary-light);">
+                                <option value="todos">Todas as Equipes</option>
+                                {% for equipe in equipes %}
+                                <option value="{{ equipe }}">{{ equipe }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label" style="color: var(--primary-dark); font-weight: 600;">Família</label>
+                            <select class="form-select" id="filtroFamilia" style="border: 2px solid var(--primary-light);">
+                                <option value="todos">Todas as Famílias</option>
+                                {% for familia in familias %}
+                                <option value="{{ familia }}">{{ familia }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label" style="color: var(--primary-dark); font-weight: 600;">Data Início</label>
+                            <input type="date" class="form-control" id="filtroDataInicio" value="{{ min_date }}" style="border: 2px solid var(--primary-light);">
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label" style="color: var(--primary-dark); font-weight: 600;">Data Fim</label>
+                            <input type="date" class="form-control" id="filtroDataFim" value="{{ max_date }}" style="border: 2px solid var(--primary-light);">
+                        </div>
+                        <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                            <button class="btn w-100" style="background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-olive) 100%); color: white; font-weight: 600; border: none; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" 
+                                    onmouseover="this.style.boxShadow='0 4px 12px rgba(100, 148, 28, 0.4)'; this.style.transform='translateY(-2px)'" 
+                                    onmouseout="this.style.boxShadow='0 2px 5px rgba(0,0,0,0.2)'; this.style.transform='translateY(0)'"
+                                    onclick="aplicarFiltros()">
+                                🔄 Aplicar Filtros
+                            </button>
                         </div>
                     </div>
-                    
-                    <!-- Total de NFs -->
-                    <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100 card-hover">
-                            <div class="card-body py-3">
-                                <h4 class="text-success mb-1" id="totalNFs">0</h4>
-                                <small class="text-muted">Total de NFs</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Total de Itens -->
-                    <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100 card-hover">
-                            <div class="card-body py-3">
-                                <h4 class="text-info mb-1" id="totalItens">0</h4>
-                                <small class="text-muted">Total de Itens</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Ticket Médio -->
-                    <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100 card-hover">
-                            <div class="card-body py-3">
-                                <h4 class="text-warning mb-1" id="ticketMedio">R$ 0</h4>
-                                <small class="text-muted">Ticket Médio</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Consultor Top -->
-                    <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100 card-hover">
-                            <div class="card-body py-3">
-                                <h5 class="text-purple mb-1" id="topConsultor">N/A</h5>
-                                <small class="text-muted">Consultor Top</small>
-                                <div class="mt-1">
-                                    <small class="text-success" id="topConsultorValor">R$ 0</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Revenda Top -->
-                    <div class="col-xl-2 col-md-4 col-6 mb-3">
-                        <div class="card bg-light border-0 h-100 card-hover">
-                            <div class="card-body py-3">
-                                <h5 class="text-danger mb-1" id="topRevenda">N/A</h5>
-                                <small class="text-muted">Revenda Top</small>
-                                <div class="mt-1">
-                                    <small class="text-success" id="topRevendaValor">R$ 0</small>
-                                </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <button class="btn" style="background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-olive) 100%); color: white; font-weight: 600; border: none; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+                                        onmouseover="this.style.boxShadow='0 4px 12px rgba(66, 109, 35, 0.4)'; this.style.transform='translateY(-2px)'" 
+                                        onmouseout="this.style.boxShadow='0 2px 5px rgba(0,0,0,0.2)'; this.style.transform='translateY(0)'"
+                                        onclick="exportarParaExcel()">
+                                    📥 Exportar Excel
+                                </button>
+                                <button class="btn" style="background: linear-gradient(135deg, var(--accent-yellow) 0%, #e6ff00 100%); color: var(--primary-dark); font-weight: 600; border: none; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+                                        onmouseover="this.style.boxShadow='0 4px 12px rgba(206, 240, 5, 0.4)'; this.style.transform='translateY(-2px)'" 
+                                        onmouseout="this.style.boxShadow='0 2px 5px rgba(0,0,0,0.2)'; this.style.transform='translateY(0)'"
+                                        onclick="exportarParaImagem()" id="btnExportarImagem">
+                                    📸 Exportar Imagem do Relatório
+                                </button>
+                                <button class="btn" style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); color: white; font-weight: 600; border: none; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+                                        onmouseover="this.style.boxShadow='0 4px 12px rgba(108, 117, 125, 0.4)'; this.style.transform='translateY(-2px)'" 
+                                        onmouseout="this.style.boxShadow='0 2px 5px rgba(0,0,0,0.2)'; this.style.transform='translateY(0)'"
+                                        onclick="resetarFiltros()">
+                                    🗑️ Limpar Filtros
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Distribuição por Marca COM PORCENTAGENS -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-primary text-white">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0">💰 Distribuição por Marca (Valor)</h6>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="togglePorcentagem" checked>
-                                        <label class="form-check-label text-white" for="togglePorcentagem">
-                                            Mostrar %
-                                        </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Métricas Consolidadas - AJUSTAR CORES -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm stat-card card-hover">
+                <div class="card-header" style="background: linear-gradient(135deg, var(--accent-olive) 0%, var(--accent-green) 100%); color: white;">
+                    <h6 class="mb-0">📈 Métricas Consolidadas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <!-- Total de Vendas (Valor) -->
+                        <div class="col-xl-2 col-md-4 col-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body py-3">
+                                    <h4 class="text-primary mb-1" id="totalValorVendas">R$ 0</h4>
+                                    <small class="text-muted">Total Vendas (Valor)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total de NFs -->
+                        <div class="col-xl-2 col-md-4 col-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body py-3">
+                                    <h4 class="text-success mb-1" id="totalNFs">0</h4>
+                                    <small class="text-muted">Total de NFs</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total de Itens -->
+                        <div class="col-xl-2 col-md-4 col-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body py-3">
+                                    <h4 class="text-info mb-1" id="totalItens">0</h4>
+                                    <small class="text-muted">Total de Itens</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ticket Médio -->
+                        <div class="col-xl-2 col-md-4 col-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body py-3">
+                                    <h4 class="text-warning mb-1" id="ticketMedio">R$ 0</h4>
+                                    <small class="text-muted">Ticket Médio</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Consultor Top -->
+                        <div class="col-xl-2 col-md-4 col-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body py-3">
+                                    <h5 class="text-purple mb-1" id="topConsultor">N/A</h5>
+                                    <small class="text-muted">Consultor Top</small>
+                                    <div class="mt-1">
+                                        <small class="text-success" id="topConsultorValor">R$ 0</small>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-lg-8">
-                                        <canvas id="chartMarcas" height="250"></canvas>
+                        </div>
+                        
+                        <!-- Revenda Top -->
+                        <div class="col-xl-2 col-md-4 col-6 mb-3">
+                            <div class="card bg-light border-0 h-100 card-hover">
+                                <div class="card-body py-3">
+                                    <h5 class="text-danger mb-1" id="topRevenda">N/A</h5>
+                                    <small class="text-muted">Revenda Top</small>
+                                    <div class="mt-1">
+                                        <small class="text-success" id="topRevendaValor">R$ 0</small>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-                                            <table class="table table-sm table-hover">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Marca</th>
-                                                        <th class="text-end">Valor</th>
-                                                        <th class="text-end">%</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="tabelaPorcentagemMarca">
-                                                    <tr>
-                                                        <td colspan="3" class="text-center text-muted">Carregando dados...</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Distribuição por Marca COM PORCENTAGENS -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%); color: white;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">💰 Distribuição por Marca (Valor)</h6>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="togglePorcentagem" checked>
+                                            <label class="form-check-label text-white" for="togglePorcentagem">
+                                                Mostrar %
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Capilaridade Geral (mantida) -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm card-hover">
-            <div class="card-header bg-info text-white">
-                <h6 class="mb-0">🌐 Capilaridade Geral</h6>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-4">
-                        <div class="card bg-light border-0">
-                            <div class="card-body py-3">
-                                <h5 class="text-info mb-1" id="capClientes">0</h5>
-                                <small class="text-muted">Clientes</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="card bg-light border-0">
-                            <div class="card-body py-3">
-                                <h5 class="text-success mb-1" id="capVendedores">0</h5>
-                                <small class="text-muted">Vendedores</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="card bg-light border-0">
-                            <div class="card-body py-3">
-                                <h5 class="text-warning mb-1" id="capMarcas">0</h5>
-                                <small class="text-muted">Marcas</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row text-center mt-3">
-                    <div class="col-6">
-                        <div class="card bg-light border-0">
-                            <div class="card-body py-3">
-                                <h5 class="text-secondary mb-1" id="capMediaItensNF">0.0</h5>
-                                <small class="text-muted">Média Itens/NF</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="card bg-light border-0">
-                            <div class="card-body py-3">
-                                <h5 class="text-secondary mb-1" id="capMediaValorNF">R$ 0</h5>
-                                <small class="text-muted">Média Valor/NF</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- NOVA: Análise Detalhada por Marca (CARDS REDUZIDOS) -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm card-hover">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">📊 Análise Detalhada por Marca</h6>
-                    <div class="col-md-4">
-                        <select class="form-select" id="selecionarMarca" onchange="carregarAnaliseMarca(this.value)">
-                            <option value="">Selecione uma marca</option>
-                            {% for marca in marcas %}
-                            <option value="{{ marca }}">{{ marca }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Métricas da Marca Selecionada -->
-                <div class="row mb-4" id="metricasMarca">
-                    <div class="col-12 text-center py-4">
-                        <div class="display-1 text-muted mb-3">🏷️</div>
-                        <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
-                        <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
-                    </div>
-                </div>
-                
-                <!-- Conteúdo da Análise da Marca (aparece quando selecionada) -->
-                <div id="conteudoAnaliseMarca" style="display: none;">
-                    <!-- Métricas Principais da Marca (CARDS REDUZIDOS) -->
-                    <div class="row mb-3">
-                        <div class="col-xl-3 col-lg-6 mb-2">
-                            <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-2">
-                                    <div class="h4 text-primary mb-1" id="marcaTotalFaturamento">R$ 0</div>
-                                    <small class="text-muted">Total Faturamento</small>
-                                    <div class="mt-1">
-                                        <small class="text-muted" id="marcaPercentualTotal">0% do total</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-xl-3 col-lg-6 mb-2">
-                            <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-2">
-                                    <div class="h4 text-success mb-1" id="marcaTicketMedio">R$ 0</div>
-                                    <small class="text-muted">Ticket Médio/Cliente</small>
-                                    <div class="mt-1">
-                                        <small class="text-muted">Valor médio por comprador</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-xl-3 col-lg-6 mb-2">
-                            <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-2">
+                                <div class="card-body">
                                     <div class="row">
-                                        <div class="col-6">
-                                            <div class="h5 text-info mb-1" id="marcaTotalClientes">0</div>
-                                            <small class="text-muted">Clientes</small>
+                                        <div class="col-lg-8">
+                                            <canvas id="chartMarcas" height="250"></canvas>
                                         </div>
-                                        <div class="col-6">
-                                            <div class="h5 text-warning mb-1" id="marcaCompradores">0</div>
-                                            <small class="text-muted">Compradores</small>
+                                        <div class="col-lg-4">
+                                            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                                <table class="table table-sm table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Marca</th>
+                                                            <th class="text-end">Valor</th>
+                                                            <th class="text-end">%</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tabelaPorcentagemMarca">
+                                                        <tr>
+                                                            <td colspan="3" class="text-center text-muted">Carregando dados...</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="mt-2">
-                                        <small class="text-muted">Penetração</small>
-                                        <div class="progress" style="height: 8px;">
-                                            <div id="marcaPenetracaoBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                        <small class="text-muted" id="marcaPenetracaoPercent">0%</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-xl-3 col-lg-6 mb-2">
-                            <div class="card bg-light border-0 h-100 card-hover">
-                                <div class="card-body text-center py-2">
-                                    <div class="h4 text-purple mb-1" id="marcaVendasCros">R$ 0</div>
-                                    <small class="text-muted">Vendas CROS</small>
-                                    <div class="mt-1">
-                                        <small class="text-muted" id="marcaPercentualCros">0% do faturamento</small>
-                                    </div>
-                                    <div class="mt-1">
-                                        <small class="text-muted" id="marcaNfsCros">0 NFs mistas</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Gráficos da Marca -->
-                    <div class="row mb-3">
-                        <!-- Gráfico: Clientes vs Compradores -->
-                        <div class="col-lg-6 mb-3">
-                            <div class="card h-100 card-hover">
-                                <div class="card-header bg-light py-2">
-                                    <h6 class="mb-0">👥 Clientes vs Compradores</h6>
-                                </div>
-                                <div class="card-body p-2">
-                                    <canvas id="chartClientesCompradores" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capilaridade Geral - AJUSTAR CORES -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm card-hover">
+                <div class="card-header" style="background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-olive) 100%); color: white;">
+                    <h6 class="mb-0">🌐 Capilaridade Geral</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body py-3">
+                                    <h5 class="text-info mb-1" id="capClientes">0</h5>
+                                    <small class="text-muted">Clientes</small>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Gráfico: Top 10 Produtos por Valor -->
-                        <div class="col-lg-6 mb-3">
-                            <div class="card h-100 card-hover">
-                                <div class="card-header bg-light py-2">
-                                    <h6 class="mb-0">🏆 Top 10 Produtos (por Valor)</h6>
+                        <div class="col-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body py-3">
+                                    <h5 class="text-success mb-1" id="capVendedores">0</h5>
+                                    <small class="text-muted">Vendedores</small>
                                 </div>
-                                <div class="card-body p-2">
-                                    <canvas id="chartTopProdutos" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body py-3">
+                                    <h5 class="text-warning mb-1" id="capMarcas">0</h5>
+                                    <small class="text-muted">Marcas</small>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="row text-center mt-3">
+                        <div class="col-6">
+                            <div class="card bg-light border-0">
+                                <div class="card-body py-3">
+                                    <h5 class="text-secondary mb-1" id="capMediaItensNF">0.0</h5>
+                                    <small class="text-muted">Média Itens/NF</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-light border-0">
+                                <div class="card-body py-3">
+                                    <h5 class="text-secondary mb-1" id="capMediaValorNF">R$ 0</h5>
+                                    <small class="text-muted">Média Valor/NF</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVA: Análise Detalhada por Marca (CARDS REDUZIDOS) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm card-hover">
+                <div class="card-header" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">📊 Análise Detalhada por Marca</h6>
+                        <div class="col-md-4">
+                            <select class="form-select" id="selecionarMarca" onchange="carregarAnaliseMarca(this.value)" style="border: 2px solid var(--primary-light);">
+                                <option value="">Selecione uma marca</option>
+                                {% for marca in marcas %}
+                                <option value="{{ marca }}">{{ marca }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Métricas da Marca Selecionada -->
+                    <div class="row mb-4" id="metricasMarca">
+                        <div class="col-12 text-center py-4">
+                            <div class="display-1 text-muted mb-3">🏷️</div>
+                            <h4 class="text-muted">Selecione uma marca para ver a análise detalhada</h4>
+                            <p class="text-muted mt-2">Clique no dropdown acima para escolher uma marca</p>
+                        </div>
+                    </div>
                     
-                    <!-- Tabela Detalhada de Top Produtos (compacta) -->
-                    <!-- Tabela Detalhada de Top Produtos SEM SCROLL -->
+                    <!-- Conteúdo da Análise da Marca (aparece quando selecionada) -->
+                    <div id="conteudoAnaliseMarca" style="display: none;">
+                        <!-- Métricas Principais da Marca (CARDS REDUZIDOS) -->
+                        <div class="row mb-3">
+                            <div class="col-xl-3 col-lg-6 mb-2">
+                                <div class="card bg-light border-0 h-100 card-hover">
+                                    <div class="card-body text-center py-2">
+                                        <div class="h4 text-primary mb-1" id="marcaTotalFaturamento">R$ 0</div>
+                                        <small class="text-muted">Total Faturamento</small>
+                                        <div class="mt-1">
+                                            <small class="text-muted" id="marcaPercentualTotal">0% do total</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-lg-6 mb-2">
+                                <div class="card bg-light border-0 h-100 card-hover">
+                                    <div class="card-body text-center py-2">
+                                        <div class="h4 text-success mb-1" id="marcaTicketMedio">R$ 0</div>
+                                        <small class="text-muted">Ticket Médio/Cliente</small>
+                                        <div class="mt-1">
+                                            <small class="text-muted">Valor médio por comprador</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-lg-6 mb-2">
+                                <div class="card bg-light border-0 h-100 card-hover">
+                                    <div class="card-body text-center py-2">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="h5 text-info mb-1" id="marcaTotalClientes">0</div>
+                                                <small class="text-muted">Clientes</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="h5 text-warning mb-1" id="marcaCompradores">0</div>
+                                                <small class="text-muted">Compradores</small>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">Penetração</small>
+                                            <div class="progress" style="height: 8px;">
+                                                <div id="marcaPenetracaoBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                            </div>
+                                            <small class="text-muted" id="marcaPenetracaoPercent">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-lg-6 mb-2">
+                                <div class="card bg-light border-0 h-100 card-hover">
+                                    <div class="card-body text-center py-2">
+                                        <div class="h4 text-purple mb-1" id="marcaVendasCros">R$ 0</div>
+                                        <small class="text-muted">Vendas CROS</small>
+                                        <div class="mt-1">
+                                            <small class="text-muted" id="marcaPercentualCros">0% do faturamento</small>
+                                        </div>
+                                        <div class="mt-1">
+                                            <small class="text-muted" id="marcaNfsCros">0 NFs mistas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gráficos da Marca -->
+                        <div class="row mb-3">
+                            <!-- Gráfico: Clientes vs Compradores -->
+                            <div class="col-lg-6 mb-3">
+                                <div class="card h-100 card-hover">
+                                    <div class="card-header bg-light py-2">
+                                        <h6 class="mb-0">👥 Clientes vs Compradores</h6>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <canvas id="chartClientesCompradores" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Gráfico: Top 10 Produtos por Valor -->
+                            <div class="col-lg-6 mb-3">
+                                <div class="card h-100 card-hover">
+                                    <div class="card-header bg-light py-2">
+                                        <h6 class="mb-0">🏆 Top 10 Produtos (por Valor)</h6>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <canvas id="chartTopProdutos" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tabela Detalhada de Top Produtos (compacta) -->
+                        <!-- Tabela Detalhada de Top Produtos SEM SCROLL -->
 <div class="row">
     <div class="col-12">
         <div class="card card-hover">
@@ -439,20 +463,46 @@
         </div>
     </div>
 </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Botão Voltar -->
-<div class="row mt-4">
-    <div class="col-12 text-center">
-        <a href="{{ url_for('index') }}" class="btn btn-primary-custom btn-lg">
-            🏠 Voltar para Página Inicial
-        </a>
+    <!-- Botão Voltar - AJUSTAR CORES -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('index') }}" class="btn" style="background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-olive) 100%); color: white; font-weight: 600; border: none; padding: 10px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 1.1rem;"
+                onmouseover="this.style.boxShadow='0 4px 12px rgba(100, 148, 28, 0.4)'; this.style.transform='translateY(-2px)'" 
+                onmouseout="this.style.boxShadow='0 2px 5px rgba(0,0,0,0.2)'; this.style.transform='translateY(0)'">
+                🏠 Voltar para Página Inicial
+            </a>
+        </div>
     </div>
 </div>
+
+<!-- ADICIONAR ESTE CSS NO FINAL DO BLOCO -->
+<style>
+    /* Responsividade para escala 90% */
+    @media (max-width: 768px) {
+        .analise-container {
+            transform: scale(1);
+            width: 100%;
+            margin-left: 0;
+            margin-top: 0;
+        }
+    }
+    
+    /* Melhorar visibilidade dos botões em geral */
+    .btn {
+        transition: all 0.3s ease !important;
+    }
+    
+    .form-select:focus, .form-control:focus {
+        border-color: var(--accent-yellow) !important;
+        box-shadow: 0 0 0 0.25rem rgba(206, 240, 5, 0.25) !important;
+    }
+</style>
 
 <!-- CSS local -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/sweetalert2.min.css') }}">
@@ -1159,10 +1209,8 @@ function exportarParaExcel() {
     window.location.href = `/exportar-vendas-filtradas?${params.toString()}`;
 }
 
-// Exportar para Imagem - CAPTURAR APENAS O DASHBOARD
-// Exportar para Imagem - VERSÃO SIMPLES E DIRETA (apenas análise por marca)
-// Exportar para Imagem - VERSÃO CORRIGIDA (largura correta)
-function exportarParaImagem() {
+// Exportar para Imagem - VERSÃO COM ESPERA DE RENDERIZAÇÃO
+async function exportarParaImagem() {
     console.log("📸 Exportando análise da marca...");
     
     // Verificar se tem marca selecionada
@@ -1177,7 +1225,7 @@ function exportarParaImagem() {
     }
     
     // Verificar se a análise está visível
-    const analiseSection = document.querySelector('#conteudoAnaliseMarca');
+    const analiseSection = document.getElementById('conteudoAnaliseMarca');
     if (!analiseSection || analiseSection.style.display === 'none') {
         Swal.fire({
             icon: 'warning',
@@ -1189,173 +1237,220 @@ function exportarParaImagem() {
     
     // Loading
     Swal.fire({
-        title: 'Gerando imagem...',
+        title: 'Preparando exportação...',
+        html: 'Renderizando gráficos...',
         allowOutsideClick: false,
         showConfirmButton: false,
         didOpen: () => Swal.showLoading()
     });
     
-    // 1. PEGAR O CARD COMPLETO
-    const cardAnalise = analiseSection.closest('.card');
-    
-    // 2. SALVAR DIMENSÕES ORIGINAIS
-    const originalWidth = cardAnalise.offsetWidth;
-    const originalHeight = cardAnalise.scrollHeight;
-    const originalDisplay = cardAnalise.style.display;
-    const originalPosition = cardAnalise.style.position;
-    const originalLeft = cardAnalise.style.left;
-    const originalTop = cardAnalise.style.top;
-    const originalZIndex = cardAnalise.style.zIndex;
-    
-    // 3. TEMPORARIAMENTE POSICIONAR PARA CAPTURA
-    cardAnalise.style.display = 'block';
-    cardAnalise.style.position = 'fixed';
-    cardAnalise.style.left = '0';
-    cardAnalise.style.top = '0';
-    cardAnalise.style.zIndex = '9999';
-    cardAnalise.style.width = originalWidth + 'px';
-    cardAnalise.style.maxWidth = 'none';
-    cardAnalise.style.margin = '0';
-    
-    // 4. ESCONDER ELEMENTOS INTERATIVOS
-    const elementosInterativos = cardAnalise.querySelectorAll('button, select, .dropdown-toggle, .form-select');
-    const estilosOriginais = [];
-    
-    elementosInterativos.forEach(el => {
-        estilosOriginais.push({ 
-            element: el, 
-            display: el.style.display,
-            visibility: el.style.visibility 
+    // 1. FUNÇÃO PARA FORÇAR RENDERIZAÇÃO DOS GRÁFICOS
+    async function renderizarGraficos() {
+        return new Promise((resolve) => {
+            // Atualizar todos os gráficos visíveis
+            const graficos = [
+                'chartClientesCompradores',
+                'chartTopProdutos'
+            ];
+            
+            let graficosAtualizados = 0;
+            const totalGraficos = graficos.length;
+            
+            graficos.forEach(chartId => {
+                const canvas = document.getElementById(chartId);
+                if (canvas) {
+                    const chart = Chart.getChart(canvas);
+                    if (chart) {
+                        // Forçar renderização
+                        chart.update('none');
+                        
+                        // Garantir que o canvas tenha dados renderizados
+                        const context = canvas.getContext('2d');
+                        if (context) {
+                            // Pequeno delay para renderização
+                            setTimeout(() => {
+                                graficosAtualizados++;
+                                if (graficosAtualizados === totalGraficos) {
+                                    resolve();
+                                }
+                            }, 200);
+                        } else {
+                            graficosAtualizados++;
+                        }
+                    } else {
+                        graficosAtualizados++;
+                    }
+                } else {
+                    graficosAtualizados++;
+                }
+            });
+            
+            // Fallback se não encontrar gráficos
+            if (totalGraficos === 0) {
+                setTimeout(resolve, 300);
+            }
         });
-        el.style.display = 'none';
-        el.style.visibility = 'hidden';
+    }
+    
+    // 2. RENDERIZAR GRÁFICOS PRIMEIRO
+    await renderizarGraficos();
+    
+    // Atualizar mensagem
+    Swal.update({
+        title: 'Gerando imagem...',
+        html: 'Capturando tela...'
     });
     
-    // 5. FORÇAR REDIMENSIONAMENTO DE GRÁFICOS
-    const graficos = cardAnalise.querySelectorAll('canvas');
-    graficos.forEach(canvas => {
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            canvas.style.width = '100%';
-            canvas.style.height = 'auto';
+    // 3. PEGAR O CARD COMPLETO
+    const cardAnaliseCompleto = document.querySelector('.card:has(#conteudoAnaliseMarca)');
+    
+    if (!cardAnaliseCompleto) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Não foi possível encontrar a seção de análise'
+        });
+        return;
+    }
+    
+    // 4. CRIAR UM CONTAINER TEMPORÁRIO PARA CAPTURA
+    const tempContainer = document.createElement('div');
+    tempContainer.id = 'temp-export-container';
+    tempContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: ${cardAnaliseCompleto.offsetWidth}px;
+        z-index: 99999;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    `;
+    
+    // 5. CLONAR O CONTEÚDO DO CARD (isso garante que os gráficos já renderizados sejam copiados)
+    const cardClone = cardAnaliseCompleto.cloneNode(true);
+    
+    // 6. COPIAR OS CANVAS DOS GRÁFICOS (IMPORTANTE!)
+    const canvasElements = cardAnaliseCompleto.querySelectorAll('canvas');
+    const canvasClones = cardClone.querySelectorAll('canvas');
+    
+    canvasElements.forEach((originalCanvas, index) => {
+        const cloneCanvas = canvasClones[index];
+        if (originalCanvas && cloneCanvas) {
+            // Copiar o conteúdo do canvas original para o clone
+            cloneCanvas.width = originalCanvas.width;
+            cloneCanvas.height = originalCanvas.height;
+            
+            const originalContext = originalCanvas.getContext('2d');
+            const cloneContext = cloneCanvas.getContext('2d');
+            
+            if (originalContext && cloneContext) {
+                // Criar uma imagem do canvas original e desenhar no clone
+                const imageData = originalCanvas.toDataURL();
+                const img = new Image();
+                img.src = imageData;
+                img.onload = function() {
+                    cloneContext.clearRect(0, 0, cloneCanvas.width, cloneCanvas.height);
+                    cloneContext.drawImage(img, 0, 0);
+                };
+            }
         }
     });
     
-    // 6. ESPERAR UM FRAME PARA ATUALIZAÇÃO
-    setTimeout(() => {
-        // 7. CAPTURAR COM DIMENSÕES CORRETAS
-        html2canvas(cardAnalise, {
-            scale: 2, // Aumentar escala para melhor qualidade
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            width: originalWidth,
-            height: originalHeight,
-            windowWidth: originalWidth,
-            windowHeight: originalHeight,
-            onclone: function(clonedDoc, element) {
-                // Garantir que o clone tenha as mesmas dimensões
-                element.style.width = originalWidth + 'px';
-                element.style.height = originalHeight + 'px';
-                element.style.maxWidth = 'none';
-                
-                // Remover qualquer overflow no clone
-                const tables = element.querySelectorAll('.table-responsive');
-                tables.forEach(table => {
-                    table.style.overflow = 'visible';
-                    table.style.maxHeight = 'none';
-                });
-                
-                // Ajustar gráficos no clone
-                const clonedCanvases = element.querySelectorAll('canvas');
-                clonedCanvases.forEach(canvas => {
-                    canvas.style.width = '100%';
-                    canvas.style.height = '100%';
-                });
-            }
-        }).then(canvas => {
-            console.log("✅ Captura realizada com largura:", canvas.width, "px");
+    // 7. REMOVER ELEMENTOS INTERATIVOS DO CLONE
+    const elementosInterativos = cardClone.querySelectorAll(
+        'button, select, .form-select, .form-check-input, .dropdown-toggle'
+    );
+    elementosInterativos.forEach(el => el.remove());
+    
+    // 8. AJUSTAR ESTILOS DO CLONE
+    cardClone.style.width = '100%';
+    cardClone.style.margin = '0';
+    cardClone.style.boxShadow = 'none';
+    cardClone.style.border = '1px solid #dee2e6';
+    
+    // 9. ADICIONAR AO CONTAINER TEMPORÁRIO
+    tempContainer.appendChild(cardClone);
+    document.body.appendChild(tempContainer);
+    
+    // 10. PEQUENA PAUSA PARA GARANTIR RENDERIZAÇÃO
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 11. CAPTURAR COM html2canvas
+    html2canvas(tempContainer, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: true,
+        allowTaint: true,
+        onclone: function(clonedDoc, element) {
+            // Garantir que tudo esteja visível no clone
+            element.style.width = '100%';
+            element.style.height = 'auto';
             
-            // 8. RESTAURAR ESTILOS ORIGINAIS
-            cardAnalise.style.display = originalDisplay;
-            cardAnalise.style.position = originalPosition;
-            cardAnalise.style.left = originalLeft;
-            cardAnalise.style.top = originalTop;
-            cardAnalise.style.zIndex = originalZIndex;
-            cardAnalise.style.width = '';
-            cardAnalise.style.maxWidth = '';
-            cardAnalise.style.margin = '';
-            cardAnalise.style.height = '';
-            
-            // Restaurar elementos interativos
-            estilosOriginais.forEach(estilo => {
-                if (estilo.element) {
-                    estilo.element.style.display = estilo.display;
-                    estilo.element.style.visibility = estilo.visibility;
-                }
+            // Remover overflow das tabelas
+            const tables = element.querySelectorAll('.table-responsive');
+            tables.forEach(table => {
+                table.style.overflow = 'visible';
+                table.style.maxHeight = 'none';
             });
             
-            // Restaurar gráficos
-            graficos.forEach(canvas => {
-                canvas.style.width = '';
-                canvas.style.height = '';
+            // Ajustar canvas no clone
+            const canvases = element.querySelectorAll('canvas');
+            canvases.forEach(canvas => {
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
             });
-            
-            // 9. CRIAR E BAIXAR IMAGEM
-            const link = document.createElement('a');
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-            const nomeMarca = marcaSelecionada.replace(/[^a-zA-Z0-9]/g, '_');
-            link.download = `analise_${nomeMarca}_${timestamp}.png`;
-            link.href = canvas.toDataURL('image/png');
-            
-            // 10. FECHAR LOADING E BAIXAR
-            Swal.close();
-            link.click();
-            
-            // Confirmação
-            Swal.fire({
-                icon: 'success',
-                title: '✅ Imagem salva!',
-                html: `
-                    <div style="text-align: center;">
-                        <p>Análise da <strong>${marcaSelecionada}</strong> exportada</p>
-                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                            Dimensões: ${canvas.width} × ${canvas.height} pixels
-                        </p>
-                    </div>
-                `,
-                timer: 2500,
-                showConfirmButton: false
-            });
-            
-        }).catch(error => {
-            console.error('❌ Erro na captura:', error);
-            
-            // RESTAURAR TUDO EM CASO DE ERRO
-            cardAnalise.style.display = originalDisplay;
-            cardAnalise.style.position = originalPosition;
-            cardAnalise.style.left = originalLeft;
-            cardAnalise.style.top = originalTop;
-            cardAnalise.style.zIndex = originalZIndex;
-            cardAnalise.style.width = '';
-            cardAnalise.style.maxWidth = '';
-            cardAnalise.style.margin = '';
-            cardAnalise.style.height = '';
-            
-            estilosOriginais.forEach(estilo => {
-                if (estilo.element) {
-                    estilo.element.style.display = estilo.display;
-                    estilo.element.style.visibility = estilo.visibility;
-                }
-            });
-            
-            Swal.fire({
-                icon: 'error',
-                title: 'Erro',
-                text: 'Não foi possível gerar a imagem'
-            });
+        }
+    }).then(canvas => {
+        console.log("✅ Captura realizada com sucesso!");
+        
+        // 12. REMOVER CONTAINER TEMPORÁRIO
+        document.body.removeChild(tempContainer);
+        
+        // 13. CRIAR E BAIXAR IMAGEM
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        const nomeMarca = marcaSelecionada.replace(/[^a-zA-Z0-9]/g, '_');
+        link.download = `analise_${nomeMarca}_${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        
+        // 14. FECHAR LOADING E BAIXAR
+        Swal.close();
+        link.click();
+        
+        // 15. CONFIRMAÇÃO
+        Swal.fire({
+            icon: 'success',
+            title: '✅ Imagem salva!',
+            html: `
+                <div style="text-align: center;">
+                    <p>Análise da <strong>${marcaSelecionada}</strong> exportada com sucesso</p>
+                    <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                        Dimensões: ${canvas.width} × ${canvas.height} pixels
+                    </p>
+                </div>
+            `,
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            timer: 3000
         });
-    }, 100); // Pequeno delay para garantir renderização
+        
+    }).catch(error => {
+        console.error('❌ Erro na captura:', error);
+        
+        // Limpar container temporário em caso de erro
+        if (document.getElementById('temp-export-container')) {
+            document.body.removeChild(tempContainer);
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro na exportação',
+            text: 'Não foi possível gerar a imagem. Tente novamente.',
+            footer: '<small>Se o problema persistir, tente atualizar a página</small>'
+        });
+    });
 }
 
 </script>
