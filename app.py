@@ -71,7 +71,7 @@ class Config:
     # - Aponta para o DB final (dbexperience)
     # - Inclui TODOS os parâmetros SSL na query string (obrigatórios pelo servidor)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql+psycopg2://squarecloud:RGil4Y8VE9M5znboTfwHInhm@square-cloud-db-4d0ca60ac1a54ad48adf5608996c6a48.squareweb.app:7091/dbexperience?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
+        'postgresql+psycopg2://squarecloud:a5AeQ39UcopRSq6du6AvEsaR@square-cloud-db-876131af756746b0b8f10fcfc88c6313.squareweb.app:7178/roexperience?sslmode=require&sslrootcert=ca-certificate.crt&sslcert=certificate.pem&sslkey=private-key.key'
     
     # 2. REMOVA SQLALCHEMY_ENGINE_OPTIONS:
     # Este bloco é desnecessário e causa conflitos quando o SSL está na URI.
