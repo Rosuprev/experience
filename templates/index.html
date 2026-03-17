@@ -226,19 +226,21 @@
             </div>
         </a>
     </div>
+    <!-- Estoque Público (sempre visível) -->
+    <div class="col-xl-2 col-md-3 col-4 mb-3">
+        <a href="{{ url_for('estoque_publico') }}" class="card menu-card-standard text-decoration-none h-100">
+            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
+                <div class="menu-icon text-dark mb-2">👀</div>
+                <h6 class="menu-title text-dark fw-bold mb-1">Estoque Público</h6>
+                <small class="menu-desc text-muted">Visualização geral</small>
+            </div>
+        </a>
+    </div>
+
     {% endif %}
 </div>
 
-                    <!-- Estoque Público (sempre visível) -->
-                    <div class="col-xl-2 col-md-3 col-4 mb-3">
-                        <a href="{{ url_for('estoque_publico') }}" class="card menu-card-standard text-decoration-none h-100">
-                            <div class="card-body text-center p-3 d-flex flex-column justify-content-center">
-                                <div class="menu-icon text-dark mb-2">👀</div>
-                                <h6 class="menu-title text-dark fw-bold mb-1">Estoque Público</h6>
-                                <small class="menu-desc text-muted">Visualização geral</small>
-                            </div>
-                        </a>
-                    </div>
+                    
 
                     <!-- ==================== -->
                     <!-- MÓDULOS ADMIN (se for admin) -->
